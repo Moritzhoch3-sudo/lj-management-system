@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LANDJUGEND SCHEURUNG - COMPONENTS & SPECIFIC VIEWS (DEUTLICH VERGRÖSSERTE ABSTÄNDE)
+   LANDJUGEND SCHEURUNG - COMPONENTS & SPECIFIC VIEWS (CACHE-BUSTED & FORCED SPACING)
    ========================================================================== */
 
 /* Dashboard & Banner */
@@ -11,7 +11,7 @@
     border: 1px solid var(--border-glow);
     border-radius: var(--radius-lg);
     padding: 2.25rem 2.75rem;
-    margin-bottom: 4.5rem; /* Max-Spacings */
+    margin-bottom: 4.5rem !important;
     gap: 2rem;
     flex-wrap: wrap;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 8px 20px rgba(0, 0, 0, 0.4);
@@ -58,8 +58,8 @@
 .metrics-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 2.5rem; /* Erhöhter Abstand zwischen Metrik-Kacheln */
-    margin-bottom: 4.5rem;
+    gap: 2.5rem;
+    margin-bottom: 4.5rem !important;
 }
 
 .metric-card {
@@ -100,15 +100,15 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2.5rem !important;
 }
 
 .members-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 3rem; /* Sehr großer Abstand im Grid */
+    gap: 3rem;
     margin-top: 1.5rem;
-    margin-bottom: 4rem;
+    margin-bottom: 5rem !important;
 }
 
 .member-card {
@@ -186,28 +186,29 @@
     margin-bottom: 1rem;
 }
 
-/* Person Tasks Grouped Section - MAXIMALER FREIRAUM (7rem / 112px ABSTAND) */
+/* Person Tasks Grouped Section - FORCED HUGE SPACING & MARGIN (5rem / 80px) */
 .person-tasks-container {
     display: flex;
     flex-direction: column;
-    gap: 7rem; /* MAXIMALER ABSTAND (112px) ZWISCHEN DEN KACHELN */
-    margin-top: 2.5rem;
-    margin-bottom: 6rem;
+    gap: 5rem !important;
+    margin-top: 2.5rem !important;
+    margin-bottom: 6rem !important;
 }
 
+/* EXPLICIT MARGIN-BOTTOM ON EACH MEMBER TASK BOX */
 .person-tasks-section {
-    border-radius: 20px;
-    padding: 2.75rem 3rem; /* Extrem großzügiges Innen-Padding */
-    margin-bottom: 0;
+    border-radius: 20px !important;
+    padding: 2.75rem 3rem !important;
+    margin-bottom: 5rem !important; /* FORCED 80px MARGIN BOTTOM ON EVERY BOX */
     transition: var(--transition-fast);
 
-    /* Tiefe, elegante Schatten */
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 10px 28px rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    /* Starke, plastische Schattierung */
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 10px 28px rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
 }
 
 .person-tasks-section:hover {
-    box-shadow: 0 30px 75px rgba(0, 0, 0, 0.8), 0 12px 35px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 30px 75px rgba(0, 0, 0, 0.8), 0 12px 35px rgba(0, 0, 0, 0.6) !important;
     transform: translateY(-4px);
 }
 
@@ -253,7 +254,7 @@
 }
 
 .clean-tasks-table th, .clean-tasks-table td {
-    padding: 1.25rem 1.25rem; /* Erhöhter Tabellenzellen-Abstand */
+    padding: 1.25rem 1.25rem;
     vertical-align: middle;
     border-bottom: 1px solid rgba(255,255,255,0.06);
 }
@@ -294,7 +295,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    padding: 0.4rem 0.85rem;
+    padding: 0.45rem 0.85rem;
     border-radius: var(--radius-sm);
     font-family: 'Montserrat', sans-serif;
     font-size: 0.8rem;
