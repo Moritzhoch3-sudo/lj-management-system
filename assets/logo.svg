@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 200" width="100%" height="100%">
+  <!-- LANDJUGEND SCHEURUNG LOGO -->
+  <g id="logo-crest">
+    <!-- Shield Border & Outline -->
+    <path d="M 20,30 Q 70,20 120,30 Q 130,100 120,130 Q 95,170 70,185 Q 45,170 20,130 Q 10,100 20,30 Z" fill="#FFD100" stroke="#1a1a1a" stroke-width="6" stroke-linejoin="round"/>
+    <!-- Wavy Green Pattern in Shield -->
+    <path d="M 20,30 Q 70,20 120,30 Q 130,80 100,85 Q 70,90 80,120 Q 90,140 70,185 Q 45,170 20,130 Z" fill="#00873D" stroke="#1a1a1a" stroke-width="4"/>
+    <!-- Cross 1 (Yellow on Green) -->
+    <g fill="#FFD100" stroke="#1a1a1a" stroke-width="2">
+      <rect x="48" y="55" width="8" height="30" rx="1"/>
+      <rect x="37" y="63" width="30" height="8" rx="1"/>
+    </g>
+    <!-- Cross 2 (Green on Yellow) -->
+    <g fill="#00873D" stroke="#1a1a1a" stroke-width="2">
+      <rect x="84" y="105" width="8" height="30" rx="1"/>
+      <rect x="73" y="113" width="30" height="8" rx="1"/>
+    </g>
+    <!-- Vertical Divider Line -->
+    <line x1="145" y1="20" x2="145" y2="180" stroke="#1a1a1a" stroke-width="7" stroke-linecap="round"/>
+  </g>
+
+  <!-- Typography: LANDJUGEND -->
+  <g id="logo-text">
+    <text x="170" y="110" font-family="'Montserrat', 'Outfit', sans-serif" font-weight="900" font-size="88" fill="#00873D" letter-spacing="2">LANDJUGEND</text>
+    
+    <!-- Yellow Triangle Accent in 'A' (approx x=235, y=60) -->
+    <polygon points="248,76 256,92 240,92" fill="#FFD100"/>
+    <!-- Yellow Bar Accent over 'E' (approx x=575, y=36) -->
+    <rect x="585" y="38" width="42" height="12" fill="#FFD100" rx="2"/>
+
+    <!-- Sub-text: — SCHEURUNG — -->
+    <line x1="170" y1="148" x2="265" y2="148" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+    <text x="285" y="162" font-family="'Montserrat', 'Outfit', sans-serif" font-weight="800" font-size="44" fill="#1a1a1a" letter-spacing="12">SCHEURING</text>
+    <line x1="655" y1="148" x2="745" y2="148" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+  </g>
+</svg>

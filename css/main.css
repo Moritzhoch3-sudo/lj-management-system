@@ -1,0 +1,347 @@
+/* ==========================================================================
+   LANDJUGEND SCHEURUNG - SCHLICHTES GRAUTON DESIGN SYSTEM
+   ========================================================================== */
+
+:root {
+    /* Edle, schlichte Grautöne */
+    --bg-dark: #111318;
+    --bg-card: #1a1d24;
+    --bg-card-hover: #222630;
+    --bg-card-glass: rgba(26, 29, 36, 0.92);
+    
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-glow: rgba(148, 163, 184, 0.25);
+
+    /* Original Landjugend Scheuring Akzentfarben */
+    --lj-green: #00873D;
+    --lj-green-light: #10b981;
+    --lj-yellow: #FFD100;
+    --lj-dark-gray: #1a1a1a;
+
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-full: 9999px;
+
+    --shadow-slate: 0 10px 30px rgba(0, 0, 0, 0.35);
+    --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reset & Base */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--bg-dark);
+    background-image: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.03) 0%, transparent 60%);
+    color: var(--text-main);
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Überschriften: Gestaltet wie das LANDJUGEND SCHEURUNG Logo */
+h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .dashboard-banner h2, .section-banner h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #ffffff;
+}
+
+/* Header & Navbar */
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(17, 19, 24, 0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.65rem 1.5rem;
+}
+
+.header-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+/* Subtil feinverpflegtes Logo */
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.brand-logo-img {
+    height: 48px;
+    width: auto;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
+    transition: var(--transition-fast);
+}
+
+.brand-logo-img:hover {
+    transform: scale(1.03);
+}
+
+.brand-text h1 {
+    font-size: 1.15rem;
+    letter-spacing: 0.06em;
+    color: #ffffff;
+    line-height: 1.1;
+}
+
+.brand-sub {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--lj-green-light);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+/* Navigation Tabs */
+.nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #181b22;
+    padding: 0.3rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    transition: var(--transition-fast);
+}
+
+.nav-link:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-link.active {
+    color: #ffffff;
+    background: #2a2e3a;
+    border: 1px solid var(--border-glow);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* User Simulator Control */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.user-simulator-box {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #181b22;
+    border: 1px solid var(--border-color);
+    padding: 0.3rem 0.65rem;
+    border-radius: var(--radius-sm);
+}
+
+.user-simulator-box label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Layout Container */
+.main-container {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+/* Card Styling: Elegant Dark Slate Gray */
+.card-glow {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-slate);
+    transition: var(--transition-fast);
+}
+
+.card-glow:hover {
+    border-color: var(--border-glow);
+    background: var(--bg-card-hover);
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.btn-primary {
+    background: #2a2e3a;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.btn-primary:hover {
+    background: #343948;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.btn-emerald {
+    background: var(--lj-green);
+    color: #ffffff;
+}
+
+.btn-emerald:hover {
+    background: #007333;
+}
+
+.btn-glow {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--text-muted);
+    border-color: var(--border-color);
+}
+
+.btn-ghost:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.btn-outline {
+    background: transparent;
+    border-color: var(--border-glow);
+    color: var(--text-main);
+}
+
+.btn-outline:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-sm {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.75rem;
+    border-radius: var(--radius-sm);
+}
+
+/* Form Controls */
+.form-control, .form-select {
+    width: 100%;
+    padding: 0.65rem 1rem;
+    background: #111318;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    transition: var(--transition-fast);
+}
+
+.form-control:focus, .form-select:focus {
+    outline: none;
+    border-color: var(--text-muted);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.form-row .col {
+    flex: 1;
+}
+
+/* Badges */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-sm);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.badge-emerald { background: rgba(0, 135, 61, 0.25); color: #4ade80; border: 1px solid rgba(0, 135, 61, 0.4); }
+.badge-success { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+.badge-warning { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+.badge-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+.badge-neutral { background: rgba(255, 255, 255, 0.08); color: var(--text-muted); }
+
+.text-success { color: var(--lj-green-light); }
+.text-danger { color: var(--danger); }
+.text-warning { color: var(--warning); }
+.text-muted { color: var(--text-muted); }
+.font-bold { font-weight: 700; }
+.hidden { display: none !important; }

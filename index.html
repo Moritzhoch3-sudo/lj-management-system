@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landjugend Scheuring | Vorstands-Zentrale</title>
+    <meta name="description" content="Zentrales Verwaltungssystem für die Vorstandschaft der Landjugend Scheuring. Aufgaben-Verwaltung, Personen-Dashboard mit Prozentanzeigen, PIN-geschütztes Kassenbuch, Verträge & Audio-Sitzungstranskription.">
+    
+    <!-- Google Fonts: Montserrat (Headings like Logo) & Inter (Body Text) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+    <!-- App Header & Navigation -->
+    <header class="app-header">
+        <div class="header-container">
+            <!-- Refined Landjugend Scheuring Logo -->
+            <div class="brand-logo">
+                <img src="assets/logo.svg" alt="Landjugend Scheuring Logo" class="brand-logo-img" />
+                <div class="brand-text">
+                    <h1 class="font-logo-heading">Vorstands-Zentrale</h1>
+                    <span class="brand-sub">Landjugend Scheuring</span>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="nav-menu">
+                <button class="nav-link active" data-tab="tasks">
+                    <span>📌</span> Aufgaben
+                </button>
+                <button class="nav-link" data-tab="dashboard">
+                    <span>📊</span> Dashboard (% Overview)
+                </button>
+                <button class="nav-link" data-tab="finance">
+                    <span>💰</span> Finanzen 🔒
+                </button>
+                <button class="nav-link" data-tab="contracts">
+                    <span>📄</span> Verträge 🔒
+                </button>
+                <button class="nav-link" data-tab="minutes">
+                    <span>🎙️</span> Sitzungen & Audio 🔒
+                </button>
+                <button class="nav-link" data-tab="settings">
+                    <span>⚙️</span> Einstellungen
+                </button>
+            </nav>
+
+            <!-- User Simulator & Actions -->
+            <div class="header-actions">
+                <div class="user-simulator-box">
+                    <label for="user-simulator-select">Angemeldet als:</label>
+                    <select id="user-simulator-select" class="form-select form-select-sm"></select>
+                </div>
+                <button class="btn btn-sm btn-ghost" id="export-backup-btn" title="Backup herunterladen">💾 Backup</button>
+                <button class="btn btn-sm btn-ghost danger-text" id="reset-data-btn" title="Auf Standarddaten zurücksetzen">🔄 Reset</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main View Viewport -->
+    <main class="main-container" id="main-content-view">
+        <!-- Injected via JavaScript Modules -->
+    </main>
+
+    <!-- Application Script Engine -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

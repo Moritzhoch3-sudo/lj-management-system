@@ -1,0 +1,368 @@
+/* ==========================================================================
+   LANDJUGEND SCHEURUNG - COMPONENTS & SPECIFIC VIEWS (GRAUTON EDITION)
+   ========================================================================== */
+
+/* Dashboard & Banner */
+.dashboard-banner, .section-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #1e222b 0%, #14171d 100%);
+    border: 1px solid var(--border-glow);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem 2rem;
+    margin-bottom: 3.5rem;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.55), 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.dashboard-banner h2, .section-banner h2 {
+    font-size: 1.6rem;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+}
+
+.global-progress-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    background: #111318;
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.progress-ring-container {
+    position: relative;
+    width: 90px;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-ring-text {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #ffffff;
+}
+
+.progress-ring-circle {
+    transition: stroke-dashoffset 0.8s ease;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.75rem;
+    margin-bottom: 3.5rem;
+}
+
+.metric-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.metric-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+}
+
+.metric-value {
+    display: block;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: #ffffff;
+}
+
+.metric-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* Members Grid */
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+}
+
+.members-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2.5rem;
+    margin-top: 1rem;
+}
+
+.member-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5), 0 6px 12px rgba(0, 0, 0, 0.3);
+    transition: var(--transition-fast);
+}
+
+.member-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.member-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-full);
+    border: 2px solid var(--border-glow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.member-name {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.member-role {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.member-percent-badge {
+    margin-left: auto;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 900;
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-sm);
+}
+
+.member-progress-container {
+    margin-bottom: 1rem;
+}
+
+.progress-bar-bg {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    transition: width 0.6s ease;
+}
+
+.member-stats-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    margin-bottom: 0.75rem;
+}
+
+/* Person Tasks Grouped Section & Clean Tables - DEUTLICH ERHÖHTER ABSTAND (5rem / 80px) */
+.person-tasks-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5rem; /* Deutlich erhöhter Abstand (80px) zwischen den Boxen */
+    margin-top: 2rem;
+    margin-bottom: 4rem;
+}
+
+.person-tasks-section {
+    border-radius: var(--radius-lg);
+    padding: 2.25rem 2.5rem;
+    margin-bottom: 0;
+    transition: var(--transition-fast);
+
+    /* Starke, plastische Schattierung */
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 8px 24px rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.person-tasks-section:hover {
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 10px 28px rgba(0, 0, 0, 0.5);
+    transform: translateY(-3px);
+}
+
+.person-tasks-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding-bottom: 1.1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.person-title-block {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.person-name {
+    font-size: 1.3rem;
+    margin-bottom: 0.15rem;
+}
+
+.person-role {
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.person-stats-badge {
+    padding: 0.45rem 0.95rem;
+    border-radius: var(--radius-sm);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+}
+
+/* Clean Structured Tasks Table */
+.clean-tasks-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.clean-tasks-table th, .clean-tasks-table td {
+    padding: 1.1rem 1.1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.task-table-row {
+    transition: background 0.2s ease;
+}
+
+.task-table-row:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.clickable-task-title {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #ffffff;
+    transition: color 0.2s ease;
+}
+
+.clickable-task-title:hover {
+    color: var(--lj-green-light);
+}
+
+.subtask-count-pill {
+    font-size: 0.7rem;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 0.15rem 0.45rem;
+    border-radius: var(--radius-full);
+    color: var(--text-muted);
+}
+
+/* Time Pressure & Urgency Color Badges */
+.due-date-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.due-overdue {
+    background: rgba(239, 68, 68, 0.25);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.25);
+}
+
+.due-urgent {
+    background: rgba(245, 158, 11, 0.25);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.due-relaxed {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.due-normal {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-muted);
+}
+
+/* Task Detail Modal */
+.task-detail-card {
+    max-width: 600px;
+}
+
+.task-detail-title {
+    font-size: 1.35rem;
+    color: #ffffff;
+    margin-top: 0.4rem;
+}
+
+.task-detail-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.detail-user-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+}
+
+.task-description-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #e2e8f0;
+    white-space: pre-line;
+}
+
+/* Settings Table */
+.settings-table td {
+    vertical-align: middle;
+}
+
+.inline-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0;
+}
