@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LANDJUGEND SCHEURUNG - COMPONENTS & SPECIFIC VIEWS (CACHE-BUSTED & FORCED SPACING)
+   LANDJUGEND SCHEURUNG - COMPONENTS & SPECIFIC VIEWS (BALANCED COMPACT SPACING)
    ========================================================================== */
 
 /* Dashboard & Banner */
@@ -10,15 +10,15 @@
     background: linear-gradient(135deg, #1e222b 0%, #14171d 100%);
     border: 1px solid var(--border-glow);
     border-radius: var(--radius-lg);
-    padding: 2.25rem 2.75rem;
-    margin-bottom: 4.5rem !important;
-    gap: 2rem;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem !important;
+    gap: 1.5rem;
     flex-wrap: wrap;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 8px 20px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
 }
 
 .dashboard-banner h2, .section-banner h2 {
-    font-size: 1.75rem;
+    font-size: 1.6rem;
     letter-spacing: 0.05em;
     color: #ffffff;
 }
@@ -26,17 +26,17 @@
 .global-progress-card {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1.25rem;
     background: #111318;
-    padding: 1.25rem 1.75rem;
+    padding: 1rem 1.25rem;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
 }
 
 .progress-ring-container {
     position: relative;
-    width: 95px;
-    height: 95px;
+    width: 85px;
+    height: 85px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -44,7 +44,7 @@
 
 .progress-ring-text {
     font-family: 'Montserrat', sans-serif;
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 900;
     color: #ffffff;
 }
@@ -57,26 +57,26 @@
 
 .metrics-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 2.5rem;
-    margin-bottom: 4.5rem !important;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem !important;
 }
 
 .metric-card {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
-    padding: 1.75rem 2rem;
+    gap: 1.25rem;
+    padding: 1.25rem 1.5rem;
 }
 
 .metric-icon {
-    width: 56px;
-    height: 56px;
+    width: 48px;
+    height: 48px;
     border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border-color);
 }
@@ -84,14 +84,14 @@
 .metric-value {
     display: block;
     font-family: 'Montserrat', sans-serif;
-    font-size: 2rem;
+    font-size: 1.75rem;
     font-weight: 800;
     line-height: 1.1;
     color: #ffffff;
 }
 
 .metric-label {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: var(--text-muted);
 }
 
@@ -100,72 +100,72 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 2.5rem !important;
+    margin-bottom: 1.25rem !important;
 }
 
 .members-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 3rem;
-    margin-top: 1.5rem;
-    margin-bottom: 5rem !important;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+    margin-bottom: 2.5rem !important;
 }
 
 .member-card {
     position: relative;
     overflow: hidden;
     border-radius: var(--radius-lg);
-    padding: 1.75rem 2rem;
-    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.55), 0 6px 16px rgba(0, 0, 0, 0.35);
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     transition: var(--transition-fast);
 }
 
 .member-card-header {
     display: flex;
     align-items: center;
-    gap: 1.25rem;
-    margin-bottom: 1.25rem;
+    gap: 1rem;
+    margin-bottom: 1rem;
 }
 
 .member-avatar {
-    width: 52px;
-    height: 52px;
+    width: 46px;
+    height: 46px;
     border-radius: var(--radius-full);
     border: 2px solid var(--border-glow);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.65rem;
+    font-size: 1.5rem;
 }
 
 .member-name {
     font-family: 'Montserrat', sans-serif;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 800;
     color: #ffffff;
 }
 
 .member-role {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
 }
 
 .member-percent-badge {
     margin-left: auto;
     font-family: 'Montserrat', sans-serif;
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-weight: 900;
-    padding: 0.3rem 0.75rem;
+    padding: 0.25rem 0.65rem;
     border-radius: var(--radius-sm);
 }
 
 .member-progress-container {
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
 }
 
 .progress-bar-bg {
     width: 100%;
-    height: 10px;
+    height: 8px;
     background: rgba(255, 255, 255, 0.08);
     border-radius: var(--radius-full);
     overflow: hidden;
@@ -180,70 +180,68 @@
 .member-stats-row {
     display: flex;
     justify-content: space-between;
-    font-size: 0.85rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    margin-bottom: 1rem;
+    font-size: 0.8rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    margin-bottom: 0.75rem;
 }
 
-/* Person Tasks Grouped Section - FORCED HUGE SPACING & MARGIN (5rem / 80px) */
+/* Person Tasks Grouped Section - BALANCED COMPACT SPACING (1.75rem) */
 .person-tasks-container {
     display: flex;
     flex-direction: column;
-    gap: 5rem !important;
-    margin-top: 2.5rem !important;
-    margin-bottom: 6rem !important;
+    gap: 1.75rem !important;
+    margin-top: 1.5rem !important;
+    margin-bottom: 3rem !important;
 }
 
-/* EXPLICIT MARGIN-BOTTOM ON EACH MEMBER TASK BOX */
 .person-tasks-section {
-    border-radius: 20px !important;
-    padding: 2.75rem 3rem !important;
-    margin-bottom: 5rem !important; /* FORCED 80px MARGIN BOTTOM ON EVERY BOX */
+    border-radius: var(--radius-lg) !important;
+    padding: 1.5rem 1.75rem !important;
+    margin-bottom: 1.75rem !important; /* COMPACT 1.75rem MARGIN BOTTOM */
     transition: var(--transition-fast);
 
-    /* Starke, plastische Schattierung */
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 10px 28px rgba(0, 0, 0, 0.5) !important;
-    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45), 0 4px 10px rgba(0, 0, 0, 0.25) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 .person-tasks-section:hover {
-    box-shadow: 0 30px 75px rgba(0, 0, 0, 0.8), 0 12px 35px rgba(0, 0, 0, 0.6) !important;
-    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 6px 16px rgba(0, 0, 0, 0.35) !important;
+    transform: translateY(-2px);
 }
 
 .person-tasks-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1.5rem;
+    gap: 1rem;
     flex-wrap: wrap;
-    padding-bottom: 1.5rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid rgba(255,255,255,0.12);
+    padding-bottom: 0.85rem;
+    margin-bottom: 0.85rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
 .person-title-block {
     display: flex;
     align-items: center;
-    gap: 1.25rem;
+    gap: 0.85rem;
 }
 
 .person-name {
-    font-size: 1.4rem;
-    margin-bottom: 0.2rem;
+    font-size: 1.2rem;
+    margin-bottom: 0.1rem;
 }
 
 .person-role {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 700;
 }
 
 .person-stats-badge {
-    padding: 0.55rem 1.1rem;
+    padding: 0.4rem 0.85rem;
     border-radius: var(--radius-sm);
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 800;
 }
 
@@ -254,7 +252,7 @@
 }
 
 .clean-tasks-table th, .clean-tasks-table td {
-    padding: 1.25rem 1.25rem;
+    padding: 0.85rem 1rem;
     vertical-align: middle;
     border-bottom: 1px solid rgba(255,255,255,0.06);
 }
@@ -271,9 +269,9 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.5rem;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: #ffffff;
     transition: color 0.2s ease;
 }
@@ -283,9 +281,9 @@
 }
 
 .subtask-count-pill {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     background: rgba(255, 255, 255, 0.08);
-    padding: 0.2rem 0.55rem;
+    padding: 0.15rem 0.45rem;
     border-radius: var(--radius-full);
     color: var(--text-muted);
 }
@@ -294,11 +292,11 @@
 .due-date-badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.45rem 0.85rem;
+    gap: 0.35rem;
+    padding: 0.3rem 0.65rem;
     border-radius: var(--radius-sm);
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 800;
 }
 
@@ -306,7 +304,7 @@
     background: rgba(239, 68, 68, 0.25);
     color: #f87171;
     border: 1px solid rgba(239, 68, 68, 0.4);
-    box-shadow: 0 0 12px rgba(239, 68, 68, 0.25);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
 }
 
 .due-urgent {
@@ -328,12 +326,12 @@
 
 /* Task Detail Modal */
 .task-detail-card {
-    max-width: 620px;
-    padding: 2.25rem;
+    max-width: 600px;
+    padding: 2rem;
 }
 
 .task-detail-title {
-    font-size: 1.45rem;
+    font-size: 1.35rem;
     color: #ffffff;
     margin-top: 0.4rem;
 }
@@ -341,22 +339,22 @@
 .task-detail-meta-row {
     display: flex;
     align-items: center;
-    gap: 0.85rem;
+    gap: 0.75rem;
     flex-wrap: wrap;
 }
 
 .detail-user-chip {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.35rem 0.75rem;
+    gap: 0.4rem;
+    padding: 0.3rem 0.65rem;
     border-radius: var(--radius-sm);
-    font-size: 0.85rem;
+    font-size: 0.8rem;
 }
 
 .task-description-text {
-    font-size: 1rem;
-    line-height: 1.65;
+    font-size: 0.95rem;
+    line-height: 1.6;
     color: #e2e8f0;
     white-space: pre-line;
 }
@@ -369,6 +367,6 @@
 .inline-group {
     display: flex;
     align-items: center;
-    gap: 1.25rem;
+    gap: 1rem;
     margin-bottom: 0;
 }
