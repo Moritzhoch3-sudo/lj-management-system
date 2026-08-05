@@ -340,35 +340,55 @@ export class DashboardModule {
                         </div>
                     </div>
 
-                    <!-- Distinct Separated Tasks Cards Container with Vertical Scroll -->
+                    <!-- Single Large Box with Multi-Line Task Rows -->
                     <div class="modal-body p-2" style="max-height: 60vh; overflow-y: auto;">
-                        <h5 class="mb-3" style="font-size: 0.9rem; color: #cbd5e1;">📋 Aufgabenliste von ${m.name}:</h5>
                         ${mTasks.length === 0 ? `
-                            <p class="text-muted text-center p-3">Keine zugewiesenen Aufgaben.</p>
+                            <p class="text-muted text-center p-4">Keine zugewiesenen Aufgaben.</p>
                         ` : `
-                            <div class="d-flex flex-column gap-3">
-                                ${mTasks.map(t => {
-                                    const cat = categories.find(c => c.id === t.categoryId) || { icon: '📁', name: 'Allgemein' };
-                                    return `
-                                        <div class="modal-task-card p-3" style="background: rgba(17, 19, 24, 0.95); border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 6px 20px rgba(0,0,0,0.6); border-left: 4px solid ${t.status === 'erledigt' ? m.color : '#94a3b8'}; transition: var(--transition-fast);">
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <div class="d-flex align-items-center gap-2" style="min-width: 0; flex: 1;">
-                                                    <span class="${t.status === 'erledigt' ? 'strikethrough-text' : ''}" style="color: #f8fafc; font-size: 0.92rem; font-weight: 700; word-break: break-word;">
-                                                        ${t.title}
-                                                    </span>
-                                                </div>
+                            <div class="card-glow p-3" style="background: rgba(17, 19, 24, 0.95); border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 10px 30px rgba(0,0,0,0.6); border-left: 4px solid ${m.color};">
+                                <h5 class="mb-3" style="font-size: 0.95rem; color: #fff; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px;">
+                                    📋 Aufgabenübersicht von ${m.name} (${mTasks.length} Aufgaben)
+                                </h5>
 
-                                                <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-2">
-                                                    <span class="badge" style="font-size: 0.75rem; background: ${t.status === 'erledigt' ? 'rgba(34,197,94,0.2)' : t.status === 'in_bearbeitung' ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.08)'}; color: ${t.status === 'erledigt' ? '#34d399' : t.status === 'in_bearbeitung' ? '#fbbf24' : '#94a3b8'}; border: 1px solid rgba(255,255,255,0.1);">
-                                                        ${t.status === 'erledigt' ? '✅ Erledigt' : t.status === 'in_bearbeitung' ? '🔄 Laufend' : '📋 Offen'}
-                                                    </span>
-                                                    <small class="text-muted" style="font-size: 0.78rem;">${cat.icon} ${cat.name}</small>
-                                                    ${t.dueDate ? `<span class="badge bg-dark" style="font-size: 0.72rem; border: 1px solid rgba(255,255,255,0.12);">📅 ${t.dueDate}</span>` : ''}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    `;
-                                }).join('')}
+                                <div class="table-responsive">
+                                    <table class="w-100" style="border-collapse: separate; border-spacing: 0 6px;">
+                                        <thead>
+                                            <tr style="color: #94a3b8; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left;">
+                                                <th style="padding: 6px 10px;">Aufgabe</th>
+                                                <th style="padding: 6px 10px; width: 140px;">Status</th>
+                                                <th style="padding: 6px 10px; width: 220px;">Projekt / Kategorie</th>
+                                                <th style="padding: 6px 10px; width: 110px;">Fälligkeit</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${mTasks.map(t => {
+                                                const cat = categories.find(c => c.id === t.categoryId) || { icon: '📁', name: 'Allgemein' };
+                                                const statusBadge = t.status === 'erledigt' 
+                                                    ? `<span class="badge" style="background: rgba(34,197,94,0.18); color: #34d399; border: 1px solid rgba(34,197,94,0.3); font-size: 0.78rem; font-weight: 700;">✅ Erledigt</span>`
+                                                    : t.status === 'in_bearbeitung'
+                                                    ? `<span class="badge" style="background: rgba(245,158,11,0.18); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); font-size: 0.78rem; font-weight: 700;">🔄 In Bearbeitung</span>`
+                                                    : `<span class="badge" style="background: rgba(255,255,255,0.06); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); font-size: 0.78rem; font-weight: 700;">📋 Offen</span>`;
+
+                                                return `
+                                                    <tr style="background: rgba(255,255,255,0.03); border-radius: 6px; transition: background 0.2s;">
+                                                        <td style="padding: 10px 10px; font-weight: 600; color: #f8fafc; font-size: 0.88rem; border-radius: 6px 0 0 6px;">
+                                                            <span class="${t.status === 'erledigt' ? 'strikethrough-text' : ''}">${t.title}</span>
+                                                        </td>
+                                                        <td style="padding: 10px 10px;">${statusBadge}</td>
+                                                        <td style="padding: 10px 10px; color: #cbd5e1; font-size: 0.82rem;">
+                                                            <span style="background: rgba(255,255,255,0.05); padding: 4px 9px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.08); display: inline-flex; align-items: center; gap: 4px;">
+                                                                ${cat.icon} ${cat.name}
+                                                            </span>
+                                                        </td>
+                                                        <td style="padding: 10px 10px; color: #94a3b8; font-size: 0.8rem; border-radius: 0 6px 6px 0;">
+                                                            ${t.dueDate ? `<span class="badge bg-dark" style="border: 1px solid rgba(255,255,255,0.12);">📅 ${t.dueDate}</span>` : '-'}
+                                                        </td>
+                                                    </tr>
+                                                `;
+                                            }).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         `}
                     </div>
