@@ -32,6 +32,9 @@ class App {
     }
 
     static startApp() {
+        const headerEl = document.querySelector('.app-header');
+        if (headerEl) headerEl.style.display = 'block';
+
         this.renderNavbar();
         this.bindGlobalEvents();
         this.updateNavbarTabVisibility();

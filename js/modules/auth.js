@@ -84,9 +84,11 @@ export class AppAuth {
 
     static renderEntryLockPage(containerEl, onAuthenticatedCallback) {
         const members = StorageEngine.getMembers();
+        const headerEl = document.querySelector('.app-header');
+        if (headerEl) headerEl.style.display = 'none';
 
         containerEl.innerHTML = `
-            <div class="app-entry-lock-viewport d-flex align-items-center justify-content-center p-4" style="min-height: 80vh;">
+            <div class="app-entry-lock-viewport d-flex align-items-center justify-content-center p-4" style="min-height: 85vh;">
                 <div class="card-glow entry-lock-card text-center" style="max-width: 460px; width: 100%; border: 1px solid rgba(0,135,61,0.35); background: rgba(17, 19, 24, 0.96); box-shadow: 0 20px 50px rgba(0,0,0,0.7); padding: 2.5rem 2rem; border-radius: 16px;">
                     
                     <!-- Logo Badge -->
@@ -106,7 +108,7 @@ export class AppAuth {
                     <form id="app-entry-pass-form" autocomplete="off">
                         <div class="form-group mb-2 text-start">
                             <label class="form-label small font-bold text-muted mb-1">Benutzername (Vorname & Nachname zusammengeschrieben):</label>
-                            <input type="text" id="entry-username-input" class="form-control" placeholder="z. B. moritzkubik oder valentinmuellner" required autofocus autocomplete="off" 
+                            <input type="text" id="entry-username-input" class="form-control" placeholder="z. B. moritzkubik" required autofocus autocomplete="off" 
                                    style="font-size: 1rem; padding: 0.65rem; border-radius: 8px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: #ffffff;" />
                         </div>
 
@@ -122,21 +124,6 @@ export class AppAuth {
                             🔓 Anmelden & Vorstands-Zentrale Freischalten
                         </button>
                     </form>
-
-                    <!-- Helper: List of Exclusively Allowed Usernames -->
-                    <div class="mt-3 text-start">
-                        <details style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 8px 12px; border: 1px solid rgba(255,255,255,0.08);">
-                            <summary style="cursor: pointer; font-size: 0.8rem; color: #34d399; font-weight: bold;">💡 Übersicht aller gültigen Benutzernamen</summary>
-                            <div class="mt-2" style="max-height: 150px; overflow-y: auto; font-size: 0.78rem;">
-                                ${members.map(m => `
-                                    <div class="d-flex justify-content-between py-1" style="border-bottom: 1px solid rgba(255,255,255,0.04);">
-                                        <span style="color: #fff;">${m.avatar} ${m.name} (${m.role}):</span>
-                                        <code style="color: #38bdf8; font-weight: bold;">${this.sanitizeUsername(m.name)}</code>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </details>
-                    </div>
 
                     <small class="text-muted d-block mt-3" style="font-size: 0.78rem;">
                         🛡️ Geschützte Vereinsinstanz der Landjugend Scheuring
