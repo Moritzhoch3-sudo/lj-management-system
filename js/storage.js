@@ -20,22 +20,34 @@ const STORAGE_KEYS = {
 
 const DEFAULT_PIN = '1357';
 
+const MEMBER_RESET_VERSION = 'lj_member_reset_v5';
+
 export class StorageEngine {
     static getMembers() {
+        // One-time forced reset: overwrite stale localStorage AND cloud with correct INITIAL_MEMBERS
+        const resetDone = localStorage.getItem(MEMBER_RESET_VERSION);
+        if (!resetDone) {
+            localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(INITIAL_MEMBERS));
+            localStorage.setItem(MEMBER_RESET_VERSION, 'true');
+            // Force push correct members to cloud (delayed to avoid circular init)
+            setTimeout(() => CloudStorageEngine.pushAllToCloud(), 500);
+            return INITIAL_MEMBERS;
+        }
+
         const raw = localStorage.getItem(STORAGE_KEYS.MEMBERS);
         if (!raw) {
-            this.saveMembers(INITIAL_MEMBERS);
+            localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(INITIAL_MEMBERS));
             return INITIAL_MEMBERS;
         }
         try {
             const parsed = JSON.parse(raw);
             if (!Array.isArray(parsed) || parsed.length < 13) {
-                this.saveMembers(INITIAL_MEMBERS);
+                localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(INITIAL_MEMBERS));
                 return INITIAL_MEMBERS;
             }
             return parsed;
         } catch (e) {
-            this.saveMembers(INITIAL_MEMBERS);
+            localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(INITIAL_MEMBERS));
             return INITIAL_MEMBERS;
         }
     }

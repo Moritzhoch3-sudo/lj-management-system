@@ -91,8 +91,8 @@ export class CloudStorageEngine {
 
                 for (const [prop, storageKey] of Object.entries(keyMap)) {
                     if (cloudData[prop] !== undefined && cloudData[prop] !== null) {
-                        // Protect members list integrity
-                        if (prop === 'members' && (!Array.isArray(cloudData[prop]) || cloudData[prop].length < 13)) {
+                        // NEVER overwrite local members from cloud - INITIAL_MEMBERS in data.js is authoritative
+                        if (prop === 'members') {
                             continue;
                         }
                         const localRaw = localStorage.getItem(storageKey);
