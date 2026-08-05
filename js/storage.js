@@ -5,7 +5,7 @@ import { INITIAL_MEMBERS, CATEGORIES, INITIAL_TASKS, INITIAL_FINANCES, INITIAL_C
 import { CloudStorageEngine } from './cloud-storage.js';
 
 const STORAGE_KEYS = {
-    MEMBERS: 'lj_members_screenshot_v1',
+    MEMBERS: 'lj_members_v4_final',
     CATEGORIES: 'lj_categories_v1',
     TASKS: 'lj_tasks_v3_12',
     FINANCES: 'lj_finances_v1',
