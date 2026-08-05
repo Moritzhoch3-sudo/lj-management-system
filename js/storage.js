@@ -29,7 +29,7 @@ export class StorageEngine {
         }
         try {
             const parsed = JSON.parse(raw);
-            if (!Array.isArray(parsed) || parsed.length === 0) {
+            if (!Array.isArray(parsed) || parsed.length < 13) {
                 this.saveMembers(INITIAL_MEMBERS);
                 return INITIAL_MEMBERS;
             }
