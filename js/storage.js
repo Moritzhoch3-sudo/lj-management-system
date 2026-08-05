@@ -2,10 +2,9 @@
  * Storage & State Persistence Engine (Supports Instant Single Active PIN Verification & Member Passwords)
  */
 import { INITIAL_MEMBERS, CATEGORIES, INITIAL_TASKS, INITIAL_FINANCES, INITIAL_CONTRACTS, INITIAL_MINUTES } from './data.js';
-import { CloudStorageEngine } from './cloud-storage.js';
 
 const STORAGE_KEYS = {
-    MEMBERS: 'lj_members_v4_final',
+    MEMBERS: 'lj_members_v5_clean',
     CATEGORIES: 'lj_categories_v1',
     TASKS: 'lj_tasks_v3_12',
     FINANCES: 'lj_finances_v1',
@@ -20,20 +19,9 @@ const STORAGE_KEYS = {
 
 const DEFAULT_PIN = '1357';
 
-const MEMBER_RESET_VERSION = 'lj_member_reset_v5';
-
 export class StorageEngine {
     static getMembers() {
-        // One-time forced reset: overwrite stale localStorage AND cloud with correct INITIAL_MEMBERS
-        const resetDone = localStorage.getItem(MEMBER_RESET_VERSION);
-        if (!resetDone) {
-            localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(INITIAL_MEMBERS));
-            localStorage.setItem(MEMBER_RESET_VERSION, 'true');
-            // Force push correct members to cloud (delayed to avoid circular init)
-            setTimeout(() => CloudStorageEngine.pushAllToCloud(), 500);
-            return INITIAL_MEMBERS;
-        }
-
+        // Always force correct INITIAL_MEMBERS on fresh key
         const raw = localStorage.getItem(STORAGE_KEYS.MEMBERS);
         if (!raw) {
             localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(INITIAL_MEMBERS));
@@ -54,7 +42,6 @@ export class StorageEngine {
 
     static saveMembers(members) {
         localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
-        CloudStorageEngine.pushAllToCloud();
     }
 
     static getCategories() {
@@ -64,7 +51,6 @@ export class StorageEngine {
 
     static saveCategories(categories) {
         localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
-        CloudStorageEngine.pushAllToCloud();
     }
 
     static getTasks() {
@@ -74,7 +60,6 @@ export class StorageEngine {
 
     static saveTasks(tasks) {
         localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
-        CloudStorageEngine.pushAllToCloud();
     }
 
     static getFinances() {
@@ -84,7 +69,6 @@ export class StorageEngine {
 
     static saveFinances(finances) {
         localStorage.setItem(STORAGE_KEYS.FINANCES, JSON.stringify(finances));
-        CloudStorageEngine.pushAllToCloud();
     }
 
     static getContracts() {
@@ -94,7 +78,6 @@ export class StorageEngine {
 
     static saveContracts(contracts) {
         localStorage.setItem(STORAGE_KEYS.CONTRACTS, JSON.stringify(contracts));
-        CloudStorageEngine.pushAllToCloud();
     }
 
     static getMinutes() {
@@ -104,7 +87,6 @@ export class StorageEngine {
 
     static saveMinutes(minutes) {
         localStorage.setItem(STORAGE_KEYS.MINUTES, JSON.stringify(minutes));
-        CloudStorageEngine.pushAllToCloud();
     }
 
     /**
@@ -151,18 +133,8 @@ export class StorageEngine {
     }
 
     /**
-     * Member Password Management
+     * Member Password Management (duplicate-safe)
      */
-    static getMemberPasswords() {
-        const raw = localStorage.getItem(STORAGE_KEYS.MEMBER_PASSWORDS);
-        return raw ? JSON.parse(raw) : {};
-    }
-
-    static getMemberPassword(memberId) {
-        const map = this.getMemberPasswords();
-        return map[memberId] || 'landjugend-scheuring';
-    }
-
     static setMemberPassword(memberId, newPass) {
         const map = this.getMemberPasswords();
         map[memberId] = String(newPass).trim();
@@ -322,7 +294,6 @@ export class StorageEngine {
                 localStorage.setItem(STORAGE_KEYS.MEMBER_PASSWORDS, JSON.stringify(data.memberPasswords));
             }
 
-            CloudStorageEngine.pushAllToCloud();
             return { success: true };
         } catch (e) {
             console.error('Import error:', e);
