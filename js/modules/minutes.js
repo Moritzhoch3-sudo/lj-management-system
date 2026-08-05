@@ -5,8 +5,18 @@ import { StorageEngine } from '../storage.js';
 import { AudioRecorderEngine } from './recorder.js';
 
 let activeRecorder = null;
+let recordingStartTimestampStr = null;
 
 export class MinutesModule {
+    static formatStartTimestamp(d = new Date()) {
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        return `${day}.${month}.${year}_${hours}:${minutes}`;
+    }
+
     static render(containerEl) {
         const minutes = StorageEngine.getMinutes();
         const members = StorageEngine.getMembers();
@@ -67,13 +77,15 @@ export class MinutesModule {
                     ${minutes.length === 0 ? `
                         <div class="empty-column-placeholder">Noch keine Sitzungsprotokolle vorhanden.</div>
                     ` : minutes.map(m => `
-                        <div class="minute-card card-glow mb-4">
-                            <div class="minute-header">
+                        <div class="minute-card card-glow mb-4" style="border-left: 4px solid #10b981; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                            <div class="minute-header d-flex justify-content-between align-items-center mb-2">
                                 <div>
-                                    <h3 class="minute-title">${m.title}</h3>
-                                    <span class="minute-meta">📅 ${m.date} | 📍 ${m.location || 'Landjugendheim'}</span>
+                                    <h3 class="minute-title" style="color: #34d399; font-size: 1.25rem; font-weight: 800; font-family: monospace; letter-spacing: 0.03em;">
+                                        📁 ${m.title}
+                                    </h3>
+                                    <span class="minute-meta text-muted small">📅 Datum: ${m.date} | 📍 ${m.location || 'Landjugendheim Scheuring'}</span>
                                 </div>
-                                <button class="btn btn-sm btn-ghost danger-text delete-minute-btn" data-id="${m.id}">🗑️</button>
+                                <button class="btn btn-sm btn-ghost danger-text delete-minute-btn" data-id="${m.id}" title="Löschen">🗑️</button>
                             </div>
 
                             <!-- Bullet Point Summary -->
@@ -133,6 +145,7 @@ export class MinutesModule {
         startBtn?.addEventListener('click', async () => {
             liveBox.classList.remove('hidden');
             textarea.value = '';
+            recordingStartTimestampStr = this.formatStartTimestamp(new Date());
 
             activeRecorder = new AudioRecorderEngine(
                 (text) => {
@@ -174,7 +187,8 @@ export class MinutesModule {
                 alert('Bitte sprich zuerst Text ein oder tippe Notizen in das Feld.');
                 return;
             }
-            this.generateBulletProtocol(text, containerEl, members);
+            const stamp = recordingStartTimestampStr || this.formatStartTimestamp(new Date());
+            this.generateBulletProtocol(text, stamp, containerEl, members);
         });
 
         containerEl.querySelectorAll('.delete-minute-btn').forEach(btn => {
@@ -192,8 +206,9 @@ export class MinutesModule {
     /**
      * Fact-based bullet point summarizer (filters greetings, chit-chat, and extracts actionable facts)
      */
-    static generateBulletProtocol(rawText, containerEl, members) {
-        const todayStr = new Date().toISOString().slice(0, 10);
+    static generateBulletProtocol(rawText, timestampStr, containerEl, members) {
+        const titleStr = `Zusammenfassung_${timestampStr}`;
+        const datePart = timestampStr.split('_')[0] || new Date().toISOString().slice(0, 10);
         const rawSentences = rawText.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
 
         // Phrases to ignore completely (greetings, pleasantries, chit-chat)
@@ -242,15 +257,15 @@ export class MinutesModule {
             }
         });
 
-        if (bullets.length === 0) bullets.push(`• Wichtige Beschlüsse und Vorstands-Fakten vom ${todayStr}`);
+        if (bullets.length === 0) bullets.push(`• Wichtige Beschlüsse und Vorstands-Fakten vom ${datePart}`);
         if (decisions.length === 0) decisions.push('Sitzung ordnungsgemäß durchgeführt.');
 
-        // Save generated minute
+        // Save generated minute with dedicated box title: Zusammenfassung_DD.MM.YYYY_HH:mm
         const minutes = StorageEngine.getMinutes();
         minutes.unshift({
             id: 'm_doc_' + Date.now(),
-            title: `Vorstandssitzung vom ${todayStr}`,
-            date: todayStr,
+            title: titleStr,
+            date: datePart,
             location: 'Landjugendheim Scheuring',
             summary: rawText,
             bullets: bullets,
@@ -259,7 +274,10 @@ export class MinutesModule {
         });
         StorageEngine.saveMinutes(minutes);
 
-        alert(`✨ Erfolg! Fakten-Stichpunktprotokoll ohne Smalltalk archiviert!`);
+        // Reset recording start timestamp for future recordings
+        recordingStartTimestampStr = null;
+
+        alert(`✨ Erfolg! Eigene Zusammenfassungs-Box '${titleStr}' wurde erstellt und archiviert!`);
         this.render(containerEl);
     }
 }
