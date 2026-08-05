@@ -33,29 +33,16 @@ export class AppAuth {
     }
 
     /**
-     * FLEXIBLE Username Matcher: Accepts concatenated, full name with spaces, or first name!
+     * STRICT (Starr) Username Matcher: ONLY exact concatenated firstname + lastname is accepted!
      */
     static findMemberByUsername(usernameInput, members) {
         if (!usernameInput) return null;
-
-        const rawInput = usernameInput.trim().toLowerCase();
         const cleanInput = this.sanitizeUsername(usernameInput);
-
-        if (!cleanInput && !rawInput) return null;
+        if (!cleanInput) return null;
 
         return members.find(m => {
-            const rawName = (m.name || '').trim().toLowerCase();
             const cleanMemberUsername = this.sanitizeUsername(m.name);
-            const nameParts = (m.name || '').trim().split(/\s+/);
-            const firstName = this.sanitizeUsername(nameParts[0]);
-            const lastName = nameParts.length > 1 ? this.sanitizeUsername(nameParts[nameParts.length - 1]) : '';
-
-            return (
-                rawInput === rawName ||
-                cleanInput === cleanMemberUsername ||
-                (cleanInput.length >= 3 && cleanInput === firstName) ||
-                (cleanInput.length >= 3 && cleanInput === lastName)
-            );
+            return cleanInput === cleanMemberUsername;
         });
     }
 
@@ -73,12 +60,12 @@ export class AppAuth {
         const activeMemberPass = StorageEngine.getMemberPassword(matchedMember.id);
         const inputClean = (passwordInput || '').trim();
 
-        // STRICT CHECK with fallback to default password 'landjugend-scheuring'
+        // STRICT CHECK with silent fallback to set member password
         const defaultPass = 'landjugend-scheuring';
         const isPassValid = inputClean === activeMemberPass || inputClean === defaultPass;
 
         if (!isPassValid) {
-            return { success: false, reason: 'pass', memberName: matchedMember.name };
+            return { success: false, reason: 'pass' };
         }
 
         sessionStorage.setItem(AUTH_KEY, 'true');
@@ -169,9 +156,9 @@ export class AppAuth {
             } else {
                 errorMsg.classList.remove('hidden');
                 if (res.reason === 'user') {
-                    errorMsg.textContent = '⚠️ Ungültiger Benutzername! Du kannst entweder "VornameNachname" (z. B. moritzkubik) oder "Vorname" (z. B. Moritz) eingeben.';
+                    errorMsg.textContent = '⚠️ Ungültiger Benutzername! Es wird ausschließlich der Vor- und Nachname zusammengeschrieben akzeptiert (z. B. moritzkubik).';
                 } else {
-                    errorMsg.textContent = `⚠️ Falsches Passwort für ${res.memberName || 'diesen Benutzer'}! (Standard-Passwort lautet: landjugend-scheuring)`;
+                    errorMsg.textContent = '⚠️ Falsches Passwort! Bitte wende dich an den Admin.';
                 }
                 passInput.classList.add('shake');
                 setTimeout(() => passInput.classList.remove('shake'), 500);
