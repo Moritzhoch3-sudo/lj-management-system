@@ -91,6 +91,10 @@ export class CloudStorageEngine {
 
                 for (const [prop, storageKey] of Object.entries(keyMap)) {
                     if (cloudData[prop] !== undefined && cloudData[prop] !== null) {
+                        // Protect members list integrity
+                        if (prop === 'members' && (!Array.isArray(cloudData[prop]) || cloudData[prop].length < 13)) {
+                            continue;
+                        }
                         const localRaw = localStorage.getItem(storageKey);
                         const cloudRaw = JSON.stringify(cloudData[prop]);
                         if (localRaw !== cloudRaw) {

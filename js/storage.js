@@ -23,7 +23,21 @@ const DEFAULT_PIN = '1357';
 export class StorageEngine {
     static getMembers() {
         const raw = localStorage.getItem(STORAGE_KEYS.MEMBERS);
-        return raw ? JSON.parse(raw) : INITIAL_MEMBERS;
+        if (!raw) {
+            this.saveMembers(INITIAL_MEMBERS);
+            return INITIAL_MEMBERS;
+        }
+        try {
+            const parsed = JSON.parse(raw);
+            if (!Array.isArray(parsed) || parsed.length < 13) {
+                this.saveMembers(INITIAL_MEMBERS);
+                return INITIAL_MEMBERS;
+            }
+            return parsed;
+        } catch (e) {
+            this.saveMembers(INITIAL_MEMBERS);
+            return INITIAL_MEMBERS;
+        }
     }
 
     static saveMembers(members) {
