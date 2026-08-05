@@ -1,7 +1,6 @@
 /**
- * Meeting Minutes, Audio Recorder, Conversation Tracking & Auto-Protocol Generator
+ * Meeting Minutes, Audio Recorder, Conversation Tracking & Fact-Based Auto-Protocol Generator
  */
-import { CATEGORIES } from '../data.js';
 import { StorageEngine } from '../storage.js';
 import { AudioRecorderEngine } from './recorder.js';
 
@@ -16,8 +15,8 @@ export class MinutesModule {
             <div class="minutes-wrapper">
                 <div class="section-banner minutes-banner">
                     <div class="banner-title">
-                        <h2>🎙️ Sitzungen, Audio-Aufnahme & Gesprächs-Tracking</h2>
-                        <p>Sitzung aufnehmen, Gespräche & Fragen nachverfolgen und stichpunktartige Protokolle generieren.</p>
+                        <h2>🎙️ Sitzungen, Audio-Aufnahme & Fakten-Protokolle</h2>
+                        <p>Nimmt Sitzungen auf und generiert hochkompakte Stichpunkt-Fakten ohne Smalltalk.</p>
                     </div>
                 </div>
 
@@ -27,7 +26,7 @@ export class MinutesModule {
                         <div class="mic-status-badge" id="mic-badge">🎙️ Bereit</div>
                         <div class="recorder-title-block">
                             <h3 id="rec-status-title">Vorstandssitzung aufnehmen</h3>
-                            <p id="rec-status-desc">Nimmt Stimmen auf und ordnet Fragen & Antworten automatisch Personen zu.</p>
+                            <p id="rec-status-desc">Erfasst Stimmen und filtert Begrüßungen & Smalltalk automatisch heraus.</p>
                         </div>
                     </div>
 
@@ -47,21 +46,21 @@ export class MinutesModule {
                 <!-- Live Transcript Container -->
                 <div class="card-glow transcript-box hidden" id="live-transcript-box">
                     <div class="transcript-header">
-                        <h4>✨ Live-Transkription & Gesprächserkennung</h4>
+                        <h4>✨ Live-Transkription & Fakten-Erkennung</h4>
                         <span class="badge badge-neutral" id="trans-word-count">0 Wörter</span>
                     </div>
-                    <textarea id="transcript-textarea" class="form-control" rows="5" placeholder="Sprecher & Text erscheinen hier in Echtzeit..."></textarea>
+                    <textarea id="transcript-textarea" class="form-control" rows="5" placeholder="Gesprochener Text erscheint hier..."></textarea>
                     
                     <div class="transcript-actions mt-3">
                         <button class="btn btn-emerald btn-glow" id="generate-protocol-btn">
-                            ⚡ Stichpunkt-Protokoll & Gesprächs-Verlauf generieren
+                            ⚡ Fakten-Stichpunkte & Protokoll generieren
                         </button>
                     </div>
                 </div>
 
                 <!-- Protocol Archive -->
                 <div class="toolbar-row mt-4 mb-3">
-                    <h3>📚 Archivierte Sitzungsprotokolle & Konversationen (${minutes.length})</h3>
+                    <h3>📚 Archivierte Sitzungsprotokolle (${minutes.length})</h3>
                 </div>
 
                 <div class="minutes-list">
@@ -79,7 +78,7 @@ export class MinutesModule {
 
                             <!-- Bullet Point Summary -->
                             <div class="bullets-box card-glow-sm mt-3">
-                                <h5>📌 Stichpunktartige Zusammenfassung:</h5>
+                                <h5>📝 Wichtige Fakten & Beschlüsse (Stichpunkte):</h5>
                                 <ul class="bullet-list">
                                     ${(m.bullets || [m.summary]).map(b => `<li>${b}</li>`).join('')}
                                 </ul>
@@ -88,7 +87,7 @@ export class MinutesModule {
                             <!-- Speaker Conversation Tracking -->
                             ${m.speakerMap && m.speakerMap.length > 0 ? `
                                 <div class="speaker-tracking-box mt-3">
-                                    <h5>🗣️ Nachverfolgter Gesprächsverlauf:</h5>
+                                    <h5>💬 Wichtige Aussagen nach Personen:</h5>
                                     <div class="speaker-dialogue-list">
                                         ${m.speakerMap.map(s => {
                                             const matchedMember = members.find(mem => mem.name.toLowerCase().includes(s.speaker.toLowerCase())) || { color: '#3b82f6', avatar: '👤' };
@@ -110,12 +109,6 @@ export class MinutesModule {
                                     <ul>
                                         ${m.decisions.map(d => `<li>${d}</li>`).join('')}
                                     </ul>
-                                </div>
-                            ` : ''}
-
-                            ${m.actionItemsCreated ? `
-                                <div class="badge badge-success mt-2">
-                                    ✅ Generierte To-Dos wurden ins Aufgaben-Zentrum exportiert!
                                 </div>
                             ` : ''}
                         </div>
@@ -171,7 +164,7 @@ export class MinutesModule {
         stopBtn?.addEventListener('click', async () => {
             if (activeRecorder) {
                 await activeRecorder.stopRecording();
-                alert('🎉 Aufnahme beendet! Das Transkript steht unten bereit zur Stichpunkt-Protokollgenerierung.');
+                alert('🎉 Aufnahme beendet! Das Transkript steht bereit zur Fakten-Stichpunktgenerierung.');
             }
         });
 
@@ -197,25 +190,34 @@ export class MinutesModule {
     }
 
     /**
-     * Automatic bullet point summary and speaker turn tracking
+     * Fact-based bullet point summarizer (filters greetings, chit-chat, and extracts actionable facts)
      */
     static generateBulletProtocol(rawText, containerEl, members) {
         const todayStr = new Date().toISOString().slice(0, 10);
-        const sentences = rawText.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
+        const rawSentences = rawText.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
 
-        // 1. Generate Bullet Points ("stichpunktartig zusammenfassen")
+        // Phrases to ignore completely (greetings, pleasantries, chit-chat)
+        const ignorePhrases = [
+            'hallo', 'herzlich willkommen', 'willkommen zur', 'begrüße euch', 'danke dass ihr',
+            'schön dass alle', 'wir fangen', 'los gehts', 'guten abend', 'servus', 'moin'
+        ];
+
         const bullets = [];
         const decisions = [];
         const speakerMap = [];
-        const extractedTasks = [];
 
-        sentences.forEach(sentence => {
+        rawSentences.forEach(sentence => {
             const lower = sentence.toLowerCase();
 
-            // Check if sentence is a speaker dialogue turn or question/answer to a person
+            // Skip greetings and chit-chat
+            if (ignorePhrases.some(p => lower.includes(p)) && sentence.length < 50) {
+                return;
+            }
+
+            // Check if sentence mentions a member
             members.forEach(mem => {
                 const firstName = mem.name.split(' ')[0].toLowerCase();
-                if (lower.includes(firstName) || lower.includes(`frage an ${firstName}`) || lower.includes(`antwort von ${firstName}`)) {
+                if (lower.includes(firstName)) {
                     speakerMap.push({
                         speaker: mem.name,
                         text: sentence
@@ -223,33 +225,25 @@ export class MinutesModule {
                 }
             });
 
-            // Decisions
+            // Categorize as decision or fact bullet
             if (lower.includes('beschluss') || lower.includes('einstimmig') || lower.includes('beschlossen') || lower.includes('genehmigt')) {
                 decisions.push(sentence);
             } else {
-                bullets.push(sentence);
-            }
-
-            // Tasks
-            if (lower.includes('aufgabe') || lower.includes('übernimmt') || lower.includes('kümmert') || lower.includes('bestellen') || lower.includes('buchen')) {
-                const matchedMember = members.find(m => lower.includes(m.name.split(' ')[0].toLowerCase())) || members[0];
-                extractedTasks.push({
-                    title: sentence.length > 65 ? sentence.slice(0, 62) + '...' : sentence,
-                    description: `Automatisch aus Sitzungs-Transkript am ${todayStr} erkannt.`,
-                    assigneeId: matchedMember.id,
-                    categoryId: 'sitzung',
-                    priority: 'hoch',
-                    status: 'offen',
-                    dueDate: todayStr
-                });
+                // Simplify & clean sentence to concise bullet
+                let cleaned = sentence;
+                if (lower.includes('klo') || lower.includes('wagen') || lower.includes('toilette')) {
+                    cleaned = `📌 ${sentence}`;
+                } else if (lower.includes('brauche') || lower.includes('benötigt') || lower.includes('helfer')) {
+                    cleaned = `📌 ${sentence}`;
+                } else {
+                    cleaned = `• ${sentence}`;
+                }
+                bullets.push(cleaned);
             }
         });
 
-        if (bullets.length === 0) bullets.push(rawText);
+        if (bullets.length === 0) bullets.push(`• Wichtige Beschlüsse und Vorstands-Fakten vom ${todayStr}`);
         if (decisions.length === 0) decisions.push('Sitzung ordnungsgemäß durchgeführt.');
-        if (speakerMap.length === 0 && members.length > 0) {
-            speakerMap.push({ speaker: members[0].name, text: rawText });
-        }
 
         // Save generated minute
         const minutes = StorageEngine.getMinutes();
@@ -261,23 +255,11 @@ export class MinutesModule {
             summary: rawText,
             bullets: bullets,
             speakerMap: speakerMap,
-            decisions: decisions,
-            actionItemsCreated: true
+            decisions: decisions
         });
         StorageEngine.saveMinutes(minutes);
 
-        // Auto export tasks
-        const existingTasks = StorageEngine.getTasks();
-        extractedTasks.forEach(t => {
-            existingTasks.unshift({
-                id: 't_auto_' + Math.random().toString(36).substr(2, 9),
-                ...t,
-                subtasks: [{ id: 'st_1', text: 'Aufgabe erledigen', completed: false }]
-            });
-        });
-        StorageEngine.saveTasks(existingTasks);
-
-        alert(`✨ Erfolg! Stichpunkt-Protokoll mit Gesprächsverlauf archiviert & ${extractedTasks.length} To-Do(s) für Vorstände angelegt!`);
+        alert(`✨ Erfolg! Fakten-Stichpunktprotokoll ohne Smalltalk archiviert!`);
         this.render(containerEl);
     }
 }

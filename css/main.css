@@ -90,9 +90,9 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .dashboard-banner h2
 }
 
 .brand-logo-img {
-    height: 44px;
+    height: 48px;
     width: auto;
-    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
+    display: block;
     transition: var(--transition-fast);
 }
 

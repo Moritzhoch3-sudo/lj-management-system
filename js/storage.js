@@ -1,17 +1,24 @@
 /**
- * Storage & State Persistence Engine
+ * Storage & State Persistence Engine (Supports Instant Single Active PIN Verification & Member Passwords)
  */
-import { INITIAL_MEMBERS, CATEGORIES, INITIAL_TASKS, INITIAL_FINANCES, INITIAL_CONTRACTS, INITIAL_MINUTES, DEFAULT_PIN } from './data.js';
+import { INITIAL_MEMBERS, CATEGORIES, INITIAL_TASKS, INITIAL_FINANCES, INITIAL_CONTRACTS, INITIAL_MINUTES } from './data.js';
+import { CloudStorageEngine } from './cloud-storage.js';
 
 const STORAGE_KEYS = {
     MEMBERS: 'lj_members_v3_12',
+    CATEGORIES: 'lj_categories_v1',
     TASKS: 'lj_tasks_v3_12',
     FINANCES: 'lj_finances_v1',
     CONTRACTS: 'lj_contracts_v1',
     MINUTES: 'lj_minutes_v2',
-    PIN: 'lj_vault_pin_v1',
-    CURRENT_USER: 'lj_current_user_v1'
+    PIN_HASH: 'lj_vault_pin_hash_v3',
+    CURRENT_USER: 'lj_current_user_v1',
+    LAST_CATEGORY: 'lj_last_category_v1',
+    PIN: 'lj_vault_pin_plain_v1',
+    MEMBER_PASSWORDS: 'lj_member_passwords_v1'
 };
+
+const DEFAULT_PIN = '1357';
 
 export class StorageEngine {
     static getMembers() {
@@ -21,6 +28,17 @@ export class StorageEngine {
 
     static saveMembers(members) {
         localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
+        CloudStorageEngine.pushAllToCloud();
+    }
+
+    static getCategories() {
+        const raw = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
+        return raw ? JSON.parse(raw) : CATEGORIES;
+    }
+
+    static saveCategories(categories) {
+        localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+        CloudStorageEngine.pushAllToCloud();
     }
 
     static getTasks() {
@@ -30,6 +48,7 @@ export class StorageEngine {
 
     static saveTasks(tasks) {
         localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
+        CloudStorageEngine.pushAllToCloud();
     }
 
     static getFinances() {
@@ -39,6 +58,7 @@ export class StorageEngine {
 
     static saveFinances(finances) {
         localStorage.setItem(STORAGE_KEYS.FINANCES, JSON.stringify(finances));
+        CloudStorageEngine.pushAllToCloud();
     }
 
     static getContracts() {
@@ -48,6 +68,7 @@ export class StorageEngine {
 
     static saveContracts(contracts) {
         localStorage.setItem(STORAGE_KEYS.CONTRACTS, JSON.stringify(contracts));
+        CloudStorageEngine.pushAllToCloud();
     }
 
     static getMinutes() {
@@ -57,14 +78,74 @@ export class StorageEngine {
 
     static saveMinutes(minutes) {
         localStorage.setItem(STORAGE_KEYS.MINUTES, JSON.stringify(minutes));
+        CloudStorageEngine.pushAllToCloud();
     }
 
+    /**
+     * Plain PIN Retrieval & Instant Strict Verification
+     */
     static getPIN() {
         return localStorage.getItem(STORAGE_KEYS.PIN) || DEFAULT_PIN;
     }
 
-    static setPIN(newPin) {
-        localStorage.setItem(STORAGE_KEYS.PIN, newPin);
+    static async setPIN(newPin) {
+        const cleanPin = String(newPin).trim();
+        localStorage.setItem(STORAGE_KEYS.PIN, cleanPin);
+        
+        // Compute SHA-256 hash for consistency
+        const msgUint8 = new TextEncoder().encode(cleanPin);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashedPin = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        localStorage.setItem(STORAGE_KEYS.PIN_HASH, hashedPin);
+    }
+
+    static async verifyPIN(pinInput) {
+        const cleanInput = String(pinInput).trim();
+        const activePIN = this.getPIN();
+
+        // INSTANT STRICT COMPARISON: ONLY the single active PIN is accepted!
+        return cleanInput === activePIN;
+    }
+
+    /**
+     * Member Password Management
+     */
+    static getMemberPasswords() {
+        const raw = localStorage.getItem(STORAGE_KEYS.MEMBER_PASSWORDS);
+        return raw ? JSON.parse(raw) : {};
+    }
+
+    static getMemberPassword(memberId) {
+        const map = this.getMemberPasswords();
+        return map[memberId] || 'landjugend-scheuring';
+    }
+
+    static setMemberPassword(memberId, newPass) {
+        const map = this.getMemberPasswords();
+        map[memberId] = String(newPass).trim();
+        localStorage.setItem(STORAGE_KEYS.MEMBER_PASSWORDS, JSON.stringify(map));
+    }
+
+    /**
+     * Reset all member passwords to 'landjugend-scheuring' EXCEPT Admin (Moritz Kubik)
+     */
+    static resetAllMemberPasswordsExceptAdmin() {
+        const members = this.getMembers();
+        const map = this.getMemberPasswords();
+        const newMap = {};
+
+        members.forEach(m => {
+            if (this.isSuperAdmin(m.id)) {
+                if (map[m.id]) {
+                    newMap[m.id] = map[m.id];
+                }
+            } else {
+                newMap[m.id] = 'landjugend-scheuring';
+            }
+        });
+
+        localStorage.setItem(STORAGE_KEYS.MEMBER_PASSWORDS, JSON.stringify(newMap));
     }
 
     static getCurrentUserId() {
@@ -75,20 +156,85 @@ export class StorageEngine {
         localStorage.setItem(STORAGE_KEYS.CURRENT_USER, memberId);
     }
 
-    static exportFullBackup() {
-        const backup = {
-            version: '3.0',
-            exportedAt: new Date().toISOString(),
-            members: this.getMembers(),
-            tasks: this.getTasks(),
-            finances: this.getFinances(),
-            contracts: this.getContracts(),
-            minutes: this.getMinutes()
-        };
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup, null, 2));
+    static getLastSelectedCategory() {
+        return localStorage.getItem(STORAGE_KEYS.LAST_CATEGORY) || '';
+    }
+
+    static setLastSelectedCategory(catId) {
+        if (catId) {
+            localStorage.setItem(STORAGE_KEYS.LAST_CATEGORY, catId);
+        }
+    }
+
+    /**
+     * Super Admin Check for Moritz Kubik (2. Kassier)
+     */
+    static isSuperAdmin(userId = this.getCurrentUserId()) {
+        const members = this.getMembers();
+        const currentUser = members.find(m => m.id === userId);
+        if (!currentUser) return false;
+
+        const cleanName = (currentUser.name || '').toLowerCase();
+        const cleanRole = (currentUser.role || '').toLowerCase();
+        return cleanName.includes('moritz') || cleanName.includes('kubik') || cleanRole.includes('2. kassier');
+    }
+
+    /**
+     * Permission check: Moritz Kubik can edit all tasks; standard members can only edit tasks assigned to themselves.
+     */
+    static canUserEditTask(task, userId = this.getCurrentUserId()) {
+        if (this.isSuperAdmin(userId)) return true;
+        return task.assigneeId === userId;
+    }
+
+    /**
+     * Export complete Dashboard & Task Overview as a Clean Native Excel CSV Spreadsheet
+     */
+    static exportExcelDashboard() {
+        const members = this.getMembers();
+        const tasks = this.getTasks();
+        const categories = this.getCategories();
+
+        let csvContent = "\uFEFF"; // UTF-8 BOM for Microsoft Excel
+
+        csvContent += "Landjugend Scheuring - Vorstands-Dashboard & Aufgaben-Übersicht\n";
+        csvContent += `Exportiert am:;${new Date().toLocaleString('de-DE')}\n\n`;
+
+        members.forEach(m => {
+            const mTasks = tasks.filter(t => t.assigneeId === m.id);
+            const total = mTasks.length;
+            const completed = mTasks.filter(t => t.status === 'erledigt').length;
+            const inProgress = mTasks.filter(t => t.status === 'in_bearbeitung').length;
+            const open = mTasks.filter(t => t.status === 'offen').length;
+            const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            csvContent += `=========================================================================\n`;
+            csvContent += `VORSTANDSMITGLIED:;${m.name};ROLLE / AMT:;${m.role};FORTSCHRITT:;${pct}%\n`;
+            csvContent += `STATISTIK:;${completed} von ${total} erledigt;(${inProgress} in Bearbeitung | ${open} offen);;;\n`;
+            csvContent += `-------------------------------------------------------------------------\n`;
+            csvContent += `Aufgabenname;Kategorie;Priorität;Fälligkeitsdatum;Status;Beschreibung / Notiz\n`;
+
+            if (mTasks.length === 0) {
+                csvContent += `(Keine Aufgaben zugewiesen);-;-;-;-;-\n`;
+            } else {
+                mTasks.forEach(t => {
+                    const cat = categories.find(c => c.id === t.categoryId) || { name: 'Allgemein' };
+                    const titleClean = (t.title || '').replace(/;/g, ',').replace(/\n/g, ' ');
+                    const descClean = (t.description || '').replace(/;/g, ',').replace(/\n/g, ' ');
+                    const statusStr = t.status === 'erledigt' ? '✅ ERLEDIGT' : t.status === 'in_bearbeitung' ? '🔄 IN BEARBEITUNG' : '📋 OFFEN';
+
+                    csvContent += `"${titleClean}";"${cat.name}";"${t.priority.toUpperCase()}";"${t.dueDate || 'Keins'}";"${statusStr}";"${descClean}"\n`;
+                });
+            }
+
+            csvContent += `\n`;
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
         const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", `landjugend_scheuring_12_backup_${new Date().toISOString().slice(0,10)}.json`);
+        downloadAnchor.setAttribute("href", url);
+        downloadAnchor.setAttribute("download", `landjugend_scheuring_dashboard_uebersicht_${new Date().toISOString().slice(0,10)}.csv`);
         document.body.appendChild(downloadAnchor);
         downloadAnchor.click();
         downloadAnchor.remove();
@@ -96,10 +242,14 @@ export class StorageEngine {
 
     static resetToDefaults() {
         localStorage.removeItem(STORAGE_KEYS.MEMBERS);
+        localStorage.removeItem(STORAGE_KEYS.CATEGORIES);
         localStorage.removeItem(STORAGE_KEYS.TASKS);
         localStorage.removeItem(STORAGE_KEYS.FINANCES);
         localStorage.removeItem(STORAGE_KEYS.CONTRACTS);
         localStorage.removeItem(STORAGE_KEYS.MINUTES);
+        localStorage.removeItem(STORAGE_KEYS.PIN_HASH);
+        localStorage.removeItem(STORAGE_KEYS.PIN);
+        localStorage.removeItem(STORAGE_KEYS.MEMBER_PASSWORDS);
         window.location.reload();
     }
 }

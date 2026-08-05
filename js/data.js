@@ -204,4 +204,4 @@ export const INITIAL_MINUTES = [
     }
 ];
 
-export const DEFAULT_PIN = '1925';
+export const DEFAULT_PIN = '2026';

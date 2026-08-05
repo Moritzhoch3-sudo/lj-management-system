@@ -31,7 +31,7 @@
             <!-- Navigation Tabs (Mobile Horizontally Scrollable) -->
             <nav class="nav-menu">
                 <button class="nav-link active" data-tab="tasks">
-                    <span>📌</span> Aufgaben
+                    <span>✅</span> Aufgaben
                 </button>
                 <button class="nav-link" data-tab="dashboard">
                     <span>📊</span> Dashboard (% Overview)
@@ -40,7 +40,7 @@
                     <span>💰</span> Finanzen 🔒
                 </button>
                 <button class="nav-link" data-tab="contracts">
-                    <span>📄</span> Verträge 🔒
+                    <span>📋</span> Verträge 🔒
                 </button>
                 <button class="nav-link" data-tab="minutes">
                     <span>🎙️</span> Sitzungen & Audio 🔒
@@ -48,16 +48,19 @@
                 <button class="nav-link" data-tab="settings">
                     <span>⚙️</span> Einstellungen
                 </button>
+                <button class="nav-link" data-tab="password">
+                    <span>🔑</span> Passwort ändern
+                </button>
             </nav>
 
             <!-- User Simulator & Actions -->
             <div class="header-actions">
+                <div id="cloud-sync-badge" class="cloud-sync-badge status-connecting">🔄 verbinde Cloud...</div>
                 <div class="user-simulator-box">
                     <label for="user-simulator-select">Angemeldet als:</label>
                     <select id="user-simulator-select" class="form-select form-select-sm"></select>
                 </div>
-                <button class="btn btn-sm btn-ghost" id="export-backup-btn" title="Backup herunterladen">💾 Backup</button>
-                <button class="btn btn-sm btn-ghost danger-text" id="reset-data-btn" title="Auf Standarddaten zurücksetzen">🔄 Reset</button>
+                <button class="btn btn-sm btn-emerald text-nowrap" id="export-excel-btn" title="Dashboard als Excel-Datei herunterladen">📊 Export Excel</button>
             </div>
         </div>
     </header>

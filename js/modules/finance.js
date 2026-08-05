@@ -1,5 +1,5 @@
 /**
- * Finance & Cashbook Module (PIN Protected)
+ * Finance & Cashbook Module - Direct In-Box & In-Table Creation & Editing (PIN Protected)
  */
 import { StorageEngine } from '../storage.js';
 
@@ -48,53 +48,154 @@ export class FinanceModule {
                     </div>
                 </div>
 
-                <!-- Action Bar -->
-                <div class="toolbar-row">
-                    <h3>📜 Transaktions-Journal (${finances.length} Einträge)</h3>
-                    <button class="btn btn-primary btn-glow" id="add-finance-btn">➕ Neue Buchung erfassen</button>
-                </div>
+                <!-- DIRECT INLINE TRANSACTION CREATION & JOURNAL IN THE BOX -->
+                <div class="card-glow mb-4">
+                    <div class="toolbar-row mb-3">
+                        <h3>📜 Transaktions-Journal (${finances.length} Einträge)</h3>
+                    </div>
 
-                <!-- Finance Table -->
-                <div class="card-glow table-responsive">
-                    <table class="finance-table">
-                        <thead>
-                            <tr>
-                                <th>Datum</th>
-                                <th>Verwendungszweck / Titel</th>
-                                <th>Kategorie</th>
-                                <th>Beleg-Nr.</th>
-                                <th>Typ</th>
-                                <th>Betrag</th>
-                                <th>Aktionen</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${finances.length === 0 ? `
-                                <tr><td colspan="7" class="text-center p-4">Keine Buchungen vorhanden.</td></tr>
-                            ` : finances.map(f => `
+                    <!-- DIRECT INLINE QUICK-ADD FORM AT TOP OF TABLE BOX -->
+                    <div class="card-inline-add-bar mb-3 p-3" style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <h4 class="mb-2" style="font-size: 0.95rem; color: #34d399;">➕ Neue Buchung / Ausgabe direkt hier erfassen:</h4>
+                        <form id="inline-finance-add-form">
+                            <div class="row g-2">
+                                <div class="col-md-2">
+                                    <label class="form-label small mb-1">Datum</label>
+                                    <input type="date" id="add-fin-date" class="form-control form-control-sm" value="${new Date().toISOString().slice(0,10)}" required />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small mb-1">Verwendungszweck / Titel *</label>
+                                    <input type="text" id="add-fin-title" class="form-control form-control-sm" placeholder="z. B. Getränkeeinkauf Brauerei" required />
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small mb-1">Typ</label>
+                                    <select id="add-fin-type" class="form-select form-select-sm">
+                                        <option value="ausgabe" selected>📉 Ausgabe (-)</option>
+                                        <option value="einnahme">📈 Einnahme (+)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small mb-1">Betrag (€) *</label>
+                                    <input type="number" step="0.01" id="add-fin-amount" class="form-control form-control-sm" placeholder="0.00" required />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small mb-1">Kategorie</label>
+                                    <input type="text" id="add-fin-category" class="form-control form-control-sm" placeholder="Feste, Equipment..." />
+                                </div>
+                            </div>
+                            <div class="row g-2 mt-1 align-items-end">
+                                <div class="col-md-4">
+                                    <label class="form-label small mb-1">Beleg-Nr. / Quittung</label>
+                                    <input type="text" id="add-fin-receipt" class="form-control form-control-sm" placeholder="BELEG-2026-..." />
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label small mb-1">Notizen / Details</label>
+                                    <input type="text" id="add-fin-notes" class="form-control form-control-sm" placeholder="Anmerkungen..." />
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    <button type="submit" class="btn btn-sm btn-emerald w-100">➕ Buchung Speichern</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Finance Table with Direct Inline Editing -->
+                    <div class="table-responsive">
+                        <table class="finance-table">
+                            <thead>
                                 <tr>
-                                    <td>${f.date}</td>
-                                    <td>
-                                        <strong>${f.title}</strong>
-                                        ${f.notes ? `<br><small class="text-muted">${f.notes}</small>` : ''}
-                                    </td>
-                                    <td><span class="badge badge-neutral">${f.category || 'Allgemein'}</span></td>
-                                    <td><code>${f.receipt || '-'}</code></td>
-                                    <td>
-                                        <span class="badge ${f.type === 'einnahme' ? 'badge-success' : 'badge-danger'}">
-                                            ${f.type === 'einnahme' ? 'Einnahme' : 'Ausgabe'}
-                                        </span>
-                                    </td>
-                                    <td class="${f.type === 'einnahme' ? 'text-success font-bold' : 'text-danger font-bold'}">
-                                        ${f.type === 'einnahme' ? '+' : '-'}${Math.abs(f.amount).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-ghost danger-text delete-finance-btn" data-id="${f.id}">🗑️</button>
-                                    </td>
+                                    <th style="width: 110px;">Datum</th>
+                                    <th>Verwendungszweck & Notiz</th>
+                                    <th style="width: 140px;">Kategorie</th>
+                                    <th style="width: 130px;">Beleg-Nr.</th>
+                                    <th style="width: 110px;">Typ</th>
+                                    <th style="width: 120px;">Betrag</th>
+                                    <th style="width: 120px;">Aktionen</th>
                                 </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                ${finances.length === 0 ? `
+                                    <tr><td colspan="7" class="text-center p-4">Keine Buchungen vorhanden. Nutzen Sie das Formular oben, um eine hinzuzufügen.</td></tr>
+                                ` : finances.map(f => `
+                                    <tr class="finance-row">
+                                        <td>${f.date}</td>
+                                        <td>
+                                            <strong>${f.title}</strong>
+                                            ${f.notes ? `<br><small class="text-muted">${f.notes}</small>` : ''}
+                                        </td>
+                                        <td><span class="badge badge-neutral">${f.category || 'Allgemein'}</span></td>
+                                        <td><code>${f.receipt || '-'}</code></td>
+                                        <td>
+                                            <span class="badge ${f.type === 'einnahme' ? 'badge-success' : 'badge-danger'}">
+                                                ${f.type === 'einnahme' ? 'Einnahme' : 'Ausgabe'}
+                                            </span>
+                                        </td>
+                                        <td class="${f.type === 'einnahme' ? 'text-success font-bold' : 'text-danger font-bold'}">
+                                            ${f.type === 'einnahme' ? '+' : '-'}${Math.abs(f.amount).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
+                                        </td>
+                                        <td>
+                                            <div class="table-action-btns">
+                                                <button class="btn btn-sm btn-ghost toggle-fin-edit-btn" data-id="${f.id}" title="Direkt in der Zeile bearbeiten">✏️ Edit</button>
+                                                <button class="btn btn-sm btn-ghost danger-text delete-finance-btn" data-id="${f.id}" title="Löschen">🗑️</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <!-- INLINE EDITABLE ROW -->
+                                    <tr class="inline-edit-finance-row hidden" id="inline-fin-edit-${f.id}">
+                                        <td colspan="7" style="background: rgba(0,0,0,0.4); padding: 0.8rem; border-top: 1px dashed var(--border-color);">
+                                            <form class="inline-fin-edit-form" data-id="${f.id}">
+                                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                                    <strong style="color: #34d399; font-size: 0.9rem;">✏️ Buchung direkt in der Tabelle bearbeiten</strong>
+                                                    <button type="button" class="btn btn-sm btn-ghost cancel-fin-edit-btn" data-id="${f.id}">✖️ Schließen</button>
+                                                </div>
+
+                                                <div class="row g-2 mb-2">
+                                                    <div class="col-md-2">
+                                                        <label class="form-label small mb-1">Datum</label>
+                                                        <input type="date" class="form-control form-control-sm fin-edit-date" value="${f.date}" required />
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label small mb-1">Titel / Verwendungszweck *</label>
+                                                        <input type="text" class="form-control form-control-sm fin-edit-title" value="${f.title}" required />
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <label class="form-label small mb-1">Typ</label>
+                                                        <select class="form-select form-select-sm fin-edit-type">
+                                                            <option value="ausgabe" ${f.type === 'ausgabe' ? 'selected' : ''}>📉 Ausgabe (-)</option>
+                                                            <option value="einnahme" ${f.type === 'einnahme' ? 'selected' : ''}>📈 Einnahme (+)</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <label class="form-label small mb-1">Betrag (€)</label>
+                                                        <input type="number" step="0.01" class="form-control form-control-sm fin-edit-amount" value="${Math.abs(f.amount)}" required />
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label small mb-1">Kategorie</label>
+                                                        <input type="text" class="form-control form-control-sm fin-edit-category" value="${f.category || ''}" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="row g-2 align-items-end">
+                                                    <div class="col-md-4">
+                                                        <label class="form-label small mb-1">Beleg-Nr.</label>
+                                                        <input type="text" class="form-control form-control-sm fin-edit-receipt" value="${f.receipt || ''}" />
+                                                    </div>
+                                                    <div class="col-md-5">
+                                                        <label class="form-label small mb-1">Notizen</label>
+                                                        <input type="text" class="form-control form-control-sm fin-edit-notes" value="${f.notes || ''}" />
+                                                    </div>
+                                                    <div class="col-md-3 text-end">
+                                                        <button type="submit" class="btn btn-sm btn-emerald w-100">💾 Speichern</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         `;
@@ -103,10 +204,94 @@ export class FinanceModule {
     }
 
     static bindEvents(containerEl, finances) {
-        document.getElementById('add-finance-btn')?.addEventListener('click', () => {
-            this.openFinanceModal(containerEl);
+        // Direct Inline Quick-Add Submission
+        document.getElementById('inline-finance-add-form')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const date = document.getElementById('add-fin-date').value;
+            const title = document.getElementById('add-fin-title').value.trim();
+            const type = document.getElementById('add-fin-type').value;
+            const amount = parseFloat(document.getElementById('add-fin-amount').value);
+            const category = document.getElementById('add-fin-category').value.trim();
+            const receipt = document.getElementById('add-fin-receipt').value.trim();
+            const notes = document.getElementById('add-fin-notes').value.trim();
+
+            if (!title || isNaN(amount)) return;
+
+            const currentFinances = StorageEngine.getFinances();
+            currentFinances.unshift({
+                id: 'f_' + Date.now(),
+                date,
+                title,
+                type,
+                amount,
+                category,
+                receipt,
+                notes
+            });
+
+            StorageEngine.saveFinances(currentFinances);
+            this.render(containerEl);
         });
 
+        // Toggle Edit Row
+        containerEl.querySelectorAll('.toggle-fin-edit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.currentTarget.dataset.id;
+                const editRow = containerEl.querySelector(`#inline-fin-edit-${id}`);
+                if (editRow) {
+                    editRow.classList.toggle('hidden');
+                }
+            });
+        });
+
+        // Cancel Edit Row
+        containerEl.querySelectorAll('.cancel-fin-edit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.currentTarget.dataset.id;
+                const editRow = containerEl.querySelector(`#inline-fin-edit-${id}`);
+                if (editRow) {
+                    editRow.classList.add('hidden');
+                }
+            });
+        });
+
+        // Save Edit Row
+        containerEl.querySelectorAll('.inline-fin-edit-form').forEach(form => {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const id = form.dataset.id;
+                const currentFinances = StorageEngine.getFinances();
+                const idx = currentFinances.findIndex(f => f.id === id);
+
+                if (idx !== -1) {
+                    const date = form.querySelector('.fin-edit-date').value;
+                    const title = form.querySelector('.fin-edit-title').value.trim();
+                    const type = form.querySelector('.fin-edit-type').value;
+                    const amount = parseFloat(form.querySelector('.fin-edit-amount').value);
+                    const category = form.querySelector('.fin-edit-category').value.trim();
+                    const receipt = form.querySelector('.fin-edit-receipt').value.trim();
+                    const notes = form.querySelector('.fin-edit-notes').value.trim();
+
+                    if (!title || isNaN(amount)) return;
+
+                    currentFinances[idx] = {
+                        ...currentFinances[idx],
+                        date,
+                        title,
+                        type,
+                        amount,
+                        category,
+                        receipt,
+                        notes
+                    };
+
+                    StorageEngine.saveFinances(currentFinances);
+                    this.render(containerEl);
+                }
+            });
+        });
+
+        // Delete button
         containerEl.querySelectorAll('.delete-finance-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const id = e.currentTarget.dataset.id;
@@ -116,91 +301,6 @@ export class FinanceModule {
                     this.render(containerEl);
                 }
             });
-        });
-    }
-
-    static openFinanceModal(mainContainerEl) {
-        const modal = document.createElement('div');
-        modal.className = 'modal-backdrop active';
-
-        modal.innerHTML = `
-            <div class="modal-card">
-                <div class="modal-header">
-                    <h3>➕ Neue Buchung erfassen</h3>
-                    <button class="btn btn-ghost modal-close">&times;</button>
-                </div>
-                <form id="finance-form">
-                    <div class="form-group">
-                        <label>Titel / Verwendungszweck *</label>
-                        <input type="text" id="fin-title" class="form-control" required placeholder="z. B. Getränkeeinkauf Brauerei" />
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group col">
-                            <label>Typ</label>
-                            <select id="fin-type" class="form-select">
-                                <option value="einnahme">📈 Einnahme (+)</option>
-                                <option value="ausgabe">📉 Ausgabe (-)</option>
-                            </select>
-                        </div>
-                        <div class="form-group col">
-                            <label>Betrag (€) *</label>
-                            <input type="number" step="0.01" id="fin-amount" class="form-control" required placeholder="150.00" />
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group col">
-                            <label>Kategorie</label>
-                            <input type="text" id="fin-category" class="form-control" placeholder="Events, Gebühren, Sponsoring, Instandhaltung" />
-                        </div>
-                        <div class="form-group col">
-                            <label>Beleg-Nr. / Quittung</label>
-                            <input type="text" id="fin-receipt" class="form-control" placeholder="BELEG-2026-..." />
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Datum</label>
-                        <input type="date" id="fin-date" class="form-control" value="${new Date().toISOString().slice(0,10)}" />
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-ghost modal-close">Abbrechen</button>
-                        <button type="submit" class="btn btn-primary btn-glow">Buchung speichern</button>
-                    </div>
-                </form>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-        modal.querySelectorAll('.modal-close').forEach(b => b.addEventListener('click', () => modal.remove()));
-
-        document.getElementById('finance-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const finances = StorageEngine.getFinances();
-
-            const title = document.getElementById('fin-title').value;
-            const type = document.getElementById('fin-type').value;
-            const amount = parseFloat(document.getElementById('fin-amount').value);
-            const category = document.getElementById('fin-category').value;
-            const receipt = document.getElementById('fin-receipt').value;
-            const date = document.getElementById('fin-date').value;
-
-            const newEntry = {
-                id: 'f_' + Date.now(),
-                title,
-                type,
-                amount,
-                category,
-                receipt,
-                date
-            };
-
-            finances.unshift(newEntry);
-            StorageEngine.saveFinances(finances);
-            modal.remove();
-            this.render(mainContainerEl);
         });
     }
 }
