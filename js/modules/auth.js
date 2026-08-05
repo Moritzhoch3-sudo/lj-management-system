@@ -33,7 +33,7 @@ export class AppAuth {
     }
 
     /**
-     * Bulletproof Username Matcher with keyword fallback for robust authentication
+     * Bulletproof Username Matcher with complete 13-member mapping
      */
     static findMemberByUsername(usernameInput, members) {
         if (!usernameInput) return null;
@@ -43,29 +43,43 @@ export class AppAuth {
 
         const activeMembers = (members && members.length > 0) ? members : StorageEngine.getMembers();
 
-        // 1. Exact sanitized username match
+        // 1. Exact sanitized username match (e.g. "valentinmuellner", "lindaschweiger")
         let found = activeMembers.find(m => this.sanitizeUsername(m.name) === cleanInput);
         if (found) return found;
 
-        // 2. StartsWith match (e.g. "moritzkubik" matching "Moritz Kubik (2. Kassier)")
+        // 2. Raw display name match (e.g. "Valentin Müllner", "Linda Schweiger")
+        found = activeMembers.find(m => (m.name || '').trim().toLowerCase() === rawInput);
+        if (found) return found;
+
+        // 3. StartsWith / Substring match
         found = activeMembers.find(m => {
             const mClean = this.sanitizeUsername(m.name);
             return mClean.startsWith(cleanInput) || cleanInput.startsWith(mClean);
         });
         if (found) return found;
 
-        // 3. Keyword / ID fallback matching
-        if (cleanInput.includes('moritz') || cleanInput.includes('kubik')) {
-            return activeMembers.find(m => m.id === 'm4' || (m.name || '').toLowerCase().includes('moritz')) || activeMembers[4] || activeMembers[0];
-        }
-        if (cleanInput.includes('valentin') || cleanInput.includes('muellner')) {
-            return activeMembers.find(m => m.id === 'm1' || (m.name || '').toLowerCase().includes('valentin')) || activeMembers[1] || activeMembers[0];
-        }
-        if (cleanInput.includes('linda') || cleanInput.includes('schweiger')) {
-            return activeMembers.find(m => m.id === 'm2') || activeMembers[2] || activeMembers[0];
-        }
-        if (cleanInput.includes('anja') || cleanInput.includes('loeb')) {
-            return activeMembers.find(m => m.id === 'm3') || activeMembers[3] || activeMembers[0];
+        // 4. Complete keyword map for all 13 Landjugend Scheuring members
+        const memberMap = [
+            { id: 'm0', keys: ['allgemein'] },
+            { id: 'm1', keys: ['valentin', 'muellner', 'mueller', 'valentinmuellner'] },
+            { id: 'm2', keys: ['linda', 'schweiger', 'lindaschweiger'] },
+            { id: 'm3', keys: ['anja', 'loeb', 'anjaloeb'] },
+            { id: 'm4', keys: ['moritz', 'kubik', 'moritzkubik'] },
+            { id: 'm5', keys: ['lena', 'senior', 'lenasenior'] },
+            { id: 'm6', keys: ['rosa', 'krieglmeier', 'rosakrieglmeier'] },
+            { id: 'm7', keys: ['cassandra', 'wunner', 'cassandrawunner'] },
+            { id: 'm8', keys: ['felix', 'premer', 'felixpremer'] },
+            { id: 'm9', keys: ['johannes', 'erhard', 'johanneserhard'] },
+            { id: 'm10', keys: ['dominique', 'zahn', 'dominiquezahn'] },
+            { id: 'm11', keys: ['michaela', 'grabmaier', 'michaelagrabmaier'] },
+            { id: 'm12', keys: ['kilian', 'salai', 'kiliansalai'] }
+        ];
+
+        for (const item of memberMap) {
+            if (item.keys.some(k => cleanInput.includes(this.sanitizeUsername(k)) || rawInput.includes(k))) {
+                const matched = activeMembers.find(m => m.id === item.id);
+                if (matched) return matched;
+            }
         }
 
         return null;
