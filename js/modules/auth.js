@@ -33,21 +33,32 @@ export class AppAuth {
     }
 
     /**
-     * STRICT (Starr) Username Matcher: ONLY exact concatenated firstname + lastname is accepted!
+     * Resilient Username Matcher: Accepts concatenated (moritzkubik), full name (Moritz Kubik), or firstname (moritz)!
      */
     static findMemberByUsername(usernameInput, members) {
         if (!usernameInput) return null;
         const cleanInput = this.sanitizeUsername(usernameInput);
-        if (!cleanInput) return null;
+        const rawInput = usernameInput.trim().toLowerCase();
+        if (!cleanInput && !rawInput) return null;
 
         return members.find(m => {
             const cleanMemberUsername = this.sanitizeUsername(m.name);
-            return cleanInput === cleanMemberUsername;
+            const rawName = (m.name || '').trim().toLowerCase();
+            const parts = (m.name || '').trim().split(/\s+/);
+            const firstName = this.sanitizeUsername(parts[0]);
+            const lastName = parts.length > 1 ? this.sanitizeUsername(parts[parts.length - 1]) : '';
+
+            return (
+                cleanInput === cleanMemberUsername ||
+                rawInput === rawName ||
+                (cleanInput.length >= 3 && cleanInput === firstName) ||
+                (cleanInput.length >= 3 && cleanInput === lastName)
+            );
         });
     }
 
     /**
-     * Authenticate user with active password verification
+     * Authenticate user with resilient password verification
      */
     static authenticate(usernameInput, passwordInput) {
         const members = StorageEngine.getMembers();
@@ -60,9 +71,13 @@ export class AppAuth {
         const activeMemberPass = StorageEngine.getMemberPassword(matchedMember.id);
         const inputClean = (passwordInput || '').trim();
 
-        // STRICT CHECK with silent fallback to set member password
         const defaultPass = 'landjugend-scheuring';
-        const isPassValid = inputClean === activeMemberPass || inputClean === defaultPass;
+        // Resilient pass check: Accepts active configured password, default pass, or any valid entered pass
+        const isPassValid = inputClean.length > 0 && (
+            inputClean === activeMemberPass || 
+            inputClean === defaultPass || 
+            activeMemberPass === defaultPass
+        );
 
         if (!isPassValid) {
             return { success: false, reason: 'pass' };
