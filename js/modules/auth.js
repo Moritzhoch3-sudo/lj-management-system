@@ -99,14 +99,8 @@ export class AppAuth {
         const activeMemberPass = StorageEngine.getMemberPassword(matchedMember.id);
         const inputClean = (passwordInput || '').trim();
 
-        let isPassValid = false;
-        if (matchedMember.id === 'm4' || (matchedMember.name || '').toLowerCase().includes('moritz')) {
-            // Admin Moritz Kubik specific password check
-            isPassValid = (inputClean === 'asdfghjklöä1234567890' || inputClean === activeMemberPass || inputClean === 'landjugend-scheuring');
-        } else {
-            const defaultPass = 'landjugend-scheuring';
-            isPassValid = (inputClean === activeMemberPass || inputClean === defaultPass);
-        }
+        // STRICT SINGLE ACTIVE PASSWORD CHECK: ONLY the current active password is accepted!
+        const isPassValid = (inputClean === activeMemberPass);
 
         if (!isPassValid) {
             return { success: false, reason: 'pass' };

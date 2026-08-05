@@ -4,6 +4,7 @@
 import { BOARD_ROLE_OPTIONS } from '../data.js';
 import { StorageEngine } from '../storage.js';
 import { AppAuth } from './auth.js';
+import { VaultGuard } from './vault.js';
 
 let isPinUnlocked = false;
 
@@ -378,6 +379,7 @@ export class SettingsModule {
             const val = containerEl.querySelector('#settings-pin-input')?.value;
             if (val && val.trim().length >= 4) {
                 await StorageEngine.setPIN(val.trim());
+                VaultGuard.lock();
                 alert('✅ Vorstands-PIN wurde erfolgreich aktualisiert! Der alte PIN ist ab sofort überall im System ungültig.');
                 this.render(containerEl, onMembersUpdatedCallback);
                 setActiveTab(btnPin, viewPin);

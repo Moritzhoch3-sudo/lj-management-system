@@ -4,7 +4,7 @@
 import { INITIAL_MEMBERS, CATEGORIES, INITIAL_TASKS, INITIAL_FINANCES, INITIAL_CONTRACTS, INITIAL_MINUTES } from './data.js';
 
 const STORAGE_KEYS = {
-    MEMBERS: 'lj_members_v6_nuclear',
+    MEMBERS: 'lj_members_v10_final',
     CATEGORIES: 'lj_categories_v1',
     TASKS: 'lj_tasks_v3_12',
     FINANCES: 'lj_finances_v1',
@@ -20,24 +20,7 @@ const STORAGE_KEYS = {
 const DEFAULT_PIN = '1357';
 
 export class StorageEngine {
-    /**
-     * NUCLEAR CLEANUP: Purge ALL old member storage keys and force correct INITIAL_MEMBERS
-     * This runs once per page load to guarantee correct names everywhere.
-     */
-    static {
-        // Remove ALL legacy member keys that might contain wrong names
-        const legacyKeys = [
-            'lj_members_v1', 'lj_members_v2', 'lj_members_v3', 'lj_members_v3_12',
-            'lj_members_screenshot_v1', 'lj_members_v4_final', 'lj_members_v5_clean',
-            'lj_member_reset_v5'
-        ];
-        legacyKeys.forEach(k => localStorage.removeItem(k));
-
-        // Force write correct INITIAL_MEMBERS under the current key
-        localStorage.setItem('lj_members_v6_nuclear', JSON.stringify(INITIAL_MEMBERS));
-    }
     static getMembers() {
-        // Always force correct INITIAL_MEMBERS on fresh key
         const raw = localStorage.getItem(STORAGE_KEYS.MEMBERS);
         if (!raw) {
             localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(INITIAL_MEMBERS));
@@ -45,15 +28,13 @@ export class StorageEngine {
         }
         try {
             const parsed = JSON.parse(raw);
-            if (!Array.isArray(parsed) || parsed.length < 13) {
-                localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(INITIAL_MEMBERS));
-                return INITIAL_MEMBERS;
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                return parsed;
             }
-            return parsed;
-        } catch (e) {
-            localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(INITIAL_MEMBERS));
-            return INITIAL_MEMBERS;
-        }
+        } catch (e) {}
+
+        localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(INITIAL_MEMBERS));
+        return INITIAL_MEMBERS;
     }
 
     static saveMembers(members) {
