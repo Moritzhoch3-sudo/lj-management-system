@@ -240,6 +240,54 @@ export class StorageEngine {
         downloadAnchor.remove();
     }
 
+    static exportFullBackupJSON() {
+        const backupData = {
+            version: '1.0',
+            exportDate: new Date().toISOString(),
+            members: this.getMembers(),
+            categories: this.getCategories(),
+            tasks: this.getTasks(),
+            finances: this.getFinances(),
+            contracts: this.getContracts(),
+            minutes: this.getMinutes(),
+            pin: this.getPIN(),
+            memberPasswords: this.getMemberPasswords()
+        };
+
+        const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `landjugend_scheuring_backup_${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    }
+
+    static importFullBackupJSON(jsonStr) {
+        try {
+            const data = typeof jsonStr === 'string' ? JSON.parse(jsonStr) : jsonStr;
+            if (!data || typeof data !== 'object') throw new Error('Ungültige Backup-Datei');
+
+            if (Array.isArray(data.members)) this.saveMembers(data.members);
+            if (Array.isArray(data.categories)) this.saveCategories(data.categories);
+            if (Array.isArray(data.tasks)) this.saveTasks(data.tasks);
+            if (Array.isArray(data.finances)) this.saveFinances(data.finances);
+            if (Array.isArray(data.contracts)) this.saveContracts(data.contracts);
+            if (Array.isArray(data.minutes)) this.saveMinutes(data.minutes);
+            if (data.pin) this.setPIN(data.pin);
+            if (data.memberPasswords && typeof data.memberPasswords === 'object') {
+                localStorage.setItem(STORAGE_KEYS.MEMBER_PASSWORDS, JSON.stringify(data.memberPasswords));
+            }
+
+            CloudStorageEngine.pushAllToCloud();
+            return { success: true };
+        } catch (e) {
+            console.error('Import error:', e);
+            return { success: false, error: e.message };
+        }
+    }
+
     static resetToDefaults() {
         localStorage.removeItem(STORAGE_KEYS.MEMBERS);
         localStorage.removeItem(STORAGE_KEYS.CATEGORIES);

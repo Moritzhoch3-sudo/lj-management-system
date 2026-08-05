@@ -151,6 +151,72 @@ class App {
         document.getElementById('export-excel-btn')?.addEventListener('click', () => {
             StorageEngine.exportExcelDashboard();
         });
+
+        document.getElementById('import-backup-btn')?.addEventListener('click', () => {
+            this.openBackupModal();
+        });
+    }
+
+    static openBackupModal() {
+        document.body.style.overflow = 'hidden';
+        const modal = document.createElement('div');
+        modal.className = 'modal-backdrop active';
+
+        modal.innerHTML = `
+            <div class="modal-card" style="max-width: 480px; width: 100%; border: 1px solid rgba(0,135,61,0.4);">
+                <div class="modal-header">
+                    <h3 style="font-size: 1.1rem; color: #fff;">💾 Daten-Sicherung & Cloud-Transfer</h3>
+                    <button class="btn btn-ghost modal-close modal-close-x">&times;</button>
+                </div>
+                <div class="modal-body p-3">
+                    <p class="small text-muted mb-3">
+                        Übertrage deine erstellten Aufgaben, Kassenbucheinträge & Verträge zwischen deinem Rechner und der Online-Webapplikation.
+                    </p>
+
+                    <div class="d-flex flex-column gap-3 mb-2">
+                        <button class="btn btn-emerald w-100 p-2 font-bold" id="backup-download-action">
+                            💾 1. Lokale Aufgaben & Daten herunterladen (.json)
+                        </button>
+
+                        <div class="p-3 border rounded" style="background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.1) !important;">
+                            <label class="form-label small text-emerald font-bold mb-2">📤 2. Sicherungsdatei hochladen & für den Vorstand freigeben:</label>
+                            <input type="file" id="backup-upload-input" accept=".json" class="form-control form-control-sm" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        const closeModal = () => {
+            document.body.style.overflow = '';
+            modal.remove();
+        };
+
+        modal.querySelector('.modal-close-x').onclick = closeModal;
+
+        modal.querySelector('#backup-download-action').onclick = () => {
+            StorageEngine.exportFullBackupJSON();
+        };
+
+        modal.querySelector('#backup-upload-input').onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const res = StorageEngine.importFullBackupJSON(event.target.result);
+                if (res.success) {
+                    alert('✅ Deine Aufgaben wurden erfolgreich importiert und live in die Cloud übertragen!');
+                    closeModal();
+                    this.switchTab(activeTab);
+                } else {
+                    alert('❌ Fehler beim Importieren: ' + res.error);
+                }
+            };
+            reader.readAsText(file);
+        };
     }
 
     static handleTabClick(targetTab) {
