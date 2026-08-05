@@ -33,9 +33,11 @@ def save_server_pin(new_pin):
 
 class SecureLJRequestHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
-        # Prevent caching for dynamic API responses
+        # Prevent caching for ALL files to ensure latest JS/HTML is always served
+        self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+        self.send_header('Pragma', 'no-cache')
+        self.send_header('Expires', '0')
         if self.path.startswith('/api/'):
-            self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
             self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
