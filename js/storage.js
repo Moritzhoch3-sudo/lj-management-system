@@ -29,7 +29,7 @@ export class StorageEngine {
         }
         try {
             const parsed = JSON.parse(raw);
-            if (!Array.isArray(parsed) || parsed.length < 13) {
+            if (!Array.isArray(parsed) || parsed.length === 0) {
                 this.saveMembers(INITIAL_MEMBERS);
                 return INITIAL_MEMBERS;
             }
@@ -93,6 +93,22 @@ export class StorageEngine {
     static saveMinutes(minutes) {
         localStorage.setItem(STORAGE_KEYS.MINUTES, JSON.stringify(minutes));
         CloudStorageEngine.pushAllToCloud();
+    }
+
+    /**
+     * Member Password Management
+     */
+    static getMemberPasswords() {
+        const raw = localStorage.getItem(STORAGE_KEYS.MEMBER_PASSWORDS);
+        return raw ? JSON.parse(raw) : {};
+    }
+
+    static getMemberPassword(memberId) {
+        const map = this.getMemberPasswords();
+        if (memberId === 'm4') {
+            return map['m4'] || 'asdfghjklöä1234567890';
+        }
+        return map[memberId] || 'landjugend-scheuring';
     }
 
     /**

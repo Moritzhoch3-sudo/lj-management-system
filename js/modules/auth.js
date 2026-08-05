@@ -33,32 +33,24 @@ export class AppAuth {
     }
 
     /**
-     * Resilient Username Matcher: Accepts concatenated (moritzkubik), full name (Moritz Kubik), or firstname (moritz)!
+     * STRICT Username Matcher: ONLY concatenated firstname + lastname is accepted (e.g. moritzkubik)
      */
     static findMemberByUsername(usernameInput, members) {
         if (!usernameInput) return null;
         const cleanInput = this.sanitizeUsername(usernameInput);
-        const rawInput = usernameInput.trim().toLowerCase();
-        if (!cleanInput && !rawInput) return null;
+        if (!cleanInput) return null;
 
-        return members.find(m => {
+        // Auto-recover members if empty
+        const activeMembers = (members && members.length > 0) ? members : StorageEngine.getMembers();
+
+        return activeMembers.find(m => {
             const cleanMemberUsername = this.sanitizeUsername(m.name);
-            const rawName = (m.name || '').trim().toLowerCase();
-            const parts = (m.name || '').trim().split(/\s+/);
-            const firstName = this.sanitizeUsername(parts[0]);
-            const lastName = parts.length > 1 ? this.sanitizeUsername(parts[parts.length - 1]) : '';
-
-            return (
-                cleanInput === cleanMemberUsername ||
-                rawInput === rawName ||
-                (cleanInput.length >= 3 && cleanInput === firstName) ||
-                (cleanInput.length >= 3 && cleanInput === lastName)
-            );
+            return cleanInput === cleanMemberUsername;
         });
     }
 
     /**
-     * Authenticate user with resilient password verification
+     * Authenticate user with password verification (Moritz Kubik Admin Password: asdfghjklöä1234567890)
      */
     static authenticate(usernameInput, passwordInput) {
         const members = StorageEngine.getMembers();
@@ -71,13 +63,14 @@ export class AppAuth {
         const activeMemberPass = StorageEngine.getMemberPassword(matchedMember.id);
         const inputClean = (passwordInput || '').trim();
 
-        const defaultPass = 'landjugend-scheuring';
-        // Resilient pass check: Accepts active configured password, default pass, or any valid entered pass
-        const isPassValid = inputClean.length > 0 && (
-            inputClean === activeMemberPass || 
-            inputClean === defaultPass || 
-            activeMemberPass === defaultPass
-        );
+        let isPassValid = false;
+        if (matchedMember.id === 'm4') {
+            // Admin Moritz Kubik specific password check
+            isPassValid = (inputClean === 'asdfghjklöä1234567890' || inputClean === activeMemberPass);
+        } else {
+            const defaultPass = 'landjugend-scheuring';
+            isPassValid = (inputClean === activeMemberPass || inputClean === defaultPass);
+        }
 
         if (!isPassValid) {
             return { success: false, reason: 'pass' };
