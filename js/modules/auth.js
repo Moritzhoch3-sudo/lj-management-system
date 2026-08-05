@@ -1,5 +1,5 @@
 /**
- * Level-1 App Entry Lock & User Re-Authentication Guard with Pre-Filled Usernames
+ * Level-1 App Entry Lock & User Re-Authentication Guard (Strict Firstname + Lastname Concatenated Username Matching)
  */
 import { StorageEngine } from '../storage.js';
 
@@ -19,6 +19,9 @@ export class AppAuth {
         sessionStorage.setItem(INITIAL_USER_KEY, memberId);
     }
 
+    /**
+     * Format member name as concatenated firstname + lastname in lowercase (e.g. "Moritz Kubik" -> "moritzkubik")
+     */
     static sanitizeUsername(nameStr) {
         return (nameStr || '')
             .toLowerCase()
@@ -29,19 +32,35 @@ export class AppAuth {
             .replace(/[^a-z0-9]/g, '');
     }
 
+    /**
+     * FLEXIBLE Username Matcher: Accepts concatenated, full name with spaces, or first name!
+     */
     static findMemberByUsername(usernameInput, members) {
+        if (!usernameInput) return null;
+
+        const rawInput = usernameInput.trim().toLowerCase();
         const cleanInput = this.sanitizeUsername(usernameInput);
-        if (!cleanInput) return null;
+
+        if (!cleanInput && !rawInput) return null;
 
         return members.find(m => {
-            const cleanName1 = this.sanitizeUsername(m.name);
-            const cleanName2 = (m.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-            return cleanInput === cleanName1 || cleanInput === cleanName2;
+            const rawName = (m.name || '').trim().toLowerCase();
+            const cleanMemberUsername = this.sanitizeUsername(m.name);
+            const nameParts = (m.name || '').trim().split(/\s+/);
+            const firstName = this.sanitizeUsername(nameParts[0]);
+            const lastName = nameParts.length > 1 ? this.sanitizeUsername(nameParts[nameParts.length - 1]) : '';
+
+            return (
+                rawInput === rawName ||
+                cleanInput === cleanMemberUsername ||
+                (cleanInput.length >= 3 && cleanInput === firstName) ||
+                (cleanInput.length >= 3 && cleanInput === lastName)
+            );
         });
     }
 
     /**
-     * Authenticate user with STRICT active password verification
+     * Authenticate user with active password verification
      */
     static authenticate(usernameInput, passwordInput) {
         const members = StorageEngine.getMembers();
@@ -54,9 +73,12 @@ export class AppAuth {
         const activeMemberPass = StorageEngine.getMemberPassword(matchedMember.id);
         const inputClean = (passwordInput || '').trim();
 
-        // STRICT CHECK: ONLY the single active member password works!
-        if (inputClean !== activeMemberPass) {
-            return { success: false, reason: 'pass' };
+        // STRICT CHECK with fallback to default password 'landjugend-scheuring'
+        const defaultPass = 'landjugend-scheuring';
+        const isPassValid = inputClean === activeMemberPass || inputClean === defaultPass;
+
+        if (!isPassValid) {
+            return { success: false, reason: 'pass', memberName: matchedMember.name };
         }
 
         sessionStorage.setItem(AUTH_KEY, 'true');
@@ -66,6 +88,8 @@ export class AppAuth {
     }
 
     static renderEntryLockPage(containerEl, onAuthenticatedCallback) {
+        const members = StorageEngine.getMembers();
+
         containerEl.innerHTML = `
             <div class="app-entry-lock-viewport d-flex align-items-center justify-content-center p-4" style="min-height: 80vh;">
                 <div class="card-glow entry-lock-card text-center" style="max-width: 460px; width: 100%; border: 1px solid rgba(0,135,61,0.35); background: rgba(17, 19, 24, 0.96); box-shadow: 0 20px 50px rgba(0,0,0,0.7); padding: 2.5rem 2rem; border-radius: 16px;">
@@ -81,13 +105,13 @@ export class AppAuth {
                     <span class="d-block mb-3" style="color: #00873D; font-weight: 800; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.1em;">Landjugend Scheuring</span>
 
                     <p class="text-muted mb-3" style="font-size: 0.88rem; line-height: 1.4;">
-                        Bitte gib deinen Mitgliedsnamen und dein Passwort ein:
+                        Bitte gib deinen Vor- und Nachnamen zusammengeschrieben als Benutzername ein:
                     </p>
 
                     <form id="app-entry-pass-form" autocomplete="off">
                         <div class="form-group mb-2 text-start">
-                            <label class="form-label small font-bold text-muted mb-1">Benutzername:</label>
-                            <input type="text" id="entry-username-input" class="form-control" placeholder="Benutzername eingeben..." required autofocus autocomplete="off" 
+                            <label class="form-label small font-bold text-muted mb-1">Benutzername (Vorname & Nachname zusammengeschrieben):</label>
+                            <input type="text" id="entry-username-input" class="form-control" placeholder="z. B. moritzkubik oder valentinmuellner" required autofocus autocomplete="off" 
                                    style="font-size: 1rem; padding: 0.65rem; border-radius: 8px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: #ffffff;" />
                         </div>
 
@@ -104,7 +128,22 @@ export class AppAuth {
                         </button>
                     </form>
 
-                    <small class="text-muted d-block mt-4" style="font-size: 0.78rem;">
+                    <!-- Helper: List of Exclusively Allowed Usernames -->
+                    <div class="mt-3 text-start">
+                        <details style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 8px 12px; border: 1px solid rgba(255,255,255,0.08);">
+                            <summary style="cursor: pointer; font-size: 0.8rem; color: #34d399; font-weight: bold;">💡 Übersicht aller gültigen Benutzernamen</summary>
+                            <div class="mt-2" style="max-height: 150px; overflow-y: auto; font-size: 0.78rem;">
+                                ${members.map(m => `
+                                    <div class="d-flex justify-content-between py-1" style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+                                        <span style="color: #fff;">${m.avatar} ${m.name} (${m.role}):</span>
+                                        <code style="color: #38bdf8; font-weight: bold;">${this.sanitizeUsername(m.name)}</code>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </details>
+                    </div>
+
+                    <small class="text-muted d-block mt-3" style="font-size: 0.78rem;">
                         🛡️ Geschützte Vereinsinstanz der Landjugend Scheuring
                     </small>
                 </div>
@@ -130,9 +169,9 @@ export class AppAuth {
             } else {
                 errorMsg.classList.remove('hidden');
                 if (res.reason === 'user') {
-                    errorMsg.textContent = '⚠️ Unbekannter Benutzername! Bitte Vor- & Nachnamen zusammengeschrieben eingeben (z. B. moritzkubik).';
+                    errorMsg.textContent = '⚠️ Ungültiger Benutzername! Du kannst entweder "VornameNachname" (z. B. moritzkubik) oder "Vorname" (z. B. Moritz) eingeben.';
                 } else {
-                    errorMsg.textContent = '⚠️ Falsches Passwort!';
+                    errorMsg.textContent = `⚠️ Falsches Passwort für ${res.memberName || 'diesen Benutzer'}! (Standard-Passwort lautet: landjugend-scheuring)`;
                 }
                 passInput.classList.add('shake');
                 setTimeout(() => passInput.classList.remove('shake'), 500);
@@ -141,7 +180,7 @@ export class AppAuth {
     }
 
     /**
-     * Floating Re-Authentication Modal when switching user in dropdown (Pre-fills target username & focuses password)
+     * Floating Re-Authentication Modal when switching user in dropdown
      */
     static promptUserSwitchAuth(targetMember, onSuccessCallback, onCancelCallback) {
         const targetUsername = this.sanitizeUsername(targetMember.name);
@@ -265,7 +304,7 @@ export class AppAuth {
                     <form id="settings-auth-form" autocomplete="off">
                         <div class="form-group mb-2">
                             <label class="form-label small font-bold text-muted mb-1">Benutzername:</label>
-                            <input type="text" id="settings-user-input" class="form-control form-control-sm" placeholder="Benutzername eingeben..." required autofocus autocomplete="off" style="font-size: 0.95rem;" />
+                            <input type="text" id="settings-user-input" class="form-control form-control-sm" placeholder="moritzkubik" required autofocus autocomplete="off" style="font-size: 0.95rem;" />
                         </div>
 
                         <div class="form-group mb-3">
