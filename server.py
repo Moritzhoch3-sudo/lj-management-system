@@ -52,10 +52,10 @@ class SecureLJRequestHandler(http.server.SimpleHTTPRequestHandler):
         
         if self.path.startswith('/api/'):
             origin = self.headers.get('Origin')
-            host = self.headers.get('Host', '')
             if origin:
-                if origin == 'http://localhost:8080' or (host and origin.endswith(host)):
-                    self.send_header('Access-Control-Allow-Origin', origin)
+                self.send_header('Access-Control-Allow-Origin', origin)
+            else:
+                self.send_header('Access-Control-Allow-Origin', '*')
             
             self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
             self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
@@ -65,8 +65,60 @@ class SecureLJRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_response(200)
         self.end_headers()
 
+    def do_GET(self):
+        if self.path == '/api/cloud-data' or self.path == '/api/cloud-data.json':
+            db_file = 'cloud_db.json'
+            if os.path.exists(db_file):
+                try:
+                    with open(db_file, 'r', encoding='utf-8') as f:
+                        data = f.read()
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(data.encode('utf-8'))
+                    return
+                except Exception as e:
+                    self.send_response(500)
+                    self.end_headers()
+                    return
+            else:
+                self.send_response(404)
+                self.end_headers()
+                return
+
+        super().do_GET()
+
     def do_POST(self):
         content_length = int(self.headers.get('Content-Length', 0))
+        
+        # Endpoint: Realtime Cloud Sync Data Storage
+        if self.path == '/api/cloud-data' or self.path == '/api/cloud-data.json':
+            if content_length > 5242880: # 5MB max payload
+                self.send_response(413)
+                self.end_headers()
+                self.wfile.write(b'Payload Too Large')
+                return
+                
+            body_bytes = self.rfile.read(content_length)
+            try:
+                req_data = json.loads(body_bytes.decode('utf-8')) if body_bytes else {}
+                req_data['_updatedAt'] = int(time.time() * 1000)
+                
+                with open('cloud_db.json', 'w', encoding='utf-8') as f:
+                    json.dump(req_data, f, ensure_ascii=False, indent=2)
+
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                response = {'success': True, '_updatedAt': req_data['_updatedAt']}
+                self.wfile.write(json.dumps(response).encode('utf-8'))
+            except Exception as e:
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({'success': False, 'error': str(e)}).encode('utf-8'))
+            return
+
         if content_length > 10240:
             self.send_response(413)
             self.end_headers()
@@ -214,6 +266,6 @@ if __name__ == '__main__':
     print(f"🔒 Landjugend Scheuring Server gestartet auf http://localhost:{PORT}")
     print("🔑 Backend-Authentifizierung aktiv")
     
-    # Intentionally binding to '' for deployment. (To bind only to localhost, change to '127.0.0.1')
+    socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", PORT), SecureLJRequestHandler) as httpd:
         httpd.serve_forever()
