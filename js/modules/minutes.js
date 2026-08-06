@@ -3,7 +3,8 @@
  */
 import { StorageEngine, escapeHTML } from '../storage.js';
 import { AudioRecorderEngine } from './recorder.js';
-
+import { FileReaderEngine } from './file-reader.js';
+import { ProtocolParser } from './protocol-parser.js';
 let activeRecorder = null;
 let recordingStartTimestampStr = null;
 
@@ -52,6 +53,8 @@ export class MinutesModule {
                         <button class="btn btn-danger btn-glow hidden" id="stop-rec-btn">⏹️ Aufnahme beenden</button>
                     </div>
                 </div>
+
+
 
                 <!-- Live Transcript Container -->
                 <div class="card-glow transcript-box hidden" id="live-transcript-box">
@@ -191,6 +194,71 @@ export class MinutesModule {
             this.generateBulletProtocol(text, stamp, containerEl, members);
         });
 
+        const dropZone = document.getElementById('protocol-drop-zone');
+        const fileInput = document.getElementById('protocol-file-input');
+        const progressEl = document.getElementById('upload-progress');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+
+        const handleFileUpload = async (file) => {
+            try {
+                const validation = FileReaderEngine.validateFile(file);
+                if (!validation.valid) {
+                    alert(validation.error);
+                    return;
+                }
+
+                progressEl.classList.remove('hidden');
+                progressText.textContent = 'Lese Datei...';
+                
+                const readResult = await FileReaderEngine.readFile(file);
+                if (!readResult.success) {
+                    progressEl.classList.add('hidden');
+                    alert('Fehler beim Lesen der Datei: ' + readResult.error);
+                    return;
+                }
+
+                progressText.textContent = 'Analysiere Protokoll...';
+                const rawText = readResult.text;
+                
+                const result = ProtocolParser.parse(rawText, members);
+                
+                progressEl.classList.add('hidden');
+                MinutesModule.renderTaskPreviewModal(result.tasks, result.protocolSummary, rawText, containerEl, members);
+            } catch (error) {
+                progressEl.classList.add('hidden');
+                alert('Fehler beim Upload: ' + error.message);
+            }
+        };
+
+        if (dropZone && fileInput) {
+            dropZone.addEventListener('click', () => fileInput.click());
+            
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('drag-over');
+            });
+            
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('drag-over');
+            });
+            
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                if (e.dataTransfer.files && e.dataTransfer.files.length) {
+                    handleFileUpload(e.dataTransfer.files[0]);
+                }
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files.length) {
+                    handleFileUpload(e.target.files[0]);
+                    fileInput.value = '';
+                }
+            });
+        }
+
         containerEl.querySelectorAll('.delete-minute-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const id = e.currentTarget.dataset.id;
@@ -278,6 +346,142 @@ export class MinutesModule {
         recordingStartTimestampStr = null;
 
         alert(`✨ Erfolg! Eigene Zusammenfassungs-Box '${titleStr}' wurde erstellt und archiviert!`);
+        this.render(containerEl);
+    }
+
+    static renderTaskPreviewModal(tasks, protocolSummary, rawText, containerEl, members) {
+        const overlay = document.createElement('div');
+        overlay.className = 'task-preview-overlay';
+        
+        let tasksHtml = (tasks || []).map((t, index) => {
+            const isChecked = (t.confidence >= 50) ? 'checked' : '';
+            const cardClass = isChecked ? 'task-preview-card' : 'task-preview-card disabled';
+            
+            let confidenceClass = 'confidence-low';
+            if (t.confidence >= 80) confidenceClass = 'confidence-high';
+            else if (t.confidence >= 50) confidenceClass = 'confidence-medium';
+            
+            const assignee = members.find(m => m.id === t.assigneeId || m.name === t.assigneeName) || { name: t.assigneeName || 'Allgemein', avatar: '👤', color: '#9ca3af' };
+            
+            return `
+                <div class="${cardClass}" data-index="${index}">
+                    <input type="checkbox" class="task-toggle" data-index="${index}" ${isChecked}>
+                    <div class="task-info">
+                        <h4>${escapeHTML(t.title)}</h4>
+                        <div class="task-meta">
+                            <span class="meta-badge" style="color: ${assignee.color}; border-color: ${assignee.color}40; background: ${assignee.color}15">
+                                ${assignee.avatar} ${escapeHTML(assignee.name)}
+                            </span>
+                            <span class="meta-badge">${escapeHTML(t.categoryId || 'sitzung')}</span>
+                            ${t.priority ? `<span class="meta-badge">Pri: ${escapeHTML(t.priority)}</span>` : ''}
+                            ${t.dueDate ? `<span class="meta-badge">📅 ${escapeHTML(t.dueDate)}</span>` : ''}
+                            <span class="meta-badge ${confidenceClass}">${t.confidence}% Konfidenz</span>
+                        </div>
+                        ${t.sourceText ? `<div class="source-text">"${escapeHTML(t.sourceText)}"</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        if (!tasksHtml) {
+            tasksHtml = '<p class="text-muted">Keine Aufgaben im Protokoll erkannt.</p>';
+        }
+
+        overlay.innerHTML = `
+            <div class="task-preview-modal">
+                <h2>Extrahierte Aufgaben</h2>
+                <p class="preview-subtitle">Bitte überprüfe die automatisch erkannten Aufgaben vor dem Anlegen.</p>
+                <div class="tasks-container">
+                    ${tasksHtml}
+                </div>
+                <div class="preview-actions">
+                    <button class="btn btn-ghost" id="cancel-preview-btn">Abbrechen</button>
+                    <button class="btn btn-primary" id="save-preview-btn">Ausgewählte Aufgaben anlegen</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+        
+        overlay.querySelectorAll('.task-toggle').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const card = e.target.closest('.task-preview-card');
+                if (e.target.checked) {
+                    card.classList.remove('disabled');
+                } else {
+                    card.classList.add('disabled');
+                }
+            });
+        });
+        
+        overlay.querySelector('#cancel-preview-btn').addEventListener('click', () => {
+            overlay.remove();
+        });
+        
+        overlay.querySelector('#save-preview-btn').addEventListener('click', () => {
+            const selectedIndexes = Array.from(overlay.querySelectorAll('.task-toggle:checked')).map(cb => parseInt(cb.dataset.index, 10));
+            const selectedTasks = selectedIndexes.map(i => tasks[i]);
+            
+            overlay.remove();
+            this.createTasksFromProtocol(selectedTasks, protocolSummary, rawText, containerEl);
+        });
+    }
+
+    static createTasksFromProtocol(selectedTasks, protocolSummary, rawText, containerEl) {
+        if (selectedTasks && selectedTasks.length > 0) {
+            const allTasks = StorageEngine.getTasks() || [];
+            selectedTasks.forEach(t => {
+                allTasks.push({
+                    id: 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                    title: t.title,
+                    description: t.description || `Generiert aus Protokoll: "${t.title}"`,
+                    assigneeId: t.assigneeId || 'm0',
+                    categoryId: t.categoryId || 'sitzung',
+                    priority: t.priority || 'mittel',
+                    status: 'offen',
+                    dueDate: t.dueDate || '',
+                    subtasks: []
+                });
+            });
+            StorageEngine.saveTasks(allTasks);
+        }
+        
+        const minutes = StorageEngine.getMinutes() || [];
+        const datePart = new Date().toISOString().slice(0, 10);
+        
+        let bullets = [];
+        let decisions = [];
+        let speakerMap = [];
+
+        if (protocolSummary) {
+            if (Array.isArray(protocolSummary.bullets)) {
+                bullets = protocolSummary.bullets;
+            }
+            if (Array.isArray(protocolSummary.decisions)) {
+                decisions = protocolSummary.decisions;
+            }
+            if (Array.isArray(protocolSummary.speakerMap)) {
+                speakerMap = protocolSummary.speakerMap;
+            }
+        }
+        
+        if (bullets.length === 0) {
+            bullets = ['Protokoll hochgeladen und verarbeitet.'];
+        }
+
+        minutes.unshift({
+            id: 'm_doc_' + Date.now(),
+            title: 'Protokoll-Upload_' + datePart,
+            date: datePart,
+            location: 'Landjugendheim Scheuring',
+            summary: rawText,
+            bullets: bullets,
+            speakerMap: speakerMap,
+            decisions: decisions
+        });
+        StorageEngine.saveMinutes(minutes);
+        
+        alert(`🎉 Erfolg! ${selectedTasks ? selectedTasks.length : 0} Aufgaben wurden erstellt und das Protokoll archiviert.`);
         this.render(containerEl);
     }
 }
