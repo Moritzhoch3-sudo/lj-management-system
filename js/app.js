@@ -17,6 +17,13 @@ let activeTab = 'tasks';
 
 class App {
     static init() {
+        // Pre-fetch and synchronize cloud data immediately on page load
+        CloudStorageEngine.init(() => {
+            if (AppAuth.isAuthenticated()) {
+                this.switchTab(activeTab);
+            }
+        });
+
         const mainContentEl = document.getElementById('main-content-view');
 
         // Level-1 App Entry Authentication Check (Username + Password)
@@ -39,11 +46,6 @@ class App {
         this.renderNavbar();
         this.bindGlobalEvents();
         this.updateNavbarTabVisibility();
-
-        // Initialize Realtime Cloud Sync across all devices
-        CloudStorageEngine.init(() => {
-            this.switchTab(activeTab);
-        });
 
         this.switchTab(activeTab);
     }
