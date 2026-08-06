@@ -90,10 +90,17 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .dashboard-banner h2
 }
 
 .brand-logo-img {
-    height: 48px;
+    height: 44px;
     width: auto;
+    max-height: 50px;
     display: block;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
     transition: var(--transition-fast);
+}
+
+.brand-logo-img:hover {
+    transform: scale(1.03);
 }
 
 .brand-text h1 {
@@ -277,43 +284,96 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .dashboard-banner h2
     flex: 1;
 }
 
-/* MOBILE RESPONSIVE MEDIA QUERIES */
+/* MOBILE RESPONSIVE MEDIA QUERIES (Smartphone Version) */
 @media (max-width: 768px) {
     .app-header {
-        padding: 0.5rem 0.85rem;
+        padding: 0.5rem 0.75rem;
     }
 
     .header-container {
         flex-direction: column;
-        align-items: stretch;
-        gap: 0.75rem;
+        align-items: center;
+        gap: 0.65rem;
     }
 
+    /* Smartphone Logo Display: Center official inverted logo graphic cleanly */
     .brand-logo {
         justify-content: center;
+        width: 100%;
+        padding: 0.2rem 0;
+    }
+
+    .brand-logo-img {
+        height: 38px;
+        max-width: 88%;
+        object-fit: contain;
+    }
+
+    /* Hide text subtitle on smartphones to emphasize official graphic logo */
+    .brand-text {
+        display: none;
     }
 
     .nav-menu {
         width: 100%;
         justify-content: flex-start;
+        gap: 0.35rem;
+        padding: 0.3rem 0.4rem;
+        border-radius: var(--radius-sm);
+    }
+
+    .nav-link {
+        padding: 0.45rem 0.75rem;
+        font-size: 0.75rem;
+        border-radius: 4px;
     }
 
     .header-actions {
         justify-content: space-between;
         width: 100%;
+        gap: 0.4rem;
+        flex-wrap: nowrap;
     }
 
     .user-simulator-box {
         flex: 1;
+        min-width: 0;
+    }
+
+    .user-simulator-box select {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.4rem;
     }
 
     .main-container {
-        padding: 0 0.85rem;
-        margin: 1rem auto;
+        padding: 0 0.75rem;
+        margin: 0.85rem auto;
     }
 
     .form-row {
         flex-direction: column;
         gap: 0.5rem;
+    }
+}
+
+/* Extra small smartphones (<= 480px) */
+@media (max-width: 480px) {
+    .brand-logo-img {
+        height: 34px;
+    }
+
+    .header-actions {
+        flex-wrap: wrap;
+    }
+
+    .user-simulator-box {
+        width: 100%;
+        flex: none;
+    }
+
+    .header-actions .btn {
+        flex: 1;
+        font-size: 0.7rem;
+        padding: 0.35rem 0.5rem;
     }
 }

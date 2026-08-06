@@ -124,7 +124,7 @@ export class AppAuth {
                     <!-- Logo Badge -->
                     <div class="brand-logo-wrapper mb-3 text-center">
                         <div style="padding: 4px; display: inline-block;">
-                            <img src="assets/logo.svg" alt="Landjugend Scheuring Logo" style="height: 48px; width: auto; display: block;" />
+                            <img src="assets/logo_white.png" alt="Landjugend Scheuring Logo" style="height: 48px; width: auto; display: block;" />
                         </div>
                     </div>
 
