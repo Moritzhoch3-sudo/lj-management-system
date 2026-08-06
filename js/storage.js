@@ -41,11 +41,11 @@ export class StorageEngine {
         try {
             const parsed = JSON.parse(raw);
             if (Array.isArray(parsed) && parsed.length > 0) {
-                // Ensure Moritz Kubik (m4) color is updated to Pink everywhere
+                // Ensure Moritz Kubik (m4) color is updated to original Landjugend Green everywhere
                 const moritz = parsed.find(m => m.id === 'm4' || m.name === 'Moritz Kubik');
-                if (moritz && moritz.color !== '#ff2a85') {
-                    moritz.color = '#ff2a85';
-                    moritz.bgLight = 'rgba(255, 42, 133, 0.18)';
+                if (moritz && moritz.color !== '#00873D') {
+                    moritz.color = '#00873D';
+                    moritz.bgLight = 'rgba(0, 135, 61, 0.15)';
                     localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(parsed));
                 }
                 return parsed;

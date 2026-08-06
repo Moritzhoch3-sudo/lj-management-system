@@ -7,7 +7,7 @@ export const INITIAL_MEMBERS = [
     { id: 'm1', name: 'Valentin Müllner', role: '1. Vorstand', avatar: '👱‍♂️', color: '#10b981', bgLight: 'rgba(16, 185, 129, 0.15)' },
     { id: 'm2', name: 'Linda Schweiger', role: '2. Vorstand', avatar: '👱‍♀️', color: '#06b6d4', bgLight: 'rgba(6, 182, 212, 0.15)' },
     { id: 'm3', name: 'Anja Löb', role: '1. Kassier', avatar: '👩‍💻', color: '#f59e0b', bgLight: 'rgba(245, 158, 11, 0.15)' },
-    { id: 'm4', name: 'Moritz Kubik', role: '2. Kassier', avatar: '👨‍💻', color: '#ff2a85', bgLight: 'rgba(255, 42, 133, 0.18)' },
+    { id: 'm4', name: 'Moritz Kubik', role: '2. Kassier', avatar: '👨‍💻', color: '#00873D', bgLight: 'rgba(0, 135, 61, 0.15)' },
     { id: 'm5', name: 'Lena Senior', role: '1. Schriftführer', avatar: '📝', color: '#ec4899', bgLight: 'rgba(236, 72, 153, 0.15)' },
     { id: 'm6', name: 'Rosa Krieglmeier', role: '2. Schriftführer', avatar: '📋', color: '#6366f1', bgLight: 'rgba(99, 102, 241, 0.15)' },
     { id: 'm7', name: 'Cassandra Wunner', role: 'Getränkewart', avatar: '🍺', color: '#ef4444', bgLight: 'rgba(239, 68, 68, 0.15)' },
