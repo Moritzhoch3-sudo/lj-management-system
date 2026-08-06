@@ -68,8 +68,10 @@ export class CloudStorageEngine {
 
             if (!response.ok) return;
 
-            const cloudData = await response.json();
-            if (!cloudData || typeof cloudData !== 'object') return;
+            if (!cloudData || typeof cloudData !== 'object') {
+                await this.pushAllToCloud();
+                return;
+            }
 
             // Check if remote data is newer
             let dataUpdated = false;
@@ -81,9 +83,9 @@ export class CloudStorageEngine {
                 const keyMap = {
                     members: 'lj_members_v10_final',
                     categories: 'lj_categories_v1',
-                    tasks: 'lj_tasks_v3_12',
-                    finances: 'lj_finances_v1',
-                    contracts: 'lj_contracts_v1',
+                    tasks: 'lj_tasks_v4_live',
+                    finances: 'lj_finances_v4_live',
+                    contracts: 'lj_contracts_v4_live',
                     minutes: 'lj_minutes_v2'
                 };
 
@@ -121,9 +123,9 @@ export class CloudStorageEngine {
             _updatedAt: Date.now(),
             members: JSON.parse(localStorage.getItem('lj_members_v10_final') || 'null'),
             categories: JSON.parse(localStorage.getItem('lj_categories_v1') || 'null'),
-            tasks: JSON.parse(localStorage.getItem('lj_tasks_v3_12') || 'null'),
-            finances: JSON.parse(localStorage.getItem('lj_finances_v1') || 'null'),
-            contracts: JSON.parse(localStorage.getItem('lj_contracts_v1') || 'null'),
+            tasks: JSON.parse(localStorage.getItem('lj_tasks_v4_live') || 'null'),
+            finances: JSON.parse(localStorage.getItem('lj_finances_v4_live') || 'null'),
+            contracts: JSON.parse(localStorage.getItem('lj_contracts_v4_live') || 'null'),
             minutes: JSON.parse(localStorage.getItem('lj_minutes_v2') || 'null')
         };
 

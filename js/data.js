@@ -41,58 +41,494 @@ export const CATEGORIES = [
 
 export const INITIAL_TASKS = [
     {
-        id: 't1',
-        title: 'Klo-Wagen für Summerbreak Party abholen',
-        description: 'Morgen werden 3 Personen benötigt zum Abholen.',
-        assigneeId: 'm1', // Valentin Müllner
-        categoryId: 'fest',
-        priority: 'hoch',
-        status: 'in_bearbeitung',
-        dueDate: '2026-08-06',
-        subtasks: []
+      "id": "t_1785945370195",
+      "title": "Essensbestellung Abbau",
+      "description": "",
+      "assigneeId": "m7",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-16",
+      "subtasks": []
     },
     {
-        id: 't2',
-        title: 'Kassenabschluss Juli prüfen',
-        description: 'Belege sortieren und Kontoauszüge abgleichen.',
-        assigneeId: 'm4', // Moritz Kubik
-        categoryId: 'finanzen',
-        priority: 'hoch',
-        status: 'erledigt',
-        dueDate: '2026-08-01',
-        subtasks: []
+      "id": "t_1785945336784",
+      "title": "Sari kehrmaschine organisieren",
+      "description": "",
+      "assigneeId": "m7",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "erledigt",
+      "dueDate": "2026-08-13",
+      "subtasks": []
     },
     {
-        id: 't3',
-        title: 'Getränkebestellung für Wochenende aufgeben',
-        description: '20 Kisten Spezi, 15 Kisten Bier nachbestellen.',
-        assigneeId: 'm7', // Cassandra Wunner
-        categoryId: 'getraenke',
-        priority: 'dringend',
-        status: 'offen',
-        dueDate: '2026-08-07',
-        subtasks: []
+      "id": "t_1785945260310",
+      "title": "Gewinnspiel Instagram",
+      "description": "",
+      "assigneeId": "m2",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-13",
+      "subtasks": []
     },
     {
-        id: 't4',
-        title: 'Sponsorenvertrag Brauerei verlängern',
-        description: 'Neues Angebot einholen und Rücksprache halten.',
-        assigneeId: 'm1', // Valentin Müllner
-        categoryId: 'sponsoren',
-        priority: 'mittel',
-        status: 'offen',
-        dueDate: '2026-08-15',
-        subtasks: []
+      "id": "t_1785945193233",
+      "title": "Summer Break Schild und Standfüße",
+      "description": "",
+      "assigneeId": "m1",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-13",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785945087135",
+      "title": "Boxen für Schrauben kaufen",
+      "description": "",
+      "assigneeId": "m3",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-14",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785945057688",
+      "title": "Stapler organisieren",
+      "description": "Bernhard, Alex und Chrisi stapler anfragen",
+      "assigneeId": "m4",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "erledigt",
+      "dueDate": "2026-08-07",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785945025755",
+      "title": "Banner aufhängen Kaufering",
+      "description": "",
+      "assigneeId": "m4",
+      "categoryId": "getraenke",
+      "priority": "niedrig",
+      "status": "erledigt",
+      "dueDate": "2026-08-04",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785944975201",
+      "title": "Flyer Dämmerschoppen aufhängen im Dorf",
+      "description": "",
+      "assigneeId": "m8",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-13",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785926494773",
+      "title": "Reels drehen",
+      "description": "",
+      "assigneeId": "m2",
+      "categoryId": "pr",
+      "priority": "mittel",
+      "status": "in_bearbeitung",
+      "dueDate": "2026-08-13",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785926482962",
+      "title": "Jugendschutzbeauftragten für 14.8. einladen",
+      "description": "",
+      "assigneeId": "m2",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-14",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785926466896",
+      "title": "Schichten Umfrage",
+      "description": "",
+      "assigneeId": "m2",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "erledigt",
+      "dueDate": "2026-08-13",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785926454448",
+      "title": "Merch Umfrage und Bestellung",
+      "description": "",
+      "assigneeId": "m2",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "erledigt",
+      "dueDate": "2026-08-14",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785926438785",
+      "title": "Bezahlte Werbung schalten",
+      "description": "",
+      "assigneeId": "m2",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "erledigt",
+      "dueDate": "2026-08-13",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785926424991",
+      "title": "Seeger Container bestellen 2x",
+      "description": "",
+      "assigneeId": "m2",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-08",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785926409352",
+      "title": "Dämmerschoppen Plakat posten",
+      "description": "",
+      "assigneeId": "m2",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785926395872",
+      "title": "Wiesn Bus organisieren",
+      "description": "",
+      "assigneeId": "m2",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-09-25",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785926360019",
+      "title": "Klowägen holen (Kili Müllner)",
+      "description": "",
+      "assigneeId": "m12",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-12",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785926146473",
+      "title": "Zeitmess Special bestellen",
+      "description": "",
+      "assigneeId": "m9",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "erledigt",
+      "dueDate": "2026-08-14",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785926093868",
+      "title": "B52 Maschine, Eis, Cocktailbecher organisieren",
+      "description": "Eis 13.8.: 3x Würfeleis\nEis 14.8.: 9x Crushed Ice, 5x Würfeleis\nEis 15.8.: 10 Crushed Ice, 7x Würfeleis",
+      "assigneeId": "m12",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-13",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785926063241",
+      "title": "Reindlbestellung 3 Rollen Silofolie",
+      "description": "",
+      "assigneeId": "m12",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-08",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785926047074",
+      "title": "4 Steig Bauzäune beim Ditsch abklären",
+      "description": "",
+      "assigneeId": "m12",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-08",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785926020057",
+      "title": "Parkplatzeinweiser FFW organisieren",
+      "description": "",
+      "assigneeId": "m11",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "erledigt",
+      "dueDate": "2026-08-14",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785925995492",
+      "title": "Specials bestellen",
+      "description": "",
+      "assigneeId": "m7",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-14",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785925984825",
+      "title": "Getränkebestellung SB",
+      "description": "",
+      "assigneeId": "m7",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-13",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785925972515",
+      "title": "LED Kasten und Leiste über Schrank fertig machen",
+      "description": "",
+      "assigneeId": "m7",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-13",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785925929359",
+      "title": "Semmelkörbe Dorfladen zurück bringen",
+      "description": "",
+      "assigneeId": "m7",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-13",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785925898901",
+      "title": "Spülmaschine abholen",
+      "description": "",
+      "assigneeId": "m4",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-07",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785925873308",
+      "title": "Fritteuse abholen",
+      "description": "",
+      "assigneeId": "m4",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-12",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785925856998",
+      "title": "Grills Jiri holen",
+      "description": "",
+      "assigneeId": "m4",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-12",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785925835335",
+      "title": "SimEvents Zeitplan abklären",
+      "description": "",
+      "assigneeId": "m4",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "erledigt",
+      "dueDate": "2026-08-06",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785925816373",
+      "title": "Essen Helferparty organisieren",
+      "description": "",
+      "assigneeId": "m4",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "erledigt",
+      "dueDate": "2026-09-19",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785925790989",
+      "title": "Fritteuse organisieren",
+      "description": "",
+      "assigneeId": "m4",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "erledigt",
+      "dueDate": "2026-08-13",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785925774924",
+      "title": "Essen Dämmerschoppen organisieren",
+      "description": "",
+      "assigneeId": "m4",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "erledigt",
+      "dueDate": "2026-08-13",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785925754775",
+      "title": "Edeka Bestellung",
+      "description": "",
+      "assigneeId": "m5",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-13",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785925743133",
+      "title": "Edeka Bestellung",
+      "description": "",
+      "assigneeId": "m5",
+      "categoryId": "fest",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785925735142",
+      "title": "Lebenshilfe zum 14.8. 20:30 Uhr einladen",
+      "description": "",
+      "assigneeId": "m5",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-14",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785925682327",
+      "title": "Tablet kaufen + Kartenzahlgerät besorgen",
+      "description": "",
+      "assigneeId": "m3",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-13",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785925644618",
+      "title": "Resi-Bierzeltgarnituren Dämmerschoppen reservieren",
+      "description": "",
+      "assigneeId": "m3",
+      "categoryId": "getraenke",
+      "priority": "hoch",
+      "status": "offen",
+      "dueDate": "2026-08-13",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785925622338",
+      "title": "Einlassbänder nachkaufen",
+      "description": "",
+      "assigneeId": "m3",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-13",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785925455332",
+      "title": "Kabelbinder bestellen",
+      "description": "",
+      "assigneeId": "m1",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-08",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785925437515",
+      "title": "Decke LJ fertig machen",
+      "description": "",
+      "assigneeId": "m1",
+      "categoryId": "getraenke",
+      "priority": "hoch",
+      "status": "erledigt",
+      "dueDate": "2026-08-13",
+      "subtasks": []
+    },
+    {
+      "id": "t_1785925412655",
+      "title": "Bauzaunplanen Zacherl organisieren",
+      "description": "",
+      "assigneeId": "m1",
+      "categoryId": "getraenke",
+      "priority": "mittel",
+      "status": "offen",
+      "dueDate": "2026-08-08",
+      "subtasks": []
     }
 ];
 
 export const INITIAL_FINANCES = [
-    { id: 'f1', type: 'einnahme', amount: 1450.00, title: 'Einnahmen Summerbreak Party Vorkasse', category: 'fest', date: '2026-08-01' },
-    { id: 'f2', type: 'ausgabe', amount: 320.50, title: 'Getränkelieferung August', category: 'getraenke', date: '2026-08-03' }
+    {
+      "id": "f_1785965390526",
+      "date": "2026-08-05",
+      "title": "Bier",
+      "type": "ausgabe",
+      "amount": 350,
+      "category": "Barbestand",
+      "receipt": "",
+      "notes": "Weihnachtsfeier"
+    }
 ];
 
 export const INITIAL_CONTRACTS = [
-    { id: 'c1', title: 'Mietvertrag Landjugendheim', partner: 'Gemeinde Scheuring', validUntil: '2030-12-31', status: 'aktiv' }
+    {
+      "id": "c_1785965453529",
+      "title": "SimEvents Technikaufbau SB",
+      "partner": "SimEvents",
+      "category": "Veranstaltungstechnik",
+      "status": "Aktiv",
+      "startDate": "2026-08-10",
+      "endDate": "2026-08-16",
+      "costNotice": "3000",
+      "summary": ""
+    }
 ];
 
 export const INITIAL_MINUTES = [

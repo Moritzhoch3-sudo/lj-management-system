@@ -18,9 +18,9 @@ export function escapeHTML(str) {
 const STORAGE_KEYS = {
     MEMBERS: 'lj_members_v10_final',
     CATEGORIES: 'lj_categories_v1',
-    TASKS: 'lj_tasks_v3_12',
-    FINANCES: 'lj_finances_v1',
-    CONTRACTS: 'lj_contracts_v1',
+    TASKS: 'lj_tasks_v4_live',
+    FINANCES: 'lj_finances_v4_live',
+    CONTRACTS: 'lj_contracts_v4_live',
     MINUTES: 'lj_minutes_v2',
     PIN_HASH: 'lj_vault_pin_hash_v3',
     CURRENT_USER: 'lj_current_user_v1',
