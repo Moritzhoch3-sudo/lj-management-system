@@ -41,6 +41,13 @@ export class StorageEngine {
         try {
             const parsed = JSON.parse(raw);
             if (Array.isArray(parsed) && parsed.length > 0) {
+                // Ensure Moritz Kubik (m4) color is updated to Pink everywhere
+                const moritz = parsed.find(m => m.id === 'm4' || m.name === 'Moritz Kubik');
+                if (moritz && moritz.color !== '#ff2a85') {
+                    moritz.color = '#ff2a85';
+                    moritz.bgLight = 'rgba(255, 42, 133, 0.18)';
+                    localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(parsed));
+                }
                 return parsed;
             }
         } catch (e) {}
