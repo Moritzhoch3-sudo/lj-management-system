@@ -3,6 +3,8 @@
  * Synchronizes tasks, members, finances, minutes, and contracts across all devices.
  */
 
+import { StorageEngine } from './storage.js';
+
 const CLOUD_SYNC_KEY = 'lj_cloud_sync_config_v1';
 const DEFAULT_FIREBASE_URL = 'https://lj-scheuring-default-rtdb.europe-west1.firebasedatabase.app';
 
@@ -68,6 +70,8 @@ export class CloudStorageEngine {
 
             if (!response.ok) return;
 
+            const cloudData = await response.json();
+
             if (!cloudData || typeof cloudData !== 'object') {
                 await this.pushAllToCloud();
                 return;
@@ -121,12 +125,12 @@ export class CloudStorageEngine {
 
         const payload = {
             _updatedAt: Date.now(),
-            members: JSON.parse(localStorage.getItem('lj_members_v10_final') || 'null'),
-            categories: JSON.parse(localStorage.getItem('lj_categories_v1') || 'null'),
-            tasks: JSON.parse(localStorage.getItem('lj_tasks_v3_12') || 'null'),
-            finances: JSON.parse(localStorage.getItem('lj_finances_v1') || 'null'),
-            contracts: JSON.parse(localStorage.getItem('lj_contracts_v1') || 'null'),
-            minutes: JSON.parse(localStorage.getItem('lj_minutes_v2') || 'null')
+            members: JSON.parse(localStorage.getItem('lj_members_v10_final') || 'null') || StorageEngine.getMembers(),
+            categories: JSON.parse(localStorage.getItem('lj_categories_v1') || 'null') || StorageEngine.getCategories(),
+            tasks: JSON.parse(localStorage.getItem('lj_tasks_v3_12') || 'null') || StorageEngine.getTasks(),
+            finances: JSON.parse(localStorage.getItem('lj_finances_v1') || 'null') || StorageEngine.getFinances(),
+            contracts: JSON.parse(localStorage.getItem('lj_contracts_v1') || 'null') || StorageEngine.getContracts(),
+            minutes: JSON.parse(localStorage.getItem('lj_minutes_v2') || 'null') || StorageEngine.getMinutes()
         };
 
         this.lastSyncTimestamp = payload._updatedAt;
