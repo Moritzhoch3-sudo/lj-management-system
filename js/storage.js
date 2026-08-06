@@ -25,11 +25,8 @@ const STORAGE_KEYS = {
     PIN_HASH: 'lj_vault_pin_hash_v3',
     CURRENT_USER: 'lj_current_user_v1',
     LAST_CATEGORY: 'lj_last_category_v1',
-    PIN: 'lj_vault_pin_plain_v1',
     MEMBER_PASSWORDS: 'lj_member_passwords_v1'
 };
-
-const DEFAULT_PIN = '1357';
 
 export class StorageEngine {
     static getMembers() {
@@ -163,30 +160,41 @@ export class StorageEngine {
     }
 
     /**
-     * Plain PIN Retrieval & Instant Strict Verification
+     * Salted SHA-256 PIN Hashing & Verification (No plain text PIN stored or transmitted!)
      */
-    static getPIN() {
-        return localStorage.getItem(STORAGE_KEYS.PIN) || DEFAULT_PIN;
+    static async hashPIN(pin) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(String(pin).trim() + 'lj-scheuring-pin-salt-2026');
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    static async getPINHash() {
+        const stored = localStorage.getItem(STORAGE_KEYS.PIN_HASH);
+        if (stored && /^[a-f0-9]{64}$/.test(stored)) {
+            return stored;
+        }
+        // Initialize default PIN '1357' hash securely
+        const defaultHash = await this.hashPIN('1357');
+        localStorage.setItem(STORAGE_KEYS.PIN_HASH, defaultHash);
+        localStorage.removeItem('lj_vault_pin_plain_v1'); // Purge legacy plain text key
+        return defaultHash;
     }
 
     static async setPIN(newPin) {
         const cleanPin = String(newPin).trim();
-        localStorage.setItem(STORAGE_KEYS.PIN, cleanPin);
-        
-        // Compute SHA-256 hash for consistency
-        const msgUint8 = new TextEncoder().encode(cleanPin);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashedPin = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        const hashedPin = await this.hashPIN(cleanPin);
         localStorage.setItem(STORAGE_KEYS.PIN_HASH, hashedPin);
+        localStorage.removeItem('lj_vault_pin_plain_v1'); // Purge legacy plain text key
+        CloudStorageEngine.pushAllToCloud();
     }
 
     static async verifyPIN(pinInput) {
         const cleanInput = String(pinInput).trim();
-        const activePIN = this.getPIN();
-
-        // INSTANT STRICT COMPARISON: ONLY the single active PIN is accepted!
-        return cleanInput === activePIN;
+        const inputHash = await this.hashPIN(cleanInput);
+        const activeHash = await this.getPINHash();
+        return inputHash === activeHash;
     }
 
     /**
