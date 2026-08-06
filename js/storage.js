@@ -107,7 +107,15 @@ export class StorageEngine {
 
     static getMemberPassword(memberId) {
         const map = this.getMemberPasswords();
-        return map[memberId] || null;
+        const stored = map[memberId] || null;
+        // Migration: old plaintext passwords are not 64-char hex SHA-256 hashes.
+        // Clear them so the first-login flow sets a new hashed password.
+        if (stored && !/^[a-f0-9]{64}$/.test(stored)) {
+            delete map[memberId];
+            localStorage.setItem(STORAGE_KEYS.MEMBER_PASSWORDS, JSON.stringify(map));
+            return null;
+        }
+        return stored;
     }
 
     static async hashPassword(password) {
