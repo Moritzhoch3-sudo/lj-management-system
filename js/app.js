@@ -2,6 +2,7 @@
  * Main Application Orchestrator & View Controller (Smooth Navigation & Admin Settings Access)
  */
 import { StorageEngine, escapeHTML } from './storage.js';
+import { CloudStorageEngine } from './cloud-storage.js';
 
 import { AppAuth } from './modules/auth.js';
 import { TasksModule } from './modules/tasks.js';
@@ -39,7 +40,10 @@ class App {
         this.bindGlobalEvents();
         this.updateNavbarTabVisibility();
 
-
+        // Initialize Realtime Cloud Sync across all devices
+        CloudStorageEngine.init(() => {
+            this.switchTab(activeTab);
+        });
 
         this.switchTab(activeTab);
     }

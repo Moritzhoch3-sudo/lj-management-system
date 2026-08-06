@@ -79,7 +79,7 @@ export class CloudStorageEngine {
                 this.lastSyncTimestamp = remoteTimestamp;
 
                 const keyMap = {
-                    members: 'lj_members_v4_final',
+                    members: 'lj_members_v10_final',
                     categories: 'lj_categories_v1',
                     tasks: 'lj_tasks_v3_12',
                     finances: 'lj_finances_v1',
@@ -119,7 +119,7 @@ export class CloudStorageEngine {
 
         const payload = {
             _updatedAt: Date.now(),
-            members: JSON.parse(localStorage.getItem('lj_members_v4_final') || 'null'),
+            members: JSON.parse(localStorage.getItem('lj_members_v10_final') || 'null'),
             categories: JSON.parse(localStorage.getItem('lj_categories_v1') || 'null'),
             tasks: JSON.parse(localStorage.getItem('lj_tasks_v3_12') || 'null'),
             finances: JSON.parse(localStorage.getItem('lj_finances_v1') || 'null'),

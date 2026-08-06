@@ -2,6 +2,7 @@
  * Storage & State Persistence Engine (Supports Instant Single Active PIN Verification & Member Passwords)
  */
 import { INITIAL_MEMBERS, CATEGORIES, INITIAL_TASKS, INITIAL_FINANCES, INITIAL_CONTRACTS, INITIAL_MINUTES } from './data.js';
+import { CloudStorageEngine } from './cloud-storage.js';
 
 export function escapeHTML(str) {
     if (str === null || str === undefined) return '';
@@ -50,6 +51,7 @@ export class StorageEngine {
 
     static saveMembers(members) {
         localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
+        CloudStorageEngine.pushAllToCloud();
     }
 
     static getCategories() {
@@ -59,6 +61,7 @@ export class StorageEngine {
 
     static saveCategories(categories) {
         localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+        CloudStorageEngine.pushAllToCloud();
     }
 
     static getTasks() {
@@ -68,6 +71,7 @@ export class StorageEngine {
 
     static saveTasks(tasks) {
         localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
+        CloudStorageEngine.pushAllToCloud();
     }
 
     static getFinances() {
@@ -77,6 +81,7 @@ export class StorageEngine {
 
     static saveFinances(finances) {
         localStorage.setItem(STORAGE_KEYS.FINANCES, JSON.stringify(finances));
+        CloudStorageEngine.pushAllToCloud();
     }
 
     static getContracts() {
@@ -86,6 +91,7 @@ export class StorageEngine {
 
     static saveContracts(contracts) {
         localStorage.setItem(STORAGE_KEYS.CONTRACTS, JSON.stringify(contracts));
+        CloudStorageEngine.pushAllToCloud();
     }
 
     static getMinutes() {
@@ -95,6 +101,7 @@ export class StorageEngine {
 
     static saveMinutes(minutes) {
         localStorage.setItem(STORAGE_KEYS.MINUTES, JSON.stringify(minutes));
+        CloudStorageEngine.pushAllToCloud();
     }
 
     /**
