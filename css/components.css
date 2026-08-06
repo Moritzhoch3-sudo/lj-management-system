@@ -2,23 +2,50 @@
    LANDJUGEND SCHEURUNG - COMPONENT STYLES & COMPACT RESPONSIVE LAYOUT
    ========================================================================== */
 
-/* Cards & Glassmorphism Containers */
+/* Cards & Glassmorphism Containers with 3D Depth Shadows */
 .card-glow {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    background: rgba(18, 22, 28, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.22);
     border-radius: var(--radius-md);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     transition: var(--transition-fast);
 }
 
 .card-glow:hover {
-    border-color: var(--border-glow);
+    transform: translateY(-3px);
+    border-color: rgba(52, 211, 153, 0.45);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.8), 0 0 25px rgba(0, 135, 61, 0.3);
 }
 
 .card-glow-sm {
-    background: rgba(0, 0, 0, 0.25);
-    border: 1px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius-sm);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+/* Navigation Drawer Modal Backdrop */
+.nav-drawer-backdrop {
+    background: rgba(4, 6, 8, 0.85) !important;
+    backdrop-filter: blur(8px);
+}
+
+.nav-drawer-card {
+    background: rgba(16, 20, 26, 0.96) !important;
+    border: 1px solid rgba(0, 135, 61, 0.4) !important;
+}
+
+.nav-drawer-item {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-drawer-item:hover {
+    transform: translateX(4px);
+    border-color: #00873D !important;
+    background: rgba(0, 135, 61, 0.2) !important;
 }
 
 /* Dashboard Banner */

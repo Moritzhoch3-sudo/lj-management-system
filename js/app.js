@@ -1,5 +1,5 @@
 /**
- * Main Application Orchestrator & View Controller (Smooth Navigation & Admin Settings Access)
+ * Main Application Orchestrator & View Controller (Smooth Navigation & Sleek Navigation Drawer)
  */
 import { StorageEngine, escapeHTML } from './storage.js';
 import { CloudStorageEngine } from './cloud-storage.js';
@@ -43,10 +43,8 @@ class App {
         const headerEl = document.querySelector('.app-header');
         if (headerEl) headerEl.style.display = 'block';
 
-        this.renderNavbar();
         this.bindGlobalEvents();
-        this.updateNavbarTabVisibility();
-
+        this.updateHeaderActivePill();
         this.switchTab(activeTab);
     }
 
@@ -61,97 +59,31 @@ class App {
         return authorizedKeywords.some(kw => role.includes(kw));
     }
 
-    static updateNavbarTabVisibility() {
-        const currentUserId = StorageEngine.getCurrentUserId();
-        const isVaultAuthorized = this.isUserAuthorizedForVault(currentUserId);
-        const isAdmin = StorageEngine.isSuperAdmin(currentUserId);
+    static updateHeaderActivePill() {
+        const badgeEl = document.getElementById('header-active-view-badge');
+        if (!badgeEl) return;
 
-        const protectedVaultTabs = ['finance', 'contracts', 'minutes'];
+        const titles = {
+            tasks: { icon: '✅', name: 'Aufgaben' },
+            dashboard: { icon: '📊', name: 'Dashboard' },
+            finance: { icon: '💰', name: 'Finanzen' },
+            contracts: { icon: '📋', name: 'Verträge' },
+            minutes: { icon: '🎙️', name: 'Sitzungen & Audio' },
+            settings: { icon: '⚙️', name: 'Einstellungen' },
+            password: { icon: '🔑', name: 'Passwort ändern' }
+        };
 
-        document.querySelectorAll('.nav-link[data-tab]').forEach(link => {
-            const tab = link.dataset.tab;
-            if (protectedVaultTabs.includes(tab)) {
-                if (isVaultAuthorized) {
-                    link.classList.remove('nav-tab-hidden');
-                    link.classList.add('nav-tab-visible');
-                } else {
-                    link.classList.remove('nav-tab-visible');
-                    link.classList.add('nav-tab-hidden');
-                }
-            } else if (tab === 'settings') {
-                // Settings tab is ONLY visible to Admin (Moritz Kubik)
-                if (isAdmin) {
-                    link.classList.remove('nav-tab-hidden');
-                    link.classList.add('nav-tab-visible');
-                } else {
-                    link.classList.remove('nav-tab-visible');
-                    link.classList.add('nav-tab-hidden');
-                }
-            }
-        });
-    }
-
-    static renderNavbar() {
-        const members = StorageEngine.getMembers();
-        const currentUserId = StorageEngine.getCurrentUserId();
-
-        const userSelectEl = document.getElementById('user-simulator-select');
-        if (userSelectEl) {
-            userSelectEl.innerHTML = members.map(m => `
-                <option value="${m.id}" ${m.id === currentUserId ? 'selected' : ''}>
-                    ${m.avatar} ${escapeHTML(m.name)} (${escapeHTML(m.role)})
-                </option>
-            `).join('');
-
-            userSelectEl.onchange = (e) => {
-                const targetMemberId = e.target.value;
-                const currentUserId = StorageEngine.getCurrentUserId();
-                const isCurrentAdmin = StorageEngine.isSuperAdmin(currentUserId);
-                const isTargetAdmin = StorageEngine.isSuperAdmin(targetMemberId);
-                const targetMember = members.find(m => m.id === targetMemberId);
-
-                // If switching to current user (no change), do nothing
-                if (targetMemberId === currentUserId) return;
-
-                // Asymmetric logic:
-                // If currently Admin AND switching to a non-admin (downgrading rights):
-                // Instantly switch WITHOUT prompt!
-                if (isCurrentAdmin && !isTargetAdmin) {
-                    StorageEngine.setCurrentUserId(targetMemberId);
-                    this.updateNavbarTabVisibility();
-                    this.switchTab(activeTab);
-                    return;
-                }
-
-                // Otherwise (switching back to Admin or between non-admin members): Prompt required!
-                userSelectEl.value = currentUserId;
-
-                if (!targetMember) return;
-
-                AppAuth.promptUserSwitchAuth(
-                    targetMember,
-                    (authenticatedMember) => {
-                        userSelectEl.value = authenticatedMember.id;
-                        StorageEngine.setCurrentUserId(authenticatedMember.id);
-                        this.updateNavbarTabVisibility();
-                        this.switchTab(activeTab);
-                    },
-                    () => {
-                        userSelectEl.value = currentUserId;
-                    }
-                );
-            };
-        }
+        const current = titles[activeTab] || titles.tasks;
+        badgeEl.innerHTML = `<span class="view-icon">${current.icon}</span> <span class="view-title">${current.name}</span>`;
     }
 
     static bindGlobalEvents() {
-        document.querySelectorAll('.nav-link[data-tab]').forEach(link => {
-            link.addEventListener('click', (e) => {
-                const targetTab = e.currentTarget.dataset.tab;
-                this.handleTabClick(targetTab);
-            });
+        // Open Navigation Drawer on Hamburger Menu Click
+        document.getElementById('open-nav-drawer-btn')?.addEventListener('click', () => {
+            this.openNavDrawer();
         });
 
+        // Desktop Action Buttons (Side-by-side backup/import & Excel export)
         document.getElementById('export-excel-btn')?.addEventListener('click', () => {
             StorageEngine.exportExcelDashboard();
         });
@@ -159,6 +91,183 @@ class App {
         document.getElementById('import-backup-btn')?.addEventListener('click', () => {
             this.openBackupModal();
         });
+    }
+
+    static openNavDrawer() {
+        document.body.style.overflow = 'hidden';
+        const modal = document.createElement('div');
+        modal.className = 'modal-backdrop active nav-drawer-backdrop';
+
+        const members = StorageEngine.getMembers();
+        const currentUserId = StorageEngine.getCurrentUserId();
+        const currentUser = members.find(m => m.id === currentUserId) || { name: 'Mitglied', avatar: '👤', role: 'Beisitzer', color: '#00873D' };
+
+        const isVaultAuthorized = this.isUserAuthorizedForVault(currentUserId);
+        const isAdmin = StorageEngine.isSuperAdmin(currentUserId);
+
+        const tabItems = [
+            { id: 'tasks', name: 'Aufgaben', icon: '✅', desc: 'Zentrale Aufgabenliste' },
+            { id: 'dashboard', name: 'Dashboard', icon: '📊', desc: 'Vorstands-Fortschritte (%)' },
+            { id: 'finance', name: 'Finanzen 🔒', icon: '💰', desc: 'Kassenbuch & Belegnachweis', protected: true },
+            { id: 'contracts', name: 'Verträge 🔒', icon: '📋', desc: 'Pacht & Sponsoring', protected: true },
+            { id: 'minutes', name: 'Sitzungen & Audio 🔒', icon: '🎙️', desc: 'Protokolle & KI-Transkript', protected: true },
+            { id: 'settings', name: 'Einstellungen (Admin)', icon: '⚙️', desc: 'Mitglieder & Kategorien', adminOnly: true },
+            { id: 'password', name: 'Passwort ändern', icon: '🔑', desc: 'Persönliches Passwort' }
+        ];
+
+        const closeModal = () => {
+            document.body.style.overflow = '';
+            modal.remove();
+        };
+
+        modal.innerHTML = `
+            <div class="modal-card nav-drawer-card" style="max-width: 480px; width: 95vw; border: 1px solid rgba(0,135,61,0.4); box-shadow: 0 25px 60px rgba(0,0,0,0.9); padding: 0;">
+                <div class="modal-header d-flex align-items-center justify-content-between p-3" style="border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3);">
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="assets/logo_white.png" style="width: 28px; height: 28px; object-fit: contain;" />
+                        <h3 style="font-size: 1.15rem; color: #fff; margin: 0; font-weight: 800;">Navigation & Menü</h3>
+                    </div>
+                    <button class="btn btn-ghost modal-close modal-close-x" style="font-size: 1.6rem; line-height: 1; padding: 0.2rem 0.6rem;">&times;</button>
+                </div>
+
+                <div class="modal-body p-3" style="max-height: 78vh; overflow-y: auto;">
+                    <!-- User Profile & Switcher Box -->
+                    <div class="p-3 mb-3 rounded d-flex align-items-center justify-content-between gap-2" style="background: rgba(0,0,0,0.4); border: 1px solid ${currentUser.color || '#00873D'}66;">
+                        <div class="d-flex align-items-center gap-2">
+                            <span style="font-size: 1.6rem; background: rgba(255,255,255,0.06); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid ${currentUser.color || '#00873D'};">
+                                ${currentUser.avatar}
+                            </span>
+                            <div>
+                                <strong style="color: #fff; display: block; font-size: 0.95rem;">${escapeHTML(currentUser.name)}</strong>
+                                <small style="color: ${currentUser.color || '#34d399'}; font-weight: bold;">${escapeHTML(currentUser.role)}</small>
+                            </div>
+                        </div>
+
+                        <select id="drawer-user-select" class="form-select form-select-sm" style="max-width: 140px; font-size: 0.82rem; background: rgba(0,0,0,0.5); font-weight: 600;">
+                            ${members.map(m => `
+                                <option value="${m.id}" ${m.id === currentUserId ? 'selected' : ''}>
+                                    ${m.avatar} ${escapeHTML(m.name)}
+                                </option>
+                            `).join('')}
+                        </select>
+                    </div>
+
+                    <!-- Navigation Items List -->
+                    <h5 style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.6rem; font-weight: 700;">📌 BEREICHE WÄHLEN:</h5>
+                    <div class="drawer-nav-list d-flex flex-column gap-2 mb-3">
+                        ${tabItems.map(item => {
+                            if (item.protected && !isVaultAuthorized) return '';
+                            if (item.adminOnly && !isAdmin) return '';
+                            const isActive = activeTab === item.id;
+                            return `
+                                <button class="btn nav-drawer-item p-2.5 rounded text-start d-flex align-items-center justify-content-between ${isActive ? 'active' : ''}" 
+                                        data-drawer-tab="${item.id}"
+                                        style="${isActive 
+                                            ? 'background: rgba(0, 135, 61, 0.25); border: 1px solid #00873D; color: #34d399;' 
+                                            : 'background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #e2e8f0;'}">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span style="font-size: 1.25rem;">${item.icon}</span>
+                                        <div>
+                                            <strong style="display: block; font-size: 0.95rem;">${item.name}</strong>
+                                            <small style="color: var(--text-muted); font-size: 0.76rem;">${item.desc}</small>
+                                        </div>
+                                    </div>
+                                    ${isActive ? '<span class="badge badge-success">Aktiv</span>' : ''}
+                                </button>
+                            `;
+                        }).join('')}
+                    </div>
+
+                    <!-- SIDE-BY-SIDE EXPORT & BACKUP BUTTONS (Exact user requirement!) -->
+                    <h5 style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.6rem; font-weight: 700; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.8rem;">💾 DATEN-AKTIONEN:</h5>
+                    <div class="drawer-action-pair d-flex gap-2">
+                        <button class="btn btn-sm btn-ghost text-nowrap flex-1 w-50 p-2 font-bold" id="drawer-import-backup-btn" style="border: 1px solid rgba(255,255,255,0.15); font-size: 0.85rem;">
+                            💾 Sicherung / Import
+                        </button>
+                        <button class="btn btn-sm btn-emerald text-nowrap flex-1 w-50 p-2 font-bold" id="drawer-export-excel-btn" style="font-size: 0.85rem;">
+                            📊 Export Excel
+                        </button>
+                    </div>
+                </div>
+
+                <div class="modal-footer p-3 d-flex align-items-center justify-content-between" style="border-top: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3);">
+                    <button class="btn btn-sm btn-ghost danger-text font-bold" id="drawer-logout-btn" style="font-size: 0.88rem;">
+                        🚪 Abmelden
+                    </button>
+                    <button class="btn btn-sm btn-secondary modal-close p-2 font-bold" style="font-size: 0.88rem;">
+                        ✖️ Menü Schließen
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        modal.querySelectorAll('.modal-close').forEach(b => b.addEventListener('click', closeModal));
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        // Handle navigation item click from inside drawer
+        modal.querySelectorAll('[data-drawer-tab]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const targetTab = e.currentTarget.dataset.drawerTab;
+                closeModal();
+                this.handleTabClick(targetTab);
+            });
+        });
+
+        // Bind Backup & Excel Export inside drawer
+        modal.querySelector('#drawer-import-backup-btn')?.addEventListener('click', () => {
+            closeModal();
+            this.openBackupModal();
+        });
+
+        modal.querySelector('#drawer-export-excel-btn')?.addEventListener('click', () => {
+            closeModal();
+            StorageEngine.exportExcelDashboard();
+        });
+
+        // Logout action
+        modal.querySelector('#drawer-logout-btn')?.addEventListener('click', () => {
+            closeModal();
+            AppAuth.logout();
+            this.init();
+        });
+
+        // User switcher inside drawer
+        const drawerUserSelect = modal.querySelector('#drawer-user-select');
+        if (drawerUserSelect) {
+            drawerUserSelect.onchange = (e) => {
+                const targetMemberId = e.target.value;
+                const isCurrentAdmin = StorageEngine.isSuperAdmin(currentUserId);
+                const isTargetAdmin = StorageEngine.isSuperAdmin(targetMemberId);
+                const targetMember = members.find(m => m.id === targetMemberId);
+
+                if (targetMemberId === currentUserId) return;
+
+                if (isCurrentAdmin && !isTargetAdmin) {
+                    StorageEngine.setCurrentUserId(targetMemberId);
+                    closeModal();
+                    this.switchTab(activeTab);
+                    return;
+                }
+
+                drawerUserSelect.value = currentUserId;
+
+                if (!targetMember) return;
+
+                closeModal();
+                AppAuth.promptUserSwitchAuth(
+                    targetMember,
+                    (authenticatedMember) => {
+                        StorageEngine.setCurrentUserId(authenticatedMember.id);
+                        this.switchTab(activeTab);
+                    },
+                    () => {}
+                );
+            };
+        }
     }
 
     static openBackupModal() {
@@ -275,13 +384,7 @@ class App {
                     minutes: '🎙️ Sitzungsprotokolle & Audio-Aufnahme'
                 };
                 activeTab = targetTab;
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    if (link.dataset.tab === targetTab) {
-                        link.classList.add('active');
-                    } else {
-                        link.classList.remove('active');
-                    }
-                });
+                this.updateHeaderActivePill();
                 const mainContentEl = document.getElementById('main-content-view');
                 if (mainContentEl) {
                     VaultGuard.renderPinLockPage(mainContentEl, names[targetTab], () => {
@@ -299,18 +402,11 @@ class App {
         const isLeavingProtected = protectedTabs.includes(activeTab) && !protectedTabs.includes(tabName);
         
         activeTab = tabName;
+        this.updateHeaderActivePill();
 
         if (isLeavingProtected) {
             VaultGuard.lock();
         }
-
-        document.querySelectorAll('.nav-link').forEach(link => {
-            if (link.dataset.tab === tabName) {
-                link.classList.add('active');
-            } else {
-                link.classList.remove('active');
-            }
-        });
 
         const mainContentEl = document.getElementById('main-content-view');
         if (!mainContentEl) return;
@@ -341,8 +437,7 @@ class App {
                 break;
             case 'settings':
                 SettingsModule.render(mainContentEl, () => {
-                    this.renderNavbar();
-                    this.updateNavbarTabVisibility();
+                    this.updateHeaderActivePill();
                 });
                 break;
             case 'password':

@@ -44,8 +44,9 @@
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background-color: var(--bg-dark);
-    background-image: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.03) 0%, transparent 60%);
+    background-color: #080a0c;
+    background-image: radial-gradient(circle at 50% -10%, #0d2417 0%, #0a0e12 55%, #050708 100%);
+    background-attachment: fixed;
     color: var(--text-main);
     min-height: 100vh;
     line-height: 1.5;
