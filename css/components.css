@@ -2,38 +2,41 @@
    LANDJUGEND SCHEURUNG - COMPONENT STYLES & COMPACT RESPONSIVE LAYOUT
    ========================================================================== */
 
-/* Cards & Light Glassmorphism Containers */
+/* Cards & Glassmorphism Containers with 3D Depth Shadows */
 .card-glow {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
+    background: rgba(20, 24, 32, 0.92) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.22) !important;
     border-radius: var(--radius-md) !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
     transition: var(--transition-fast) !important;
 }
 
 .card-glow:hover {
     transform: translateY(-2px);
-    border-color: rgba(0, 135, 61, 0.4) !important;
-    box-shadow: 0 8px 24px rgba(0, 135, 61, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+    border-color: rgba(52, 211, 153, 0.45) !important;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 135, 61, 0.25) !important;
 }
 
 .card-glow-sm {
-    background: #f8fafc !important;
-    border: 1px solid #e2e8f0 !important;
+    background: rgba(0, 0, 0, 0.35) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius: var(--radius-sm) !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
 }
 
 /* Page View Title Header (Unboxed, Crisp & Clear Page Heading) */
 .page-view-header {
     margin-bottom: 1.1rem;
     padding-bottom: 0.5rem;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .page-view-header h2 {
     font-size: 1.3rem !important;
-    color: #0f172a !important;
+    color: #ffffff !important;
     margin: 0 0 0.15rem 0 !important;
     display: flex;
     align-items: center;
@@ -42,20 +45,20 @@
 
 .page-view-header p {
     font-size: 0.84rem;
-    color: #64748b;
+    color: var(--text-muted);
     margin: 0;
 }
 
 /* Navigation Drawer Modal Backdrop */
 .nav-drawer-backdrop {
-    background: rgba(15, 23, 42, 0.6) !important;
-    backdrop-filter: blur(6px);
+    background: rgba(4, 6, 8, 0.85) !important;
+    backdrop-filter: blur(8px);
 }
 
 .nav-drawer-card {
-    background: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25) !important;
+    background: rgba(16, 20, 26, 0.96) !important;
+    border: 1px solid rgba(0, 135, 61, 0.4) !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9) !important;
     border-radius: 12px !important;
 }
 
@@ -68,23 +71,23 @@
     border-radius: 6px !important;
     font-size: 0.9rem !important;
     font-weight: 600 !important;
-    color: #1e293b !important;
+    color: #e2e8f0 !important;
     background: transparent !important;
     border: none !important;
-    border-bottom: 1px solid #f1f5f9 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
     margin-bottom: 0.1rem !important;
     transition: all 0.15s ease !important;
 }
 
 .nav-drawer-item-compact:hover {
-    background: #f1f5f9 !important;
-    color: #00873D !important;
+    background: rgba(0, 135, 61, 0.2) !important;
+    color: #34d399 !important;
     padding-left: 0.8rem !important;
 }
 
 .nav-drawer-item-compact.active {
-    background: #e6f4ea !important;
-    color: #00873D !important;
+    background: rgba(0, 135, 61, 0.25) !important;
+    color: #34d399 !important;
     font-weight: 800 !important;
     border-left: 4px solid #00873D !important;
 }
@@ -92,8 +95,8 @@
 /* Subtle Header Action Links */
 .btn-subtle-header {
     background: transparent !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    color: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
     font-size: 0.78rem !important;
     padding: 0.25rem 0.55rem !important;
     font-weight: 500 !important;
@@ -103,7 +106,7 @@
 
 .btn-subtle-header:hover {
     opacity: 1;
-    background: rgba(255, 255, 255, 0.18) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
     color: #ffffff !important;
 }
 

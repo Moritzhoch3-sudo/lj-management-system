@@ -44,7 +44,7 @@ export class SettingsModule {
                 <div class="settings-section-view" id="view-members" style="display: block;">
                     <div class="card-glow mb-4 p-3">
                         <div class="toolbar-row mb-3 d-flex justify-content-between align-items-center">
-                            <h3 class="mb-0" style="font-size: 1.05rem; color: #0f172a;">👥 Vorstandsmitglieder (${members.length} Personen)</h3>
+                            <h3 class="mb-0" style="font-size: 1.05rem; color: #fff;">👥 Vorstandsmitglieder (${members.length} Personen)</h3>
                             <button class="btn btn-emerald btn-sm" id="add-member-btn" style="font-size: 0.82rem;">➕ Neues Mitglied</button>
                         </div>
 
@@ -52,10 +52,10 @@ export class SettingsModule {
                         <div class="members-cards-container mt-2">
                             ${members.map(m => `
                                 <div class="member-settings-item card-glow mb-2.5 p-2.5" data-member-id="${m.id}" 
-                                     style="border-left: 5px solid ${m.color}; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
+                                     style="border-left: 5px solid ${m.color}; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px;">
                                     <div class="d-flex align-items-center gap-2 flex-wrap">
                                         <!-- Avatar Icon -->
-                                        <input type="text" class="form-control form-control-sm m-avatar" value="${m.avatar}" style="width: 44px; text-align: center; font-size: 1.1rem; font-weight: bold; background: #f8fafc;" title="Emoji Icon" />
+                                        <input type="text" class="form-control form-control-sm m-avatar" value="${m.avatar}" style="width: 44px; text-align: center; font-size: 1.1rem; font-weight: bold; background: rgba(0,0,0,0.4);" title="Emoji Icon" />
                                         
                                         <!-- Name Field -->
                                         <input type="text" class="form-control form-control-sm m-name" value="${escapeHTML(m.name)}" placeholder="Name des Mitglieds..." style="flex: 1 1 180px; min-width: 140px; font-weight: 700; font-size: 0.9rem;" />

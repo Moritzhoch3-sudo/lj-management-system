@@ -1,29 +1,29 @@
 /* ==========================================================================
-   LANDJUGEND SCHEURUNG - HELL, FREUNDLICH & COMPACT DESIGN SYSTEM
+   LANDJUGEND SCHEURUNG - EDLES DUNKLES GRAUTON DESIGN SYSTEM
    ========================================================================== */
 
 :root {
-    /* Freundliches, helles & einladendes Farbschema */
-    --bg-dark: #f8fafc;
-    --bg-card: #ffffff;
-    --bg-card-hover: #f1f5f9;
-    --bg-card-glass: rgba(255, 255, 255, 0.95);
+    /* Edle, schlichte Dunkeltöne & 3D Glasmorphismus */
+    --bg-dark: #0a0d10;
+    --bg-card: #141820;
+    --bg-card-hover: #1c222e;
+    --bg-card-glass: rgba(20, 24, 32, 0.92);
     
-    --border-color: #e2e8f0;
-    --border-glow: rgba(0, 135, 61, 0.35);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --border-glow: rgba(0, 135, 61, 0.4);
 
     /* Original Landjugend Scheuring Akzentfarben */
     --lj-green: #00873D;
-    --lj-green-dark: #007032;
+    --lj-green-dark: #00682f;
     --lj-green-light: #10b981;
     --lj-yellow: #f59e0b;
 
     --danger: #ef4444;
     --warning: #f59e0b;
-    --info: #2563eb;
+    --info: #3b82f6;
 
-    --text-main: #0f172a;
-    --text-muted: #475569;
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
     --text-dim: #64748b;
 
     --radius-sm: 6px;
@@ -31,7 +31,7 @@
     --radius-lg: 14px;
     --radius-full: 9999px;
 
-    --shadow-slate: 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
+    --shadow-slate: 0 10px 30px rgba(0, 0, 0, 0.5);
     --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -45,8 +45,8 @@
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 14px;
-    background-color: #f1f5f9;
-    background-image: radial-gradient(circle at 50% -10%, #e6f4ea 0%, #f1f5f9 60%, #e2e8f0 100%);
+    background-color: #07090c;
+    background-image: radial-gradient(circle at 50% -10%, #0d2417 0%, #090c10 55%, #040507 100%);
     background-attachment: fixed;
     color: var(--text-main);
     min-height: 100vh;
@@ -54,12 +54,12 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* Überschriften: Gestaltet wie das LANDJUGEND SCHEURUNG Logo */
+/* Überschriften */
 h1, h2, h3, h4, h5, h6, .font-logo-heading {
     font-family: 'Montserrat', sans-serif;
     font-weight: 800;
     letter-spacing: -0.01em;
-    color: #0f172a;
+    color: #ffffff;
 }
 
 h2 { font-size: 1.25rem; }
@@ -71,8 +71,9 @@ h4 { font-size: 0.92rem; }
     position: sticky;
     top: 0;
     z-index: 100;
-    background: linear-gradient(135deg, #007032 0%, #00873D 100%);
-    box-shadow: 0 4px 20px rgba(0, 135, 61, 0.25);
+    background: rgba(16, 20, 26, 0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
     padding: 0.5rem 1.25rem;
 }
 
@@ -101,15 +102,16 @@ h4 { font-size: 0.92rem; }
 }
 
 .version-badge {
-    background: rgba(255, 255, 255, 0.2);
-    color: #ffffff;
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.4);
     border-radius: var(--radius-full);
     font-weight: 700;
 }
 
 .brand-sub {
     font-size: 0.76rem;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--text-muted);
 }
 
 /* Main Container Layout */
@@ -119,12 +121,12 @@ h4 { font-size: 0.92rem; }
     padding: 1.25rem 1rem;
 }
 
-/* Form Elements - Compact & Touch-Friendly */
+/* Form Elements - Compact Dark */
 .form-control, .form-select {
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
+    background: #11141a;
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: var(--radius-sm);
-    color: #0f172a;
+    color: #f1f5f9;
     padding: 0.4rem 0.65rem;
     font-size: 14px;
     transition: var(--transition-fast);
@@ -132,8 +134,8 @@ h4 { font-size: 0.92rem; }
 
 .form-control:focus, .form-select:focus {
     outline: none;
-    border-color: var(--lj-green);
-    box-shadow: 0 0 0 3px rgba(0, 135, 61, 0.15);
+    border-color: #00873D;
+    box-shadow: 0 0 0 3px rgba(0, 135, 61, 0.25);
 }
 
 /* Buttons System */
@@ -158,18 +160,18 @@ h4 { font-size: 0.92rem; }
 
 .btn-emerald:hover {
     background: var(--lj-green-dark);
-    box-shadow: 0 4px 12px rgba(0, 135, 61, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 135, 61, 0.4);
 }
 
 .btn-ghost {
-    background: #ffffff;
-    color: #0f172a;
-    border-color: #cbd5e1;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .btn-ghost:hover {
-    background: #f8fafc;
-    border-color: #94a3b8;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .btn-primary {
@@ -183,7 +185,7 @@ h4 { font-size: 0.92rem; }
 }
 
 .btn-secondary {
-    background: #64748b;
+    background: #475569;
     color: #ffffff;
 }
 
@@ -197,8 +199,8 @@ h4 { font-size: 0.92rem; }
     font-weight: 700;
 }
 
-.badge-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-.badge-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-.badge-neutral { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
+.badge-success { background: rgba(0, 135, 61, 0.2); color: #34d399; border: 1px solid rgba(0, 135, 61, 0.4); }
+.badge-danger { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+.badge-neutral { background: rgba(255, 255, 255, 0.06); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.1); }
 
 .hidden { display: none !important; }
