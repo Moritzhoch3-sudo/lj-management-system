@@ -92,44 +92,36 @@ export class AppAuth {
         if (headerEl) headerEl.style.display = 'none';
 
         containerEl.innerHTML = `
-            <div class="app-entry-lock-viewport d-flex align-items-center justify-content-center p-4" style="min-height: 85vh;">
-                <div class="card-glow entry-lock-card text-center" style="max-width: 460px; width: 100%; border: 1px solid rgba(0,135,61,0.35); background: rgba(17, 19, 24, 0.96); box-shadow: 0 20px 50px rgba(0,0,0,0.7); padding: 2.5rem 2rem; border-radius: 16px;">
+            <div class="app-entry-lock-viewport d-flex align-items-center justify-content-center">
+                <div class="card-glow entry-lock-card text-center">
                     
                     <!-- Logo Badge -->
-                    <div class="brand-logo-wrapper mb-3 text-center">
-                        <div style="padding: 4px; display: inline-block;">
-                            <img src="assets/logo_white.png" alt="Landjugend Scheuring Logo" style="height: 48px; width: auto; display: block;" />
-                        </div>
+                    <div class="brand-logo-wrapper mb-2 text-center">
+                        <img src="assets/logo_white.png" alt="Landjugend Scheuring Logo" class="entry-lock-logo" />
                     </div>
 
-                    <h2 class="mb-1" style="font-size: 1.55rem; font-weight: 800; color: #ffffff;">Vorstands-Zentrale</h2>
-                    <span class="d-block mb-3" style="color: #00873D; font-weight: 800; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.1em;">Landjugend Scheuring</span>
+                    <h2 class="entry-lock-title">Vorstands-Zentrale</h2>
+                    <span class="entry-lock-sub">Landjugend Scheuring</span>
 
-                    <p class="text-muted mb-3" style="font-size: 0.88rem; line-height: 1.4;">
-                        Bitte gib deinen Vor- und Nachnamen zusammengeschrieben als Benutzername ein:
-                    </p>
-
-                    <form id="app-entry-pass-form" autocomplete="off">
-                        <div class="form-group mb-2 text-start">
-                            <label class="form-label small font-bold text-muted mb-1">Benutzername (Vorname & Nachname zusammengeschrieben):</label>
-                            <input type="text" id="entry-username-input" class="form-control" placeholder="z. B. moritzkubik" required autofocus autocomplete="off" 
-                                   style="font-size: 1rem; padding: 0.65rem; border-radius: 8px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: #ffffff;" />
+                    <form id="app-entry-pass-form" autocomplete="off" class="mt-3">
+                        <div class="form-group mb-3 text-start">
+                            <label class="form-label small font-bold text-muted mb-1">Benutzername</label>
+                            <input type="text" id="entry-username-input" class="form-control" placeholder="z. B. Moritz Kubik" required autofocus autocomplete="off" />
                         </div>
 
                         <div class="form-group mb-3 text-start">
-                            <label class="form-label small font-bold text-muted mb-1">Passwort:</label>
-                            <input type="password" id="entry-password-input" class="form-control" placeholder="Passwort eingeben..." required autocomplete="off" 
-                                   style="font-size: 1rem; padding: 0.65rem; border-radius: 8px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: #ffffff;" />
+                            <label class="form-label small font-bold text-muted mb-1">Passwort</label>
+                            <input type="password" id="entry-password-input" class="form-control" placeholder="Passwort eingeben..." required autocomplete="off" />
                         </div>
 
                         <div id="entry-pass-error" class="mb-3 hidden" style="color: #ef4444; font-size: 0.85rem; font-weight: 600;"></div>
 
-                        <button type="submit" class="btn btn-emerald btn-glow w-100" style="padding: 0.75rem; font-weight: 800; font-size: 0.95rem;">
-                            🔓 Anmelden & Vorstands-Zentrale Freischalten
+                        <button type="submit" class="btn btn-emerald btn-glow w-100 entry-lock-btn">
+                            🔒 Anmelden
                         </button>
                     </form>
 
-                    <small class="text-muted d-block mt-3" style="font-size: 0.78rem;">
+                    <small class="text-muted d-block mt-3" style="font-size: 0.75rem;">
                         🛡️ Geschützte Vereinsinstanz der Landjugend Scheuring
                     </small>
                 </div>
