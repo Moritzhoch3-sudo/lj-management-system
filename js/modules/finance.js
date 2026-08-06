@@ -57,44 +57,50 @@ export class FinanceModule {
 
                     <!-- DIRECT INLINE QUICK-ADD FORM AT TOP OF TABLE BOX -->
                     <div class="card-inline-add-bar mb-3 p-3" style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px;">
-                        <h4 class="mb-2" style="font-size: 0.95rem; color: #34d399;">➕ Neue Buchung / Ausgabe direkt hier erfassen:</h4>
+                        <h4 class="mb-3" style="font-size: 1rem; color: #34d399; font-weight: 700;">➕ Neue Buchung / Ausgabe erfassen:</h4>
                         <form id="inline-finance-add-form">
-                            <div class="row g-2">
-                                <div class="col-12 col-md-2">
-                                    <label class="form-label small mb-1">Datum</label>
-                                    <input type="date" id="add-fin-date" class="form-control form-control-sm" value="${new Date().toISOString().slice(0,10)}" required />
+                            <div class="row g-2 mb-2">
+                                <div class="col-12 col-sm-4 col-md-3">
+                                    <label class="form-label small font-bold text-muted mb-1">📅 Datum *</label>
+                                    <input type="date" id="add-fin-date" class="form-control form-control-sm" value="${new Date().toISOString().slice(0,10)}" required style="font-size: 15px;" />
                                 </div>
-                                <div class="col-12 col-md-3">
-                                    <label class="form-label small mb-1">Verwendungszweck / Titel *</label>
-                                    <input type="text" id="add-fin-title" class="form-control form-control-sm" placeholder="z. B. Getränkeeinkauf Brauerei" required />
+                                <div class="col-12 col-sm-8 col-md-9">
+                                    <label class="form-label small font-bold text-muted mb-1">📝 Verwendungszweck / Titel *</label>
+                                    <input type="text" id="add-fin-title" class="form-control form-control-sm" placeholder="z. B. Getränkeeinkauf Brauerei" required style="font-size: 15px;" />
                                 </div>
-                                <div class="col-6 col-md-2">
-                                    <label class="form-label small mb-1">Typ</label>
-                                    <select id="add-fin-type" class="form-select form-select-sm">
+                            </div>
+
+                            <div class="row g-2 mb-2">
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label small font-bold text-muted mb-1">📊 Typ *</label>
+                                    <select id="add-fin-type" class="form-select form-select-sm" style="font-size: 15px;">
                                         <option value="ausgabe" selected>📉 Ausgabe (-)</option>
                                         <option value="einnahme">📈 Einnahme (+)</option>
                                     </select>
                                 </div>
-                                <div class="col-6 col-md-2">
-                                    <label class="form-label small mb-1">Betrag (€) *</label>
-                                    <input type="number" step="0.01" id="add-fin-amount" class="form-control form-control-sm" placeholder="0.00" required />
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label small font-bold text-muted mb-1">💶 Betrag (€) *</label>
+                                    <input type="number" step="0.01" id="add-fin-amount" class="form-control form-control-sm" placeholder="0.00" required style="font-size: 15px;" />
                                 </div>
-                                <div class="col-12 col-md-3">
-                                    <label class="form-label small mb-1">Kategorie</label>
-                                    <input type="text" id="add-fin-category" class="form-control form-control-sm" placeholder="Feste, Equipment..." />
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label small font-bold text-muted mb-1">🏷️ Kategorie</label>
+                                    <input type="text" id="add-fin-category" class="form-control form-control-sm" placeholder="z. B. Feste, Equipment..." style="font-size: 15px;" />
                                 </div>
                             </div>
-                            <div class="row g-2 mt-1 align-items-end">
+
+                            <div class="row g-2 align-items-end">
                                 <div class="col-12 col-md-4">
-                                    <label class="form-label small mb-1">Beleg-Nr. / Quittung</label>
-                                    <input type="text" id="add-fin-receipt" class="form-control form-control-sm" placeholder="BELEG-2026-..." />
+                                    <label class="form-label small font-bold text-muted mb-1">🧾 Beleg-Nr. / Quittung</label>
+                                    <input type="text" id="add-fin-receipt" class="form-control form-control-sm" placeholder="BELEG-2026-..." style="font-size: 15px;" />
                                 </div>
                                 <div class="col-12 col-md-5">
-                                    <label class="form-label small mb-1">Notizen / Details</label>
-                                    <input type="text" id="add-fin-notes" class="form-control form-control-sm" placeholder="Anmerkungen..." />
+                                    <label class="form-label small font-bold text-muted mb-1">💬 Notizen / Details</label>
+                                    <input type="text" id="add-fin-notes" class="form-control form-control-sm" placeholder="Anmerkungen..." style="font-size: 15px;" />
                                 </div>
                                 <div class="col-12 col-md-3 text-end">
-                                    <button type="submit" class="btn btn-sm btn-emerald w-100 mt-2 mt-md-0" style="padding: 0.5rem; font-weight: bold;">➕ Buchung Speichern</button>
+                                    <button type="submit" class="btn btn-emerald w-100 mt-2 mt-md-0" style="padding: 0.55rem; font-weight: 700; font-size: 0.9rem;">
+                                        ➕ Buchung Speichern
+                                    </button>
                                 </div>
                             </div>
                         </form>

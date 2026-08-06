@@ -568,9 +568,11 @@
 
     /* Table Container & Transformation for Mobile Cards */
     .table-responsive {
-        overflow-x: visible !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
         width: 100% !important;
-        min-width: 0 !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     .clean-tasks-table {

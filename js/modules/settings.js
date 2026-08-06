@@ -43,16 +43,17 @@ export class SettingsModule {
                 <!-- Section 1: Members Management (Public) -->
                 <div class="settings-section-view" id="view-members" style="display: block;">
                     <div class="card-glow mb-4 p-3">
-                        <div class="toolbar-row mb-2 d-flex justify-content-between align-items-center">
+                        <div class="toolbar-row mb-3 d-flex justify-content-between align-items-center">
                             <h3 class="mb-0" style="font-size: 1.15rem; color: #fff;">👥 Vorstandsmitglieder (${members.length} Personen)</h3>
                             <button class="btn btn-primary btn-sm" id="add-member-btn">➕ Neues Mitglied</button>
                         </div>
 
-                        <div class="table-responsive mt-2">
+                        <!-- DESKTOP TABLE VIEW -->
+                        <div class="table-responsive mt-2 d-none d-md-block">
                             <table class="settings-table inline-edit-table w-100">
                                 <thead>
                                     <tr>
-                                        <th style="width: 55px;">Avatar</th>
+                                        <th style="width: 60px;">Avatar</th>
                                         <th>Name des Mitglieds</th>
                                         <th>Vorstandsposition / Amt</th>
                                         <th style="width: 90px;">Kennfarbe</th>
@@ -61,15 +62,15 @@ export class SettingsModule {
                                 </thead>
                                 <tbody id="members-table-body">
                                     ${members.map(m => `
-                                        <tr data-member-id="${m.id}">
+                                        <tr class="member-settings-item" data-member-id="${m.id}">
                                             <td>
-                                                <input type="text" class="form-control form-control-sm m-avatar" value="${m.avatar}" style="width: 42px; text-align: center;" />
+                                                <input type="text" class="form-control form-control-sm m-avatar" value="${m.avatar}" style="width: 42px; text-align: center; font-size: 1.1rem;" />
                                             </td>
                                             <td>
-                                                <input type="text" class="form-control form-control-sm m-name" value="${escapeHTML(m.name)}" placeholder="Name..." />
+                                                <input type="text" class="form-control form-control-sm m-name" value="${escapeHTML(m.name)}" placeholder="Name..." style="font-size: 15px; font-weight: 600;" />
                                             </td>
                                             <td>
-                                                <select class="form-select form-select-sm m-role">
+                                                <select class="form-select form-select-sm m-role" style="font-size: 14px;">
                                                     ${BOARD_ROLE_OPTIONS.map(r => `
                                                         <option value="${r}" ${m.role.startsWith(r) || m.role.includes(r) ? 'selected' : ''}>${r}</option>
                                                     `).join('')}
@@ -77,7 +78,7 @@ export class SettingsModule {
                                                 </select>
                                             </td>
                                             <td>
-                                                <input type="color" class="form-control form-control-sm m-color" value="${m.color}" style="height: 32px; cursor: pointer;" />
+                                                <input type="color" class="form-control form-control-sm m-color" value="${m.color}" style="height: 34px; cursor: pointer;" />
                                             </td>
                                             <td>
                                                 <button class="btn btn-sm btn-ghost danger-text delete-m-btn" data-id="${m.id}" title="Löschen">🗑️</button>
@@ -87,18 +88,41 @@ export class SettingsModule {
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- MOBILE CARDS VIEW -->
+                        <div class="members-mobile-list d-block d-md-none mt-2">
+                            ${members.map(m => `
+                                <div class="card-glow mb-3 p-3 member-settings-item" data-member-id="${m.id}" style="border-left: 4px solid ${m.color}; background: rgba(0,0,0,0.35); border-radius: 10px;">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <input type="text" class="form-control m-avatar" value="${m.avatar}" style="width: 48px; text-align: center; font-size: 1.25rem; font-weight: bold; background: rgba(0,0,0,0.4);" />
+                                        <input type="text" class="form-control m-name" value="${escapeHTML(m.name)}" placeholder="Name des Mitglieds..." style="font-size: 16px; font-weight: 700; color: #fff; background: rgba(0,0,0,0.4); flex: 1;" />
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <select class="form-select m-role" style="font-size: 15px; background: rgba(0,0,0,0.4); flex: 1;">
+                                            ${BOARD_ROLE_OPTIONS.map(r => `
+                                                <option value="${r}" ${m.role.startsWith(r) || m.role.includes(r) ? 'selected' : ''}>${r}</option>
+                                            `).join('')}
+                                            <option value="${escapeHTML(m.role)}" ${!BOARD_ROLE_OPTIONS.some(r => m.role.startsWith(r)) ? 'selected' : ''}>Sonstiges (${escapeHTML(m.role)})</option>
+                                        </select>
+                                        <input type="color" class="form-control m-color" value="${m.color}" style="width: 44px; height: 38px; cursor: pointer; padding: 2px;" title="Kennfarbe" />
+                                        <button class="btn btn-ghost danger-text delete-m-btn p-2" data-id="${m.id}" title="Löschen" style="font-size: 1.1rem;">🗑️</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
 
                 <!-- Section 2: Categories Management (Public) -->
                 <div class="settings-section-view" id="view-categories" style="display: none;">
                     <div class="card-glow mb-4 p-3">
-                        <div class="toolbar-row mb-2 d-flex justify-content-between align-items-center">
+                        <div class="toolbar-row mb-3 d-flex justify-content-between align-items-center">
                             <h3 class="mb-0" style="font-size: 1.15rem; color: #fff;">🏷️ Aufgaben-Kategorien (${categories.length})</h3>
                             <button class="btn btn-primary btn-sm" id="add-cat-btn">➕ Neue Kategorie</button>
                         </div>
 
-                        <div class="table-responsive mt-2">
+                        <!-- DESKTOP TABLE VIEW -->
+                        <div class="table-responsive mt-2 d-none d-md-block">
                             <table class="settings-table inline-edit-table w-100">
                                 <thead>
                                     <tr>
@@ -109,12 +133,12 @@ export class SettingsModule {
                                 </thead>
                                 <tbody id="categories-table-body">
                                     ${categories.map(c => `
-                                        <tr data-cat-id="${c.id}">
+                                        <tr class="cat-settings-item" data-cat-id="${c.id}">
                                             <td>
                                                 <input type="text" class="form-control form-control-sm c-icon" value="${c.icon}" style="width: 48px; text-align: center; font-size: 1.1rem;" />
                                             </td>
                                             <td>
-                                                <input type="text" class="form-control form-control-sm c-name" value="${escapeHTML(c.name)}" placeholder="Kategorie Name..." />
+                                                <input type="text" class="form-control form-control-sm c-name" value="${escapeHTML(c.name)}" placeholder="Kategorie Name..." style="font-size: 15px;" />
                                             </td>
                                             <td>
                                                 <button class="btn btn-sm btn-ghost danger-text delete-c-btn" data-id="${c.id}" title="Löschen">🗑️</button>
@@ -123,6 +147,17 @@ export class SettingsModule {
                                     `).join('')}
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- MOBILE CARDS VIEW -->
+                        <div class="categories-mobile-list d-block d-md-none mt-2">
+                            ${categories.map(c => `
+                                <div class="card-glow mb-2 p-2.5 cat-settings-item d-flex align-items-center gap-2" data-cat-id="${c.id}" style="background: rgba(0,0,0,0.35); border-radius: 8px;">
+                                    <input type="text" class="form-control c-icon" value="${c.icon}" style="width: 50px; text-align: center; font-size: 1.25rem; background: rgba(0,0,0,0.4);" />
+                                    <input type="text" class="form-control c-name" value="${escapeHTML(c.name)}" placeholder="Kategorie Name..." style="font-size: 16px; font-weight: 700; color: #fff; background: rgba(0,0,0,0.4); flex: 1;" />
+                                    <button class="btn btn-ghost danger-text delete-c-btn p-2" data-id="${c.id}" title="Löschen" style="font-size: 1.1rem;">🗑️</button>
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
                 </div>
@@ -284,7 +319,11 @@ export class SettingsModule {
 
         // Save Members State
         const saveMembers = () => {
-            const rows = containerEl.querySelectorAll('#members-table-body tr');
+            const visibleContainer = window.innerWidth >= 768 
+                ? containerEl.querySelector('#members-table-body') 
+                : containerEl.querySelector('.members-mobile-list');
+            
+            const rows = (visibleContainer || containerEl).querySelectorAll('.member-settings-item');
             const updated = [];
             rows.forEach(row => {
                 const id = row.dataset.memberId;
@@ -298,7 +337,7 @@ export class SettingsModule {
             if (onMembersUpdatedCallback) onMembersUpdatedCallback();
         };
 
-        containerEl.querySelectorAll('#members-table-body input, #members-table-body select').forEach(el => {
+        containerEl.querySelectorAll('.member-settings-item input, .member-settings-item select').forEach(el => {
             el.addEventListener('change', saveMembers);
         });
 
@@ -333,7 +372,11 @@ export class SettingsModule {
 
         // Save Categories State
         const saveCategories = () => {
-            const rows = containerEl.querySelectorAll('#categories-table-body tr');
+            const visibleContainer = window.innerWidth >= 768 
+                ? containerEl.querySelector('#categories-table-body') 
+                : containerEl.querySelector('.categories-mobile-list');
+
+            const rows = (visibleContainer || containerEl).querySelectorAll('.cat-settings-item');
             const updated = [];
             rows.forEach(row => {
                 const id = row.dataset.catId;
@@ -344,7 +387,7 @@ export class SettingsModule {
             StorageEngine.saveCategories(updated);
         };
 
-        containerEl.querySelectorAll('#categories-table-body input').forEach(el => {
+        containerEl.querySelectorAll('.cat-settings-item input').forEach(el => {
             el.addEventListener('change', saveCategories);
         });
 
