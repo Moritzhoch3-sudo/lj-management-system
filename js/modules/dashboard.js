@@ -107,17 +107,17 @@ export class DashboardModule {
                 <div class="members-grid">
                     ${memberStats.map(m => `
                         <div class="member-card card-glow hover-highlight-card" data-member-id="${m.id}"
-                             style="background: ${m.bgLight || 'rgba(255,255,255,0.04)'}; border-color: ${m.color}66; border-left: 4px solid ${m.color}; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);">
+                             style="background: #ffffff; border: 1px solid #e2e8f0; border-left: 5px solid ${m.color}; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);">
                             
                             <div class="member-card-header">
-                                <div class="member-avatar" style="border-color: ${m.color}; background: rgba(0,0,0,0.3)">
+                                <div class="member-avatar" style="border-color: ${m.color}66; background: ${m.color}15; color: ${m.color}; font-weight: bold;">
                                     ${m.avatar}
                                 </div>
                                 <div class="member-details">
-                                    <h4 class="member-name">${escapeHTML(m.name)}</h4>
-                                    <span class="member-role" style="color: ${m.color}">${escapeHTML(m.role)}</span>
+                                    <h4 class="member-name" style="color: #0f172a;">${escapeHTML(m.name)}</h4>
+                                    <span class="member-role" style="color: ${m.color}; font-weight: 700;">${escapeHTML(m.role)}</span>
                                 </div>
-                                <div class="member-percent-badge" style="background: ${m.color}33; color: ${m.color}; border: 1px solid ${m.color}">
+                                <div class="member-percent-badge" style="background: ${m.color}18; color: ${m.color}; border: 1px solid ${m.color}40; font-weight: 800;">
                                     ${m.percentage}%
                                 </div>
                             </div>

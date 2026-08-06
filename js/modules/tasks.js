@@ -116,31 +116,31 @@ export class TasksModule {
                     const percent = memberTasks.length > 0 ? Math.round((completedCount / memberTasks.length) * 100) : 0;
 
                     return `
-                        <div class="card-glow person-tasks-section mb-4" 
-                             style="border-left: 5px solid ${m.color}; background: ${m.bgLight || 'rgba(255,255,255,0.03)'}">
+                        <div class="card-glow person-tasks-section mb-3.5 p-3" 
+                             style="border-left: 5px solid ${m.color}; background: #ffffff; border: 1px solid #e2e8f0;">
                             
                             <!-- Person Header -->
-                            <div class="person-tasks-header">
-                                <div class="person-title-block">
-                                    <span class="member-avatar" style="border-color: ${m.color}">${m.avatar}</span>
+                            <div class="person-tasks-header d-flex align-items-center justify-content-between">
+                                <div class="person-title-block d-flex align-items-center gap-2">
+                                    <span class="member-avatar" style="border-color: ${m.color}66; background: ${m.color}15; color: ${m.color}; width: 36px; height: 36px; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1.5px solid ${m.color}40;">${m.avatar}</span>
                                     <div>
-                                        <h3 class="person-name" style="color: #fff">${escapeHTML(m.name)}</h3>
-                                        <span class="person-role" style="color: ${m.color}">${escapeHTML(m.role)}</span>
+                                        <h3 class="person-name m-0" style="color: #0f172a; font-size: 1rem; font-weight: 800;">${escapeHTML(m.name)}</h3>
+                                        <span class="person-role" style="color: ${m.color}; font-weight: 700; font-size: 0.78rem;">${escapeHTML(m.role)}</span>
                                     </div>
                                 </div>
 
-                                <div class="person-stats-badge" style="background: rgba(0,0,0,0.4); border: 1px solid ${m.color}">
-                                    <span style="color: ${m.color}">${completedCount} von ${memberTasks.length} erledigt (${percent}%)</span>
+                                <div class="person-stats-badge" style="background: ${m.color}15; border: 1px solid ${m.color}35; padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">
+                                    <span style="color: ${m.color}">${completedCount} / ${memberTasks.length} erledigt (${percent}%)</span>
                                 </div>
                             </div>
 
                             <!-- DIRECT INLINE QUICK-ADD INPUT ROW INSIDE THE CARD -->
-                            <div class="card-inline-add-bar mt-3 mb-2" style="background: rgba(0,0,0,0.25); border: 1px solid ${m.color}55; border-radius: 8px; padding: 0.6rem;">
+                            <div class="card-inline-add-bar mt-2.5 mb-2" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 0.45rem;">
                                 <form class="inline-quick-add-form d-flex align-items-center gap-2" data-member-id="${m.id}">
-                                    <input type="text" class="form-control form-control-sm quick-task-title-input" placeholder="➕ Neue Aufgabe direkt für ${escapeHTML(m.name.split(' ')[0])} eingeben..." required />
+                                    <input type="text" class="form-control form-control-sm quick-task-title-input" placeholder="➕ Neue Aufgabe direkt für ${escapeHTML(m.name.split(' ')[0])} eingeben..." required style="font-size: 0.84rem; padding: 0.35rem 0.6rem;" />
                                     
-                                    <select class="form-select form-select-sm quick-task-cat-select" style="max-width: 160px;">
-                                        <option value="" ${!lastCat ? 'selected' : ''} ${!lastCat ? 'disabled' : ''}>-- Kategorie wählen --</option>
+                                    <select class="form-select form-select-sm quick-task-cat-select" style="max-width: 150px; font-size: 0.82rem;">
+                                        <option value="" ${!lastCat ? 'selected' : ''} ${!lastCat ? 'disabled' : ''}>-- Kategorie --</option>
                                         ${categories.map(c => `
                                             <option value="${c.id}" ${lastCat === c.id ? 'selected' : ''}>
                                                 ${c.icon} ${c.name}
@@ -148,32 +148,32 @@ export class TasksModule {
                                         `).join('')}
                                     </select>
 
-                                    <select class="form-select form-select-sm quick-task-prio-select" style="max-width: 100px;">
+                                    <select class="form-select form-select-sm quick-task-prio-select" style="max-width: 95px; font-size: 0.82rem;">
                                         <option value="hoch">🔴 Hoch</option>
                                         <option value="mittel" selected>🟡 Mittel</option>
                                         <option value="niedrig">🟢 Niedrig</option>
                                     </select>
 
-                                    <input type="date" class="form-control form-control-sm quick-task-date-input" style="max-width: 130px;" />
+                                    <input type="date" class="form-control form-control-sm quick-task-date-input" style="max-width: 125px; font-size: 0.82rem;" />
 
-                                    <button type="submit" class="btn btn-sm btn-emerald text-nowrap">➕ Hinzufügen</button>
+                                    <button type="submit" class="btn btn-sm btn-emerald text-nowrap" style="padding: 0.35rem 0.65rem; font-size: 0.82rem;">➕ Hinzufügen</button>
                                 </form>
                             </div>
 
-                            <!-- Structured Clean Table for Tasks -->
+                            <!-- Structured Ultra-Compact Clean Table for Tasks (1 to 2 Lines Max) -->
                             ${memberTasks.length === 0 ? `
-                                <div class="empty-person-tasks text-muted p-2">Keine aktuellen Aufgaben für ${escapeHTML(m.name)}. Tippe oben im Feld, um direkt eine hinzuzufügen.</div>
+                                <div class="empty-person-tasks text-muted p-2" style="font-size: 0.82rem;">Keine aktuellen Aufgaben für ${escapeHTML(m.name)}.</div>
                             ` : `
-                                <div class="table-responsive mt-2">
-                                    <table class="clean-tasks-table">
+                                <div class="table-responsive mt-1.5">
+                                    <table class="clean-tasks-table compact-tasks-table w-100">
                                         <thead>
                                             <tr>
-                                                <th style="width: 150px;">Status</th>
-                                                <th>Aufgabe & Notizen</th>
-                                                <th>Kategorie</th>
-                                                <th style="width: 100px;">Priorität</th>
-                                                <th style="width: 150px;">Fälligkeitsdatum</th>
-                                                <th style="width: 130px;">Aktionen</th>
+                                                <th style="width: 135px;">Status</th>
+                                                <th>Aufgabe & Details</th>
+                                                <th style="width: 140px;">Kategorie</th>
+                                                <th style="width: 85px;">Priorität</th>
+                                                <th style="width: 130px;">Fälligkeit</th>
+                                                <th style="width: 80px; text-align: right;">Aktionen</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -184,38 +184,38 @@ export class TasksModule {
                                                 const canEdit = StorageEngine.canUserEditTask(t, currentUserId);
 
                                                 return `
-                                                    <tr class="task-table-row status-${t.status}">
-                                                        <td>
-                                                            <select class="status-quick-select form-select form-select-sm" data-task-id="${t.id}" ${canEdit ? '' : 'disabled title="🔒 Nur vom Inhaber oder Admin (Moritz Kubik) bearbeitbar"'}>
+                                                    <tr class="task-table-row compact-row status-${t.status}">
+                                                        <td style="padding: 0.35rem 0.5rem;">
+                                                            <select class="status-quick-select form-select form-select-sm" data-task-id="${t.id}" ${canEdit ? '' : 'disabled title="🔒 Nur vom Inhaber oder Admin bearbeitbar"'} style="font-size: 0.78rem; padding: 0.2rem 0.4rem;">
                                                                 <option value="offen" ${t.status === 'offen' ? 'selected' : ''}>📋 Offen</option>
-                                                                <option value="in_bearbeitung" ${t.status === 'in_bearbeitung' ? 'selected' : ''}>🔄 In Bearbeitung</option>
+                                                                <option value="in_bearbeitung" ${t.status === 'in_bearbeitung' ? 'selected' : ''}>🔄 Bearbeitung</option>
                                                                 <option value="erledigt" ${t.status === 'erledigt' ? 'selected' : ''}>✅ Erledigt</option>
                                                             </select>
                                                         </td>
-                                                        <td>
+                                                        <td style="padding: 0.35rem 0.5rem;">
                                                             <div class="task-info-block ${t.status === 'erledigt' ? 'completed-text' : ''}">
-                                                                <span class="task-title-text font-bold" style="font-weight: 600;">${escapeHTML(t.title)}</span>
-                                                                ${t.description ? `<div class="task-note-text text-muted" style="font-size: 0.83rem; margin-top: 2px;">📝 ${escapeHTML(t.description)}</div>` : ''}
+                                                                <span class="task-title-text" style="font-weight: 700; font-size: 0.88rem; color: #0f172a;">${escapeHTML(t.title)}</span>
+                                                                ${t.description ? `<span class="task-note-text text-muted" style="font-size: 0.76rem; display: block; margin-top: 1px;">📝 ${escapeHTML(t.description)}</span>` : ''}
                                                             </div>
                                                         </td>
-                                                        <td>
-                                                            <span class="category-badge">${cat.icon} ${cat.name}</span>
+                                                        <td style="padding: 0.35rem 0.5rem;">
+                                                            <span class="category-badge" style="font-size: 0.78rem; padding: 0.15rem 0.4rem;">${cat.icon} ${cat.name}</span>
                                                         </td>
-                                                        <td>
-                                                            <span class="prio-badge prio-${t.priority}">${t.priority.toUpperCase()}</span>
+                                                        <td style="padding: 0.35rem 0.5rem;">
+                                                            <span class="prio-badge prio-${t.priority}" style="font-size: 0.72rem; padding: 0.15rem 0.35rem;">${t.priority.toUpperCase()}</span>
                                                         </td>
-                                                        <td>
-                                                            <span class="due-date-badge ${urgency.cssClass}">
-                                                                ${urgency.icon} ${t.dueDate || 'Keins'}
+                                                        <td style="padding: 0.35rem 0.5rem;">
+                                                            <span class="due-date-badge ${urgency.cssClass}" style="font-size: 0.78rem; padding: 0.15rem 0.4rem;">
+                                                                ${urgency.icon} ${t.dueDate || '-'}
                                                             </span>
                                                         </td>
-                                                        <td>
-                                                            <div class="d-flex align-items-center gap-1">
+                                                        <td style="padding: 0.35rem 0.5rem; text-align: right;">
+                                                            <div class="d-flex align-items-center justify-content-end gap-1">
                                                                 ${canEdit ? `
-                                                                    <button class="btn btn-sm btn-ghost toggle-inline-edit-btn" data-task-id="${t.id}" title="Notiz / Bearbeiten" style="padding: 0.2rem 0.4rem; font-size: 0.82rem;">✏️</button>
-                                                                    <button class="btn btn-sm btn-ghost danger-text delete-task-btn" data-task-id="${t.id}" title="Löschen" style="padding: 0.2rem 0.4rem; font-size: 0.82rem;">🗑️</button>
+                                                                    <button class="btn btn-sm btn-ghost toggle-inline-edit-btn" data-task-id="${t.id}" title="Bearbeiten" style="padding: 0.15rem 0.35rem; font-size: 0.8rem;">✏️</button>
+                                                                    <button class="btn btn-sm btn-ghost danger-text delete-task-btn" data-task-id="${t.id}" title="Löschen" style="padding: 0.15rem 0.35rem; font-size: 0.8rem;">🗑️</button>
                                                                 ` : `
-                                                                    <span class="small text-muted" title="🔒 Nur vom Inhaber bearbeitbar">🔒 Schreibgeschützt</span>
+                                                                    <span class="small text-muted" title="🔒 Schreibgeschützt">🔒</span>
                                                                 `}
                                                             </div>
                                                         </td>

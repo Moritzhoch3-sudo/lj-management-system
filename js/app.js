@@ -102,40 +102,15 @@ class App {
         };
 
         modal.innerHTML = `
-            <div class="modal-card nav-drawer-card" style="max-width: 440px; width: 95vw; padding: 0;">
-                <div class="modal-header d-flex align-items-center justify-content-between p-3" style="border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
-                    <div class="d-flex align-items-center gap-2">
-                        <img src="assets/logo_white.png" style="width: 24px; height: 24px; object-fit: contain; filter: invert(1);" />
-                        <h3 style="font-size: 1.05rem; color: #0f172a; margin: 0; font-weight: 800;">Navigation & Menü</h3>
-                    </div>
-                    <button class="btn btn-ghost modal-close modal-close-x" style="font-size: 1.4rem; line-height: 1; padding: 0.15rem 0.5rem;">&times;</button>
+            <div class="modal-card nav-drawer-card" style="max-width: 360px; width: 90vw; padding: 0;">
+                <div class="modal-header d-flex align-items-center justify-content-between p-2.5" style="border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
+                    <h3 style="font-size: 1rem; color: #0f172a; margin: 0; font-weight: 800;">Navigation</h3>
+                    <button class="btn btn-ghost modal-close modal-close-x" style="font-size: 1.4rem; line-height: 1; padding: 0.1rem 0.5rem;">&times;</button>
                 </div>
 
-                <div class="modal-body p-3" style="max-height: 80vh; overflow-y: auto;">
-                    <!-- User Profile & Switcher Box -->
-                    <div class="p-2.5 mb-3 rounded d-flex align-items-center justify-content-between gap-2" style="background: #f8fafc; border: 1px solid #e2e8f0;">
-                        <div class="d-flex align-items-center gap-2">
-                            <span style="font-size: 1.3rem; background: #ffffff; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid ${currentUser.color || '#00873D'};">
-                                ${currentUser.avatar}
-                            </span>
-                            <div>
-                                <strong style="color: #0f172a; display: block; font-size: 0.88rem;">${escapeHTML(currentUser.name)}</strong>
-                                <small style="color: #00873D; font-weight: 700;">${escapeHTML(currentUser.role)}</small>
-                            </div>
-                        </div>
-
-                        <select id="drawer-user-select" class="form-select form-select-sm" style="max-width: 140px; font-size: 0.8rem; font-weight: 600;">
-                            ${members.map(m => `
-                                <option value="${m.id}" ${m.id === currentUserId ? 'selected' : ''}>
-                                    ${m.avatar} ${escapeHTML(m.name)}
-                                </option>
-                            `).join('')}
-                        </select>
-                    </div>
-
-                    <!-- Single-Line Navigation Items List (Compact & Sleek) -->
-                    <h5 style="font-size: 0.78rem; color: #64748b; margin-bottom: 0.4rem; font-weight: 700; text-transform: uppercase;">📌 SEITE WÄHLEN:</h5>
-                    <div class="drawer-nav-list d-flex flex-column gap-1 mb-3">
+                <div class="modal-body p-2.5" style="max-height: 75vh; overflow-y: auto;">
+                    <!-- Single-Line Navigation Items List -->
+                    <div class="drawer-nav-list d-flex flex-column gap-1">
                         ${tabItems.map(item => {
                             if (item.protected && !isVaultAuthorized) return '';
                             if (item.adminOnly && !isAdmin) return '';
@@ -151,25 +126,11 @@ class App {
                             `;
                         }).join('')}
                     </div>
-
-                    <!-- Side-by-Side Export & Backup Actions -->
-                    <h5 style="font-size: 0.78rem; color: #64748b; margin-bottom: 0.4rem; font-weight: 700; text-transform: uppercase; border-top: 1px solid #e2e8f0; padding-top: 0.6rem;">💾 DATEN & EXPORT:</h5>
-                    <div class="drawer-action-pair d-flex gap-2">
-                        <button class="btn btn-sm btn-ghost text-nowrap flex-1 w-50 p-2 font-bold" id="drawer-import-backup-btn" style="font-size: 0.82rem;">
-                            💾 Sicherung
-                        </button>
-                        <button class="btn btn-sm btn-emerald text-nowrap flex-1 w-50 p-2 font-bold" id="drawer-export-excel-btn" style="font-size: 0.82rem;">
-                            📊 Excel Export
-                        </button>
-                    </div>
                 </div>
 
-                <div class="modal-footer p-2.5 d-flex align-items-center justify-content-between" style="border-top: 1px solid #e2e8f0; background: #f8fafc;">
-                    <button class="btn btn-sm btn-ghost danger-text font-bold" id="drawer-logout-btn" style="font-size: 0.82rem;">
+                <div class="modal-footer p-2 d-flex align-items-center justify-content-end" style="border-top: 1px solid #e2e8f0; background: #f8fafc;">
+                    <button class="btn btn-sm btn-ghost danger-text font-bold w-100" id="drawer-logout-btn" style="font-size: 0.85rem; padding: 0.4rem;">
                         🚪 Abmelden
-                    </button>
-                    <button class="btn btn-sm btn-secondary modal-close p-1.5 font-bold" style="font-size: 0.82rem;">
-                        ✖️ Schließen
                     </button>
                 </div>
             </div>
@@ -189,17 +150,6 @@ class App {
                 closeModal();
                 this.handleTabClick(targetTab);
             });
-        });
-
-        // Bind Backup & Excel Export inside drawer
-        modal.querySelector('#drawer-import-backup-btn')?.addEventListener('click', () => {
-            closeModal();
-            this.openBackupModal();
-        });
-
-        modal.querySelector('#drawer-export-excel-btn')?.addEventListener('click', () => {
-            closeModal();
-            StorageEngine.exportExcelDashboard();
         });
 
         // Logout action

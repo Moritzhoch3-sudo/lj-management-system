@@ -339,6 +339,7 @@ export class SettingsModule {
 
         containerEl.querySelectorAll('.member-settings-item input, .member-settings-item select').forEach(el => {
             el.addEventListener('change', saveMembers);
+            el.addEventListener('input', saveMembers);
         });
 
         // Add Member
@@ -389,6 +390,7 @@ export class SettingsModule {
 
         containerEl.querySelectorAll('.cat-settings-item input').forEach(el => {
             el.addEventListener('change', saveCategories);
+            el.addEventListener('input', saveCategories);
         });
 
         // Add Category
