@@ -412,15 +412,16 @@ class App {
 
         setTimeout(() => curPassInput?.focus(), 50);
 
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const curVal = curPassInput.value.trim();
             const newVal = newPassInput.value.trim();
             const confirmVal = confirmPassInput.value.trim();
 
-            const actualPass = StorageEngine.getMemberPassword(currentUserId);
+            const actualPassHash = StorageEngine.getMemberPassword(currentUserId);
+            const hashedCurVal = await StorageEngine.hashPassword(curVal);
 
-            if (curVal !== actualPass) {
+            if (actualPassHash && hashedCurVal !== actualPassHash) {
                 msgEl.className = 'mb-3 small font-bold text-center text-danger';
                 msgEl.textContent = '⚠️ Das aktuelle Passwort ist falsch!';
                 curPassInput.classList.add('shake');
@@ -440,9 +441,11 @@ class App {
                 return;
             }
 
-            StorageEngine.setMemberPassword(currentUserId, newVal);
+            await StorageEngine.setMemberPassword(currentUserId, newVal);
+            CloudStorageEngine.pushAllToCloud();
+
             msgEl.className = 'mb-3 small font-bold text-center text-success';
-            msgEl.textContent = '✅ Dein Passwort wurde erfolgreich geändert! Das alte Passwort ist ab sofort ungültig.';
+            msgEl.textContent = '✅ Dein Passwort wurde erfolgreich geändert! Das neue Passwort ist ab sofort aktiv.';
             curPassInput.value = '';
             newPassInput.value = '';
             confirmPassInput.value = '';
