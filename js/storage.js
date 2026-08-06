@@ -18,9 +18,9 @@ export function escapeHTML(str) {
 const STORAGE_KEYS = {
     MEMBERS: 'lj_members_v10_final',
     CATEGORIES: 'lj_categories_v1',
-    TASKS: 'lj_tasks_v4_live',
-    FINANCES: 'lj_finances_v4_live',
-    CONTRACTS: 'lj_contracts_v4_live',
+    TASKS: 'lj_tasks_v3_12',
+    FINANCES: 'lj_finances_v1',
+    CONTRACTS: 'lj_contracts_v1',
     MINUTES: 'lj_minutes_v2',
     PIN_HASH: 'lj_vault_pin_hash_v3',
     CURRENT_USER: 'lj_current_user_v1',
@@ -66,7 +66,29 @@ export class StorageEngine {
 
     static getTasks() {
         const raw = localStorage.getItem(STORAGE_KEYS.TASKS);
-        return raw ? JSON.parse(raw) : INITIAL_TASKS;
+        if (raw) {
+            try {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+            } catch (e) {}
+        }
+
+        // Auto-fallback migration for any previous key versions
+        const fallbackKeys = ['lj_tasks_v4_live', 'lj_tasks_v3_11', 'lj_tasks_v3'];
+        for (const k of fallbackKeys) {
+            const fallbackRaw = localStorage.getItem(k);
+            if (fallbackRaw) {
+                try {
+                    const parsed = JSON.parse(fallbackRaw);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        localStorage.setItem(STORAGE_KEYS.TASKS, fallbackRaw);
+                        return parsed;
+                    }
+                } catch (e) {}
+            }
+        }
+
+        return INITIAL_TASKS;
     }
 
     static saveTasks(tasks) {
