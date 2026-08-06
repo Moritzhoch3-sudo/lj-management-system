@@ -12,8 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
     
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/main.css?v=6.0">
-    <link rel="stylesheet" href="css/components.css?v=6.0">
+    <link rel="stylesheet" href="css/main.css?v=7.0">
+    <link rel="stylesheet" href="css/components.css?v=7.0">
 </head>
 <body>
     <!-- Streamlined App Header -->
@@ -31,17 +31,17 @@
                 </div>
             </div>
 
-            <!-- Header Right Actions: Side-by-side Buttons & Hamburger Menu -->
+            <!-- Header Right: Subtle Export Links + Prominent Hamburger Menu Button on far right -->
             <div class="header-right-actions d-flex align-items-center gap-2">
-                <!-- Side-by-side Action Buttons -->
-                <div class="action-buttons-pair d-none d-md-flex align-items-center gap-2">
-                    <button class="btn btn-sm btn-ghost text-nowrap" id="import-backup-btn" title="Daten sichern / wiederherstellen" style="font-size: 0.82rem; padding: 0.35rem 0.65rem;">💾 Sicherung</button>
-                    <button class="btn btn-sm btn-emerald text-nowrap" id="export-excel-btn" title="Dashboard als Excel exportieren" style="font-size: 0.82rem; padding: 0.35rem 0.65rem;">📊 Excel Export</button>
+                <!-- Discrete & Subtle Backup/Excel Links -->
+                <div class="action-buttons-subtle d-none d-md-flex align-items-center gap-2" style="opacity: 0.82;">
+                    <button class="btn btn-sm btn-subtle-header" id="import-backup-btn" title="Daten sichern / wiederherstellen">💾 Sicherung</button>
+                    <button class="btn btn-sm btn-subtle-header" id="export-excel-btn" title="Dashboard als Excel exportieren">📊 Excel</button>
                 </div>
 
-                <!-- Compact Hamburger Menu Button -->
-                <button class="btn btn-emerald btn-hamburger-menu d-flex align-items-center gap-1.5" id="open-nav-drawer-btn" title="Hauptmenü öffnen" style="padding: 0.4rem 0.8rem; font-size: 0.88rem; font-weight: 700;">
-                    <span class="hamburger-icon" style="font-size: 1.1rem; line-height: 1;">☰</span>
+                <!-- Prominent Hamburger Menu Button on Far Right -->
+                <button class="btn btn-emerald btn-hamburger-menu d-flex align-items-center gap-1.5" id="open-nav-drawer-btn" title="Hauptmenü öffnen" style="padding: 0.4rem 0.85rem; font-size: 0.88rem; font-weight: 700; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: #fff;">
+                    <span class="hamburger-icon" style="font-size: 1.15rem; line-height: 1;">☰</span>
                     <span class="menu-label">Menü</span>
                 </button>
             </div>

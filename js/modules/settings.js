@@ -25,17 +25,17 @@ export class SettingsModule {
                     </div>
                 </div>
 
-                <!-- Sub-Tabs Navigation -->
-                <div class="sub-tabs-bar mb-3 d-flex gap-2">
-                    <button class="sub-tab-btn active" id="tab-btn-members">
-                        👥 Vorstandsmitglieder (${members.length})
+                <!-- Sub-Tabs Navigation (Compact & Short Text) -->
+                <div class="sub-tabs-bar mb-3 d-flex gap-1.5 flex-wrap">
+                    <button class="sub-tab-btn active" id="tab-btn-members" style="font-size: 0.85rem; padding: 0.4rem 0.75rem;">
+                        👥 Mitglieder (${members.length})
                     </button>
-                    <button class="sub-tab-btn" id="tab-btn-categories">
+                    <button class="sub-tab-btn" id="tab-btn-categories" style="font-size: 0.85rem; padding: 0.4rem 0.75rem;">
                         🏷️ Kategorien (${categories.length})
                     </button>
                     ${isSuperAdmin ? `
-                        <button class="sub-tab-btn" id="tab-btn-pin">
-                            🔒 Server-Sicherheit, PIN & Passwörter (Admin)
+                        <button class="sub-tab-btn" id="tab-btn-pin" style="font-size: 0.85rem; padding: 0.4rem 0.75rem;">
+                            🔒 Admin-PIN
                         </button>
                     ` : ''}
                 </div>
@@ -44,68 +44,37 @@ export class SettingsModule {
                 <div class="settings-section-view" id="view-members" style="display: block;">
                     <div class="card-glow mb-4 p-3">
                         <div class="toolbar-row mb-3 d-flex justify-content-between align-items-center">
-                            <h3 class="mb-0" style="font-size: 1.15rem; color: #fff;">👥 Vorstandsmitglieder (${members.length} Personen)</h3>
-                            <button class="btn btn-primary btn-sm" id="add-member-btn">➕ Neues Mitglied</button>
+                            <h3 class="mb-0" style="font-size: 1.05rem; color: #0f172a;">👥 Vorstandsmitglieder (${members.length} Personen)</h3>
+                            <button class="btn btn-emerald btn-sm" id="add-member-btn" style="font-size: 0.82rem;">➕ Neues Mitglied</button>
                         </div>
 
-                        <!-- DESKTOP TABLE VIEW -->
-                        <div class="table-responsive mt-2 d-none d-md-block">
-                            <table class="settings-table inline-edit-table w-100">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 60px;">Avatar</th>
-                                        <th>Name des Mitglieds</th>
-                                        <th>Vorstandsposition / Amt</th>
-                                        <th style="width: 90px;">Kennfarbe</th>
-                                        <th style="width: 65px;">Aktion</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="members-table-body">
-                                    ${members.map(m => `
-                                        <tr class="member-settings-item" data-member-id="${m.id}">
-                                            <td>
-                                                <input type="text" class="form-control form-control-sm m-avatar" value="${m.avatar}" style="width: 42px; text-align: center; font-size: 1.1rem;" />
-                                            </td>
-                                            <td>
-                                                <input type="text" class="form-control form-control-sm m-name" value="${escapeHTML(m.name)}" placeholder="Name..." style="font-size: 15px; font-weight: 600;" />
-                                            </td>
-                                            <td>
-                                                <select class="form-select form-select-sm m-role" style="font-size: 14px;">
-                                                    ${BOARD_ROLE_OPTIONS.map(r => `
-                                                        <option value="${r}" ${m.role.startsWith(r) || m.role.includes(r) ? 'selected' : ''}>${r}</option>
-                                                    `).join('')}
-                                                    <option value="${escapeHTML(m.role)}" ${!BOARD_ROLE_OPTIONS.some(r => m.role.startsWith(r)) ? 'selected' : ''}>Sonstiges (${escapeHTML(m.role)})</option>
-                                                </select>
-                                            </td>
-                                            <td>
-                                                <input type="color" class="form-control form-control-sm m-color" value="${m.color}" style="height: 34px; cursor: pointer;" />
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-sm btn-ghost danger-text delete-m-btn" data-id="${m.id}" title="Löschen">🗑️</button>
-                                            </td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- MOBILE CARDS VIEW -->
-                        <div class="members-mobile-list d-block d-md-none mt-2">
+                        <!-- RESPONSIVE DEMARCATED MEMBER CARDS LIST (Fits 100% on 1 screen without scrolling) -->
+                        <div class="members-cards-container mt-2">
                             ${members.map(m => `
-                                <div class="card-glow mb-3 p-3 member-settings-item" data-member-id="${m.id}" style="border-left: 4px solid ${m.color}; background: rgba(0,0,0,0.35); border-radius: 10px;">
-                                    <div class="d-flex align-items-center gap-2 mb-2">
-                                        <input type="text" class="form-control m-avatar" value="${m.avatar}" style="width: 48px; text-align: center; font-size: 1.25rem; font-weight: bold; background: rgba(0,0,0,0.4);" />
-                                        <input type="text" class="form-control m-name" value="${escapeHTML(m.name)}" placeholder="Name des Mitglieds..." style="font-size: 16px; font-weight: 700; color: #fff; background: rgba(0,0,0,0.4); flex: 1;" />
-                                    </div>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <select class="form-select m-role" style="font-size: 15px; background: rgba(0,0,0,0.4); flex: 1;">
+                                <div class="member-settings-item card-glow mb-2.5 p-2.5" data-member-id="${m.id}" 
+                                     style="border-left: 5px solid ${m.color}; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <!-- Avatar Icon -->
+                                        <input type="text" class="form-control form-control-sm m-avatar" value="${m.avatar}" style="width: 44px; text-align: center; font-size: 1.1rem; font-weight: bold; background: #f8fafc;" title="Emoji Icon" />
+                                        
+                                        <!-- Name Field -->
+                                        <input type="text" class="form-control form-control-sm m-name" value="${escapeHTML(m.name)}" placeholder="Name des Mitglieds..." style="flex: 1 1 180px; min-width: 140px; font-weight: 700; font-size: 0.9rem;" />
+                                        
+                                        <!-- Role Select -->
+                                        <select class="form-select form-select-sm m-role" style="flex: 1 1 160px; min-width: 130px; font-size: 0.84rem;">
                                             ${BOARD_ROLE_OPTIONS.map(r => `
                                                 <option value="${r}" ${m.role.startsWith(r) || m.role.includes(r) ? 'selected' : ''}>${r}</option>
                                             `).join('')}
                                             <option value="${escapeHTML(m.role)}" ${!BOARD_ROLE_OPTIONS.some(r => m.role.startsWith(r)) ? 'selected' : ''}>Sonstiges (${escapeHTML(m.role)})</option>
                                         </select>
-                                        <input type="color" class="form-control m-color" value="${m.color}" style="width: 44px; height: 38px; cursor: pointer; padding: 2px;" title="Kennfarbe" />
-                                        <button class="btn btn-ghost danger-text delete-m-btn p-2" data-id="${m.id}" title="Löschen" style="font-size: 1.1rem;">🗑️</button>
+
+                                        <!-- Kennfarbe -->
+                                        <div class="d-flex align-items-center gap-1" title="Kennfarbe">
+                                            <input type="color" class="form-control form-control-sm m-color" value="${m.color}" style="width: 40px; height: 32px; cursor: pointer; padding: 2px;" />
+                                        </div>
+
+                                        <!-- Delete Button -->
+                                        <button class="btn btn-sm btn-ghost danger-text delete-m-btn p-1.5" data-id="${m.id}" title="Mitglied entfernen" style="font-size: 0.9rem;">🗑️</button>
                                     </div>
                                 </div>
                             `).join('')}
