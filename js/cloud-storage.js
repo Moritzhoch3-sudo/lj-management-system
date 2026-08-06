@@ -57,11 +57,24 @@ export class CloudStorageEngine {
     }
 
     /**
-     * Safely fetch JSON from an HTTP URL, ensuring response is valid JSON and NOT an HTML fallback page
+     * Safely fetch JSON from an HTTP URL, bypassing mobile browser cache and validating content-type
      */
     static async safeFetchJson(url, options = {}) {
         try {
-            const resp = await fetch(url, options);
+            // Append cache buster timestamp query string to prevent mobile browser 304 caching
+            const cacheBusterUrl = url.includes('?') ? `${url}&_t=${Date.now()}` : `${url}?_t=${Date.now()}`;
+            
+            const fetchOpts = {
+                ...options,
+                cache: 'no-store',
+                headers: {
+                    ...(options.headers || {}),
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache'
+                }
+            };
+
+            const resp = await fetch(cacheBusterUrl, fetchOpts);
             if (!resp.ok) return null;
 
             const contentType = resp.headers.get('content-type') || '';
@@ -107,34 +120,35 @@ export class CloudStorageEngine {
             return;
         }
 
-        // Check if remote data is newer than local last sync timestamp
-        const remoteTimestamp = cloudData._updatedAt || 0;
+        const remoteTimestamp = cloudData._updatedAt || Date.now();
+        let dataUpdated = false;
 
-        if (remoteTimestamp > this.lastSyncTimestamp) {
-            this.lastSyncTimestamp = remoteTimestamp;
+        const keyMap = {
+            categories: 'lj_categories_v1',
+            tasks: 'lj_tasks_v3_12',
+            finances: 'lj_finances_v1',
+            contracts: 'lj_contracts_v1',
+            minutes: 'lj_minutes_v2'
+        };
 
-            let dataUpdated = false;
-            const keyMap = {
-                categories: 'lj_categories_v1',
-                tasks: 'lj_tasks_v3_12',
-                finances: 'lj_finances_v1',
-                contracts: 'lj_contracts_v1',
-                minutes: 'lj_minutes_v2'
-            };
+        // Always check if cloud data content differs from local storage content
+        for (const [prop, storageKey] of Object.entries(keyMap)) {
+            if (cloudData[prop] !== undefined && cloudData[prop] !== null) {
+                const localRaw = localStorage.getItem(storageKey);
+                const cloudRaw = JSON.stringify(cloudData[prop]);
 
-            for (const [prop, storageKey] of Object.entries(keyMap)) {
-                if (cloudData[prop] !== undefined && cloudData[prop] !== null) {
-                    const localRaw = localStorage.getItem(storageKey);
-                    const cloudRaw = JSON.stringify(cloudData[prop]);
-                    if (localRaw !== cloudRaw) {
-                        localStorage.setItem(storageKey, cloudRaw);
-                        dataUpdated = true;
-                    }
+                // If local storage doesn't match cloud data, update immediately!
+                if (localRaw !== cloudRaw) {
+                    localStorage.setItem(storageKey, cloudRaw);
+                    dataUpdated = true;
                 }
             }
+        }
 
+        if (dataUpdated || remoteTimestamp > this.lastSyncTimestamp) {
+            this.lastSyncTimestamp = remoteTimestamp;
+            this.updateStatus('online', '🟢 Live mit allen Geräten synchronisiert (10s)');
             if (dataUpdated) {
-                this.updateStatus('online', '🟢 Live mit allen Geräten synchronisiert (10s)');
                 this.notifyListeners(cloudData);
             }
         }
