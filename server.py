@@ -16,20 +16,26 @@ DEFAULT_SERVER_PIN = '2026'
 
 # In-Memory Active Server Sessions (Token -> Expiry Timestamp)
 active_sessions = {}
+# IP -> {'count': int, 'first_attempt': float}
+failed_attempts = {}
+
+def hash_pin(pin):
+    # Use SHA-256 with a fixed salt
+    return hashlib.sha256(f"LJ_SALT_v1_{pin}".encode('utf-8')).hexdigest()
 
 def get_server_pin():
     if os.path.exists(PIN_FILE):
         try:
             with open(PIN_FILE, 'r') as f:
                 data = json.load(f)
-                return data.get('pin', DEFAULT_SERVER_PIN)
+                return data.get('pin', hash_pin(DEFAULT_SERVER_PIN))
         except Exception as e:
             print("Error reading PIN file:", e)
-    return DEFAULT_SERVER_PIN
+    return hash_pin(DEFAULT_SERVER_PIN)
 
 def save_server_pin(new_pin):
     with open(PIN_FILE, 'w') as f:
-        json.dump({'pin': new_pin, 'updated_at': time.time()}, f)
+        json.dump({'pin': hash_pin(new_pin), 'updated_at': time.time()}, f)
 
 class SecureLJRequestHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -37,8 +43,20 @@ class SecureLJRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
         self.send_header('Pragma', 'no-cache')
         self.send_header('Expires', '0')
+        
+        # Security Headers
+        self.send_header('X-Content-Type-Options', 'nosniff')
+        self.send_header('X-Frame-Options', 'DENY')
+        self.send_header('X-XSS-Protection', '1; mode=block')
+        self.send_header('Referrer-Policy', 'strict-origin-when-cross-origin')
+        
         if self.path.startswith('/api/'):
-            self.send_header('Access-Control-Allow-Origin', '*')
+            origin = self.headers.get('Origin')
+            host = self.headers.get('Host', '')
+            if origin:
+                if origin == 'http://localhost:8080' or (host and origin.endswith(host)):
+                    self.send_header('Access-Control-Allow-Origin', origin)
+            
             self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
             self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         super().end_headers()
@@ -49,6 +67,12 @@ class SecureLJRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_POST(self):
         content_length = int(self.headers.get('Content-Length', 0))
+        if content_length > 10240:
+            self.send_response(413)
+            self.end_headers()
+            self.wfile.write(b'Payload Too Large')
+            return
+            
         body_bytes = self.rfile.read(content_length)
         
         try:
@@ -58,10 +82,36 @@ class SecureLJRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         # Endpoint 1: Verify PIN on Server Side
         if self.path == '/api/verify-pin':
+            client_ip = self.client_address[0]
+            now = time.time()
+            
+            if client_ip in failed_attempts:
+                if now - failed_attempts[client_ip]['first_attempt'] > 60:
+                    del failed_attempts[client_ip]
+                elif failed_attempts[client_ip]['count'] >= 5:
+                    self.send_response(429)
+                    self.send_header('Content-Type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({'error': 'Too many requests'}).encode('utf-8'))
+                    return
+
             submitted_pin = str(req_data.get('pin', '')).strip()
             actual_pin = get_server_pin()
 
-            if submitted_pin == actual_pin:
+            if hash_pin(submitted_pin) == actual_pin:
+                if client_ip in failed_attempts:
+                    del failed_attempts[client_ip]
+                
+                # Cleanup expired sessions
+                expired = [tok for tok, exp in active_sessions.items() if exp <= now]
+                for tok in expired:
+                    del active_sessions[tok]
+                
+                # Enforce max 100 active sessions
+                if len(active_sessions) >= 100:
+                    oldest_token = min(active_sessions, key=active_sessions.get)
+                    del active_sessions[oldest_token]
+
                 # Generate cryptographically secure session token
                 session_token = secrets.token_hex(24)
                 # Session valid for 4 hours
@@ -78,6 +128,11 @@ class SecureLJRequestHandler(http.server.SimpleHTTPRequestHandler):
                 }
                 self.wfile.write(json.dumps(response).encode('utf-8'))
             else:
+                if client_ip not in failed_attempts:
+                    failed_attempts[client_ip] = {'count': 1, 'first_attempt': now}
+                else:
+                    failed_attempts[client_ip]['count'] += 1
+
                 self.send_response(401)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
@@ -111,13 +166,23 @@ class SecureLJRequestHandler(http.server.SimpleHTTPRequestHandler):
             token = auth_header.replace('Bearer ', '').strip() if auth_header else ''
 
             if token in active_sessions and active_sessions[token] > time.time():
-                new_pin = str(req_data.get('newPin', '')).strip()
-                if len(new_pin) >= 4:
-                    save_server_pin(new_pin)
-                    self.send_response(200)
+                old_pin = str(req_data.get('old_pin', req_data.get('oldPin', ''))).strip()
+                new_pin = str(req_data.get('newPin', req_data.get('new_pin', ''))).strip()
+                
+                if hash_pin(old_pin) == get_server_pin():
+                    if len(new_pin) >= 4:
+                        save_server_pin(new_pin)
+                        active_sessions.clear()
+                        self.send_response(200)
+                        self.send_header('Content-Type', 'application/json')
+                        self.end_headers()
+                        self.wfile.write(json.dumps({'success': True, 'message': 'Backend PIN erfolgreich aktualisiert'}).encode('utf-8'))
+                        return
+                else:
+                    self.send_response(401)
                     self.send_header('Content-Type', 'application/json')
                     self.end_headers()
-                    self.wfile.write(json.dumps({'success': True, 'message': 'Backend PIN erfolgreich aktualisiert'}).encode('utf-8'))
+                    self.wfile.write(json.dumps({'success': False, 'error': 'Alte PIN falsch'}).encode('utf-8'))
                     return
 
             self.send_response(403)
@@ -134,9 +199,21 @@ if __name__ == '__main__':
     # Initialize PIN file if not present
     if not os.path.exists(PIN_FILE):
         save_server_pin(DEFAULT_SERVER_PIN)
+    else:
+        # Check if the existing file has a plain text PIN or hashed PIN
+        # By trying to hash it. A plaintext pin is usually 4-6 chars, a hash is 64 chars.
+        try:
+            with open(PIN_FILE, 'r') as f:
+                data = json.load(f)
+                pin_val = data.get('pin', '')
+                if len(pin_val) < 64: # Re-save as hash
+                    save_server_pin(pin_val)
+        except Exception:
+            pass
 
     print(f"🔒 Landjugend Scheuring Server gestartet auf http://localhost:{PORT}")
-    print(f"🔑 Backend-Authentifizierung aktiv (Master PIN: {get_server_pin()})")
+    print("🔑 Backend-Authentifizierung aktiv")
     
+    # Intentionally binding to '' for deployment. (To bind only to localhost, change to '127.0.0.1')
     with socketserver.TCPServer(("", PORT), SecureLJRequestHandler) as httpd:
         httpd.serve_forever()

@@ -84,9 +84,7 @@ export class CloudStorageEngine {
                     tasks: 'lj_tasks_v3_12',
                     finances: 'lj_finances_v1',
                     contracts: 'lj_contracts_v1',
-                    minutes: 'lj_minutes_v2',
-                    pin: 'lj_vault_pin_plain_v1',
-                    memberPasswords: 'lj_member_passwords_v1'
+                    minutes: 'lj_minutes_v2'
                 };
 
                 for (const [prop, storageKey] of Object.entries(keyMap)) {
@@ -126,9 +124,7 @@ export class CloudStorageEngine {
             tasks: JSON.parse(localStorage.getItem('lj_tasks_v3_12') || 'null'),
             finances: JSON.parse(localStorage.getItem('lj_finances_v1') || 'null'),
             contracts: JSON.parse(localStorage.getItem('lj_contracts_v1') || 'null'),
-            minutes: JSON.parse(localStorage.getItem('lj_minutes_v2') || 'null'),
-            pin: localStorage.getItem('lj_vault_pin_plain_v1') || '1357',
-            memberPasswords: JSON.parse(localStorage.getItem('lj_member_passwords_v1') || '{}')
+            minutes: JSON.parse(localStorage.getItem('lj_minutes_v2') || 'null')
         };
 
         this.lastSyncTimestamp = payload._updatedAt;

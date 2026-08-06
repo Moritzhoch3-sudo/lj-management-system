@@ -3,6 +3,17 @@
  */
 import { INITIAL_MEMBERS, CATEGORIES, INITIAL_TASKS, INITIAL_FINANCES, INITIAL_CONTRACTS, INITIAL_MINUTES } from './data.js';
 
+export function escapeHTML(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+
 const STORAGE_KEYS = {
     MEMBERS: 'lj_members_v10_final',
     CATEGORIES: 'lj_categories_v1',
@@ -96,10 +107,15 @@ export class StorageEngine {
 
     static getMemberPassword(memberId) {
         const map = this.getMemberPasswords();
-        if (memberId === 'm4') {
-            return map['m4'] || 'asdfghjklöä1234567890';
-        }
-        return map[memberId] || 'landjugend-scheuring';
+        return map[memberId] || null;
+    }
+
+    static async hashPassword(password) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password + 'lj-scheuring-salt-2026');
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
     /**
@@ -132,9 +148,15 @@ export class StorageEngine {
     /**
      * Member Password Management (duplicate-safe)
      */
-    static setMemberPassword(memberId, newPass) {
+    static async setMemberPassword(memberId, newPass) {
         const map = this.getMemberPasswords();
-        map[memberId] = String(newPass).trim();
+        map[memberId] = await this.hashPassword(String(newPass).trim());
+        localStorage.setItem(STORAGE_KEYS.MEMBER_PASSWORDS, JSON.stringify(map));
+    }
+
+    static deleteMemberPassword(memberId) {
+        const map = this.getMemberPasswords();
+        delete map[memberId];
         localStorage.setItem(STORAGE_KEYS.MEMBER_PASSWORDS, JSON.stringify(map));
     }
 
@@ -151,8 +173,6 @@ export class StorageEngine {
                 if (map[m.id]) {
                     newMap[m.id] = map[m.id];
                 }
-            } else {
-                newMap[m.id] = 'landjugend-scheuring';
             }
         });
 
@@ -181,13 +201,8 @@ export class StorageEngine {
      * Super Admin Check for Moritz Kubik (2. Kassier)
      */
     static isSuperAdmin(userId = this.getCurrentUserId()) {
-        const members = this.getMembers();
-        const currentUser = members.find(m => m.id === userId);
-        if (!currentUser) return false;
-
-        const cleanName = (currentUser.name || '').toLowerCase();
-        const cleanRole = (currentUser.role || '').toLowerCase();
-        return cleanName.includes('moritz') || cleanName.includes('kubik') || cleanRole.includes('2. kassier');
+        const ADMIN_IDS = ['m4']; // Moritz Kubik
+        return ADMIN_IDS.includes(userId);
     }
 
     /**
@@ -260,9 +275,7 @@ export class StorageEngine {
             tasks: this.getTasks(),
             finances: this.getFinances(),
             contracts: this.getContracts(),
-            minutes: this.getMinutes(),
-            pin: this.getPIN(),
-            memberPasswords: this.getMemberPasswords()
+            minutes: this.getMinutes()
         };
 
         const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
@@ -286,10 +299,6 @@ export class StorageEngine {
             if (Array.isArray(data.finances)) this.saveFinances(data.finances);
             if (Array.isArray(data.contracts)) this.saveContracts(data.contracts);
             if (Array.isArray(data.minutes)) this.saveMinutes(data.minutes);
-            if (data.pin) this.setPIN(data.pin);
-            if (data.memberPasswords && typeof data.memberPasswords === 'object') {
-                localStorage.setItem(STORAGE_KEYS.MEMBER_PASSWORDS, JSON.stringify(data.memberPasswords));
-            }
 
             return { success: true };
         } catch (e) {

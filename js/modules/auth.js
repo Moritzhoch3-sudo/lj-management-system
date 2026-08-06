@@ -1,7 +1,7 @@
 /**
  * Level-1 App Entry Lock & User Re-Authentication Guard (Strict Firstname + Lastname Concatenated Username Matching)
  */
-import { StorageEngine } from '../storage.js';
+import { StorageEngine, escapeHTML } from '../storage.js';
 
 const AUTH_KEY = 'lj_app_authenticated';
 const INITIAL_USER_KEY = 'lj_initial_login_user';
@@ -51,44 +51,13 @@ export class AppAuth {
         found = activeMembers.find(m => (m.name || '').trim().toLowerCase() === rawInput);
         if (found) return found;
 
-        // 3. StartsWith / Substring match
-        found = activeMembers.find(m => {
-            const mClean = this.sanitizeUsername(m.name);
-            return mClean.startsWith(cleanInput) || cleanInput.startsWith(mClean);
-        });
-        if (found) return found;
-
-        // 4. Complete keyword map for all 13 Landjugend Scheuring members
-        const memberMap = [
-            { id: 'm0', keys: ['allgemein'] },
-            { id: 'm1', keys: ['valentin', 'muellner', 'mueller', 'valentinmuellner'] },
-            { id: 'm2', keys: ['linda', 'schweiger', 'lindaschweiger'] },
-            { id: 'm3', keys: ['anja', 'loeb', 'anjaloeb'] },
-            { id: 'm4', keys: ['moritz', 'kubik', 'moritzkubik'] },
-            { id: 'm5', keys: ['lena', 'senior', 'lenasenior'] },
-            { id: 'm6', keys: ['rosa', 'krieglmeier', 'rosakrieglmeier'] },
-            { id: 'm7', keys: ['cassandra', 'wunner', 'cassandrawunner'] },
-            { id: 'm8', keys: ['felix', 'premer', 'felixpremer'] },
-            { id: 'm9', keys: ['johannes', 'erhard', 'johanneserhard'] },
-            { id: 'm10', keys: ['dominique', 'zahn', 'dominiquezahn'] },
-            { id: 'm11', keys: ['michaela', 'grabmaier', 'michaelagrabmaier'] },
-            { id: 'm12', keys: ['kilian', 'salai', 'kiliansalai'] }
-        ];
-
-        for (const item of memberMap) {
-            if (item.keys.some(k => cleanInput.includes(this.sanitizeUsername(k)) || rawInput.includes(k))) {
-                const matched = activeMembers.find(m => m.id === item.id);
-                if (matched) return matched;
-            }
-        }
-
         return null;
     }
 
     /**
-     * Authenticate user with password verification (Moritz Kubik Admin Password: asdfghjklöä1234567890)
+     * Authenticate user with password verification
      */
-    static authenticate(usernameInput, passwordInput) {
+    static async authenticate(usernameInput, passwordInput) {
         const members = StorageEngine.getMembers();
         const matchedMember = this.findMemberByUsername(usernameInput, members);
 
@@ -96,11 +65,16 @@ export class AppAuth {
             return { success: false, reason: 'user' };
         }
 
-        const activeMemberPass = StorageEngine.getMemberPassword(matchedMember.id);
+        let activeMemberPass = StorageEngine.getMemberPassword(matchedMember.id);
         const inputClean = (passwordInput || '').trim();
 
-        // STRICT SINGLE ACTIVE PASSWORD CHECK: ONLY the current active password is accepted!
-        const isPassValid = (inputClean === activeMemberPass);
+        if (!activeMemberPass) {
+            await StorageEngine.setMemberPassword(matchedMember.id, inputClean);
+            activeMemberPass = StorageEngine.getMemberPassword(matchedMember.id);
+        }
+
+        const hashedInput = await StorageEngine.hashPassword(inputClean);
+        const isPassValid = (hashedInput === activeMemberPass);
 
         if (!isPassValid) {
             return { success: false, reason: 'pass' };
@@ -170,11 +144,11 @@ export class AppAuth {
         // Immediate Autofocus on page load
         setTimeout(() => userInput?.focus(), 50);
 
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const uVal = userInput.value;
             const pVal = passInput.value;
-            const res = this.authenticate(uVal, pVal);
+            const res = await this.authenticate(uVal, pVal);
 
             if (res.success) {
                 if (onAuthenticatedCallback) onAuthenticatedCallback(res.member);
@@ -216,19 +190,19 @@ export class AppAuth {
                     <div class="d-flex align-items-center gap-2 mb-3 p-2" style="background: rgba(255,255,255,0.04); border-radius: 8px; border-left: 4px solid ${targetMember.color}">
                         <span style="font-size: 1.4rem;">${targetMember.avatar}</span>
                         <div>
-                            <strong style="color: #fff;">Wechsel zu: ${targetMember.name}</strong>
-                            <small class="d-block text-muted">${targetMember.role}</small>
+                            <strong style="color: #fff;">Wechsel zu: ${escapeHTML(targetMember.name)}</strong>
+                            <small class="d-block text-muted">${escapeHTML(targetMember.role)}</small>
                         </div>
                     </div>
 
                     <p class="text-muted small mb-3">
-                        Bitte gib das Passwort für <strong>${targetMember.name}</strong> ein:
+                        Bitte gib das Passwort für <strong>${escapeHTML(targetMember.name)}</strong> ein:
                     </p>
 
                     <form id="reauth-switch-form" autocomplete="off">
                         <div class="form-group mb-2">
                             <label class="form-label small font-bold text-muted mb-1">Benutzername:</label>
-                            <input type="text" id="reauth-user-input" class="form-control form-control-sm text-emerald font-bold" value="${targetUsername}" readonly required style="font-size: 0.95rem; background: rgba(0,0,0,0.4);" />
+                            <input type="text" id="reauth-user-input" class="form-control form-control-sm text-emerald font-bold" value="${escapeHTML(targetUsername)}" readonly required style="font-size: 0.95rem; background: rgba(0,0,0,0.4);" />
                         </div>
 
                         <div class="form-group mb-3">
@@ -264,12 +238,12 @@ export class AppAuth {
             });
         });
 
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const uVal = userInput.value;
             const pVal = passInput.value;
 
-            const res = this.authenticate(uVal, pVal);
+            const res = await this.authenticate(uVal, pVal);
             if (res.success && res.member.id === targetMember.id) {
                 closeModal();
                 if (onSuccessCallback) onSuccessCallback(res.member);
@@ -352,12 +326,12 @@ export class AppAuth {
             });
         });
 
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const uVal = userInput.value;
             const pVal = passInput.value;
 
-            const res = this.authenticate(uVal, pVal);
+            const res = await this.authenticate(uVal, pVal);
             if (res.success && StorageEngine.isSuperAdmin(res.member.id)) {
                 closeModal();
                 if (onSuccessCallback) onSuccessCallback();

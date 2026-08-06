@@ -1,7 +1,7 @@
 /**
  * Main Application Orchestrator & View Controller (Smooth Navigation & Admin Settings Access)
  */
-import { StorageEngine } from './storage.js';
+import { StorageEngine, escapeHTML } from './storage.js';
 
 import { AppAuth } from './modules/auth.js';
 import { TasksModule } from './modules/tasks.js';
@@ -93,7 +93,7 @@ class App {
         if (userSelectEl) {
             userSelectEl.innerHTML = members.map(m => `
                 <option value="${m.id}" ${m.id === currentUserId ? 'selected' : ''}>
-                    ${m.avatar} ${m.name} (${m.role})
+                    ${m.avatar} ${escapeHTML(m.name)} (${escapeHTML(m.role)})
                 </option>
             `).join('');
 
@@ -349,7 +349,7 @@ class App {
                 <div class="section-banner settings-banner mb-4">
                     <div class="banner-title">
                         <h2>🔑 Passwort ändern</h2>
-                        <p>Ändere dein persönliches Vereinspasswort für ${currentUser.name}.</p>
+                        <p>Ändere dein persönliches Vereinspasswort für ${escapeHTML(currentUser.name)}.</p>
                     </div>
                 </div>
 
@@ -358,8 +358,8 @@ class App {
                         <span style="font-size: 2.2rem; background: rgba(0,0,0,0.3); width: 60px; height: 60px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; border: 2px solid ${currentUser.color || '#00873D'}">
                             ${currentUser.avatar}
                         </span>
-                        <h3 style="font-size: 1.2rem; color: #fff; margin-top: 8px;">${currentUser.name}</h3>
-                        <small style="color: ${currentUser.color || '#34d399'}; font-weight: bold;">${currentUser.role}</small>
+                        <h3 style="font-size: 1.2rem; color: #fff; margin-top: 8px;">${escapeHTML(currentUser.name)}</h3>
+                        <small style="color: ${currentUser.color || '#34d399'}; font-weight: bold;">${escapeHTML(currentUser.role)}</small>
                     </div>
 
                     <form id="change-my-password-form" autocomplete="off">

@@ -1,7 +1,7 @@
 /**
  * Central Task Management Module - Inline Quick-Add per Member Card & Direct Inline Table/Card Editing
  */
-import { StorageEngine } from '../storage.js';
+import { StorageEngine, escapeHTML } from '../storage.js';
 
 let currentFilterMember = 'all';
 let currentFilterCategory = 'all';
@@ -48,7 +48,7 @@ export class TasksModule {
                             <option value="all">👥 Alle Mitglieder (${members.length})</option>
                             ${members.map(m => `
                                 <option value="${m.id}" ${currentFilterMember === m.id ? 'selected' : ''}>
-                                    ${m.avatar} ${m.name} (${m.role})
+                                    ${m.avatar} ${escapeHTML(m.name)} (${escapeHTML(m.role)})
                                 </option>
                             `).join('')}
                         </select>
@@ -124,8 +124,8 @@ export class TasksModule {
                                 <div class="person-title-block">
                                     <span class="member-avatar" style="border-color: ${m.color}">${m.avatar}</span>
                                     <div>
-                                        <h3 class="person-name" style="color: #fff">${m.name}</h3>
-                                        <span class="person-role" style="color: ${m.color}">${m.role}</span>
+                                        <h3 class="person-name" style="color: #fff">${escapeHTML(m.name)}</h3>
+                                        <span class="person-role" style="color: ${m.color}">${escapeHTML(m.role)}</span>
                                     </div>
                                 </div>
 
@@ -137,7 +137,7 @@ export class TasksModule {
                             <!-- DIRECT INLINE QUICK-ADD INPUT ROW INSIDE THE CARD -->
                             <div class="card-inline-add-bar mt-3 mb-2" style="background: rgba(0,0,0,0.25); border: 1px solid ${m.color}55; border-radius: 8px; padding: 0.6rem;">
                                 <form class="inline-quick-add-form d-flex align-items-center gap-2" data-member-id="${m.id}">
-                                    <input type="text" class="form-control form-control-sm quick-task-title-input" placeholder="➕ Neue Aufgabe direkt für ${m.name.split(' ')[0]} eingeben..." required />
+                                    <input type="text" class="form-control form-control-sm quick-task-title-input" placeholder="➕ Neue Aufgabe direkt für ${escapeHTML(m.name.split(' ')[0])} eingeben..." required />
                                     
                                     <select class="form-select form-select-sm quick-task-cat-select" style="max-width: 160px;">
                                         <option value="" ${!lastCat ? 'selected' : ''} ${!lastCat ? 'disabled' : ''}>-- Kategorie wählen --</option>
@@ -162,7 +162,7 @@ export class TasksModule {
 
                             <!-- Structured Clean Table for Tasks -->
                             ${memberTasks.length === 0 ? `
-                                <div class="empty-person-tasks text-muted p-2">Keine aktuellen Aufgaben für ${m.name}. Tippe oben im Feld, um direkt eine hinzuzufügen.</div>
+                                <div class="empty-person-tasks text-muted p-2">Keine aktuellen Aufgaben für ${escapeHTML(m.name)}. Tippe oben im Feld, um direkt eine hinzuzufügen.</div>
                             ` : `
                                 <div class="table-responsive mt-2">
                                     <table class="clean-tasks-table">
@@ -194,8 +194,8 @@ export class TasksModule {
                                                         </td>
                                                         <td>
                                                             <div class="task-info-block ${t.status === 'erledigt' ? 'completed-text' : ''}">
-                                                                <span class="task-title-text font-bold" style="font-weight: 600;">${t.title}</span>
-                                                                ${t.description ? `<div class="task-note-text text-muted" style="font-size: 0.83rem; margin-top: 2px;">📝 ${t.description}</div>` : ''}
+                                                                <span class="task-title-text font-bold" style="font-weight: 600;">${escapeHTML(t.title)}</span>
+                                                                ${t.description ? `<div class="task-note-text text-muted" style="font-size: 0.83rem; margin-top: 2px;">📝 ${escapeHTML(t.description)}</div>` : ''}
                                                             </div>
                                                         </td>
                                                         <td>
@@ -233,7 +233,7 @@ export class TasksModule {
                                                                 <div class="row g-2 mb-2">
                                                                     <div class="col-md-5">
                                                                         <label class="form-label small mb-1">Aufgabenname *</label>
-                                                                        <input type="text" class="form-control form-control-sm edit-inline-title" value="${t.title}" required />
+                                                                        <input type="text" class="form-control form-control-sm edit-inline-title" value="${escapeHTML(t.title)}" required />
                                                                     </div>
                                                                     <div class="col-md-3">
                                                                         <label class="form-label small mb-1">Kategorie</label>
@@ -257,7 +257,7 @@ export class TasksModule {
 
                                                                 <div class="mb-2">
                                                                     <label class="form-label small mb-1">📝 Notizen, Details & Kontakte vor Ort:</label>
-                                                                    <textarea class="form-control form-control-sm edit-inline-desc" rows="2" placeholder="Notizen, Zusatzinfos hier eintragen...">${t.description || ''}</textarea>
+                                                                    <textarea class="form-control form-control-sm edit-inline-desc" rows="2" placeholder="Notizen, Zusatzinfos hier eintragen...">${escapeHTML(t.description || '')}</textarea>
                                                                 </div>
 
                                                                 <div class="d-flex justify-content-end gap-2 mt-2">
@@ -339,13 +339,13 @@ export class TasksModule {
                     <span class="prio-badge prio-${t.priority}">${t.priority.toUpperCase()}</span>
                 </div>
 
-                <h4 class="card-title">${t.title}</h4>
-                ${t.description ? `<p class="card-desc-preview text-muted small mt-1 mb-2">📝 ${t.description}</p>` : ''}
+                <h4 class="card-title">${escapeHTML(t.title)}</h4>
+                ${t.description ? `<p class="card-desc-preview text-muted small mt-1 mb-2">📝 ${escapeHTML(t.description)}</p>` : ''}
 
                 <div class="card-footer">
                     <div class="assignee-info">
                         <span class="assignee-avatar" style="border-color: ${member.color}">${member.avatar}</span>
-                        <span class="assignee-name" style="color: ${member.color}">${member.name.split(' ')[0]}</span>
+                        <span class="assignee-name" style="color: ${member.color}">${escapeHTML(member.name.split(' ')[0])}</span>
                     </div>
 
                     <div class="card-actions">
@@ -357,10 +357,10 @@ export class TasksModule {
                 <!-- INLINE EDIT FORM INSIDE KANBAN CARD -->
                 <form class="inline-task-edit-form card-inline-editor mt-2 p-2 hidden" id="inline-edit-row-${t.id}" data-task-id="${t.id}" style="background: rgba(0,0,0,0.5); border-radius: 6px; border: 1px dashed var(--border-color);">
                     <label class="form-label small mb-1">Titel</label>
-                    <input type="text" class="form-control form-control-sm mb-2 edit-inline-title" value="${t.title}" required />
+                    <input type="text" class="form-control form-control-sm mb-2 edit-inline-title" value="${escapeHTML(t.title)}" required />
                     
                     <label class="form-label small mb-1">📝 Notiz / Details</label>
-                    <textarea class="form-control form-control-sm mb-2 edit-inline-desc" rows="2" placeholder="Notiz...">${t.description || ''}</textarea>
+                    <textarea class="form-control form-control-sm mb-2 edit-inline-desc" rows="2" placeholder="Notiz...">${escapeHTML(t.description || '')}</textarea>
                     
                     <div class="d-flex gap-1 mb-2">
                         <select class="form-select form-select-sm edit-inline-cat">

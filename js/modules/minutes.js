@@ -1,7 +1,7 @@
 /**
  * Meeting Minutes, Audio Recorder, Conversation Tracking & Fact-Based Auto-Protocol Generator
  */
-import { StorageEngine } from '../storage.js';
+import { StorageEngine, escapeHTML } from '../storage.js';
 import { AudioRecorderEngine } from './recorder.js';
 
 let activeRecorder = null;
@@ -81,9 +81,9 @@ export class MinutesModule {
                             <div class="minute-header d-flex justify-content-between align-items-center mb-2">
                                 <div>
                                     <h3 class="minute-title" style="color: #34d399; font-size: 1.25rem; font-weight: 800; font-family: monospace; letter-spacing: 0.03em;">
-                                        📁 ${m.title}
+                                        📁 ${escapeHTML(m.title)}
                                     </h3>
-                                    <span class="minute-meta text-muted small">📅 Datum: ${m.date} | 📍 ${m.location || 'Landjugendheim Scheuring'}</span>
+                                    <span class="minute-meta text-muted small">📅 Datum: ${m.date} | 📍 ${escapeHTML(m.location || 'Landjugendheim Scheuring')}</span>
                                 </div>
                                 <button class="btn btn-sm btn-ghost danger-text delete-minute-btn" data-id="${m.id}" title="Löschen">🗑️</button>
                             </div>
@@ -92,7 +92,7 @@ export class MinutesModule {
                             <div class="bullets-box card-glow-sm mt-3">
                                 <h5>📝 Wichtige Fakten & Beschlüsse (Stichpunkte):</h5>
                                 <ul class="bullet-list">
-                                    ${(m.bullets || [m.summary]).map(b => `<li>${b}</li>`).join('')}
+                                    ${(m.bullets || [m.summary]).map(b => `<li>${escapeHTML(b)}</li>`).join('')}
                                 </ul>
                             </div>
 
@@ -105,8 +105,8 @@ export class MinutesModule {
                                             const matchedMember = members.find(mem => mem.name.toLowerCase().includes(s.speaker.toLowerCase())) || { color: '#3b82f6', avatar: '👤' };
                                             return `
                                                 <div class="dialogue-chip mb-2" style="border-left: 3px solid ${matchedMember.color}">
-                                                    <strong style="color: ${matchedMember.color}">${matchedMember.avatar} ${s.speaker}:</strong>
-                                                    <span>${s.text}</span>
+                                                    <strong style="color: ${matchedMember.color}">${matchedMember.avatar} ${escapeHTML(s.speaker)}:</strong>
+                                                    <span>${escapeHTML(s.text)}</span>
                                                 </div>
                                             `;
                                         }).join('')}
@@ -119,7 +119,7 @@ export class MinutesModule {
                                 <div class="decisions-box mt-3">
                                     <h5>⚖️ Gefasste Beschlüsse:</h5>
                                     <ul>
-                                        ${m.decisions.map(d => `<li>${d}</li>`).join('')}
+                                        ${m.decisions.map(d => `<li>${escapeHTML(d)}</li>`).join('')}
                                     </ul>
                                 </div>
                             ` : ''}

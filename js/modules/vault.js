@@ -3,15 +3,15 @@
  */
 import { StorageEngine } from '../storage.js';
 
-let isVaultUnlocked = false;
+let vaultUnlockTimestamp = 0;
 
 export class VaultGuard {
     static isUnlocked() {
-        return isVaultUnlocked;
+        return vaultUnlockTimestamp > 0 && (Date.now() - vaultUnlockTimestamp) < 1800000;
     }
 
     static lock() {
-        isVaultUnlocked = false;
+        vaultUnlockTimestamp = 0;
     }
 
     static renderPinLockPage(containerEl, targetModuleName, onSuccessCallback) {
@@ -73,7 +73,7 @@ export class VaultGuard {
 
             const isValid = await StorageEngine.verifyPIN(val);
             if (isValid) {
-                isVaultUnlocked = true;
+                vaultUnlockTimestamp = Date.now();
                 statusMsg.style.color = '#34d399';
                 statusMsg.textContent = '✅ PIN korrekt! Bereich wird geöffnet...';
                 setTimeout(() => {

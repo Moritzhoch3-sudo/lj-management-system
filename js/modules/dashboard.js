@@ -1,7 +1,7 @@
 /**
  * Vorstands-Dashboard Engine with Depth Shadows, Separated Task Cards & Strict Permissions
  */
-import { StorageEngine } from '../storage.js';
+import { StorageEngine, escapeHTML } from '../storage.js';
 
 export class DashboardModule {
     static render(containerEl, onFilterMemberClick) {
@@ -114,8 +114,8 @@ export class DashboardModule {
                                     ${m.avatar}
                                 </div>
                                 <div class="member-details">
-                                    <h4 class="member-name">${m.name}</h4>
-                                    <span class="member-role" style="color: ${m.color}">${m.role}</span>
+                                    <h4 class="member-name">${escapeHTML(m.name)}</h4>
+                                    <span class="member-role" style="color: ${m.color}">${escapeHTML(m.role)}</span>
                                 </div>
                                 <div class="member-percent-badge" style="background: ${m.color}33; color: ${m.color}; border: 1px solid ${m.color}">
                                     ${m.percentage}%
@@ -162,8 +162,8 @@ export class DashboardModule {
                                                        style="cursor: pointer; width: 16px; height: 16px; accent-color: ${m.color}; flex-shrink: 0;" />
                                                 <span class="mini-task-title ${t.status === 'erledigt' ? 'strikethrough-text' : ''}" 
                                                       style="font-size: 0.82rem; color: ${t.status === 'erledigt' ? '#94a3b8' : '#ffffff'}; word-break: break-word;" 
-                                                      title="${t.title}">
-                                                    ${t.title}
+                                                      title="${escapeHTML(t.title)}">
+                                                    ${escapeHTML(t.title)}
                                                 </span>
                                             </li>
                                         `).join('')}
@@ -313,8 +313,8 @@ export class DashboardModule {
                         <div class="d-flex align-items-center gap-2">
                             <span style="font-size: 1.5rem; background: rgba(0,0,0,0.3); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid ${m.color}">${m.avatar}</span>
                             <div>
-                                <h3 style="margin: 0; font-size: 1.15rem; color: #fff;">${m.name}</h3>
-                                <small style="color: ${m.color}; font-weight: 700;">${m.role} (${m.percentage}% erledigt)</small>
+                                <h3 style="margin: 0; font-size: 1.15rem; color: #fff;">${escapeHTML(m.name)}</h3>
+                                <small style="color: ${m.color}; font-weight: 700;">${escapeHTML(m.role)} (${m.percentage}% erledigt)</small>
                             </div>
                         </div>
                         <button class="btn btn-ghost modal-close modal-close-x" title="Schließen">&times;</button>
@@ -347,7 +347,7 @@ export class DashboardModule {
                         ` : `
                             <div class="card-glow p-3" style="background: rgba(17, 19, 24, 0.95); border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 10px 30px rgba(0,0,0,0.6); border-left: 4px solid ${m.color};">
                                 <h5 class="mb-3" style="font-size: 0.95rem; color: #fff; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px;">
-                                    📋 Aufgabenübersicht von ${m.name} (${mTasks.length} Aufgaben)
+                                    📋 Aufgabenübersicht von ${escapeHTML(m.name)} (${mTasks.length} Aufgaben)
                                 </h5>
 
                                 <div class="table-responsive">
@@ -372,7 +372,7 @@ export class DashboardModule {
                                                 return `
                                                     <tr style="background: rgba(255,255,255,0.03); border-radius: 6px; transition: background 0.2s;">
                                                         <td style="padding: 10px 10px; font-weight: 600; color: #f8fafc; font-size: 0.88rem; border-radius: 6px 0 0 6px;">
-                                                            <span class="${t.status === 'erledigt' ? 'strikethrough-text' : ''}">${t.title}</span>
+                                                            <span class="${t.status === 'erledigt' ? 'strikethrough-text' : ''}">${escapeHTML(t.title)}</span>
                                                         </td>
                                                         <td style="padding: 10px 10px;">${statusBadge}</td>
                                                         <td style="padding: 10px 10px; color: #cbd5e1; font-size: 0.82rem;">
@@ -473,8 +473,8 @@ export class DashboardModule {
                                         <div class="d-flex align-items-center gap-2">
                                             <span style="font-size: 1.2rem;">${m.avatar}</span>
                                             <div>
-                                                <strong style="font-size: 0.9rem;">${m.name}</strong>
-                                                <small class="d-block text-muted" style="font-size: 0.75rem;">${m.role}</small>
+                                                <strong style="font-size: 0.9rem;">${escapeHTML(m.name)}</strong>
+                                                <small class="d-block text-muted" style="font-size: 0.75rem;">${escapeHTML(m.role)}</small>
                                             </div>
                                         </div>
                                         <span class="badge" style="background: ${m.color}33; color: ${m.color}; border: 1px solid ${m.color}; font-size: 0.78rem;">
@@ -494,8 +494,8 @@ export class DashboardModule {
                                     <div class="member-modal-box mb-3 p-2" style="background: rgba(255,255,255,0.03); border-radius: 8px; border-left: 4px solid ${m.color}">
                                         <div class="d-flex align-items-center gap-2 mb-2 pb-1" style="border-bottom: 1px solid rgba(255,255,255,0.06);">
                                             <span>${m.avatar}</span>
-                                            <strong style="font-size: 0.92rem; color: #ffffff;">${m.name}</strong>
-                                            <small style="color: ${m.color}; font-weight: 600; font-size: 0.75rem;">(${m.role})</small>
+                                            <strong style="font-size: 0.92rem; color: #ffffff;">${escapeHTML(m.name)}</strong>
+                                            <small style="color: ${m.color}; font-weight: 600; font-size: 0.75rem;">(${escapeHTML(m.role)})</small>
                                             <span class="badge ms-auto" style="background: ${m.color}22; color: ${m.color}; font-size: 0.72rem;">${memberTasks.length} Aufgaben</span>
                                         </div>
 
@@ -505,7 +505,7 @@ export class DashboardModule {
                                                 return `
                                                     <div class="d-flex align-items-center justify-content-between py-1 px-2 mb-1" style="background: rgba(0,0,0,0.3); border-radius: 5px; font-size: 0.82rem;">
                                                         <span class="${t.status === 'erledigt' ? 'strikethrough-text' : ''}" style="color: #f1f5f9;">
-                                                            • ${t.title}
+                                                            • ${escapeHTML(t.title)}
                                                         </span>
                                                         <small class="text-muted" style="font-size: 0.72rem; margin-left: 8px;">
                                                             ${cat.icon} ${cat.name}
@@ -617,7 +617,7 @@ export class DashboardModule {
                             <div class="legend-item d-flex align-items-center gap-2 p-2" style="background: rgba(255,255,255,0.03); border-radius: 6px; border-left: 3px solid ${m.color}">
                                 <span style="font-size: 1rem;">${m.avatar}</span>
                                 <div>
-                                    <div style="font-weight: bold; font-size: 0.8rem; color: #fff;">${m.name}</div>
+                                    <div style="font-weight: bold; font-size: 0.8rem; color: #fff;">${escapeHTML(m.name)}</div>
                                     <small style="color: ${m.color}; font-size: 0.72rem;">${m.completed} von ${m.total} erledigt (${m.percentage}%)</small>
                                 </div>
                             </div>

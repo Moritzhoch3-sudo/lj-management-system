@@ -1,7 +1,7 @@
 /**
  * Contracts & Documents Vault Module - Direct In-Box Creation & Card Editing (PIN Protected)
  */
-import { StorageEngine } from '../storage.js';
+import { StorageEngine, escapeHTML } from '../storage.js';
 
 export class ContractsModule {
     static render(containerEl) {
@@ -83,12 +83,12 @@ export class ContractsModule {
                         ` : contracts.map(c => `
                             <div class="contract-card card-glow" id="contract-card-${c.id}">
                                 <div class="contract-header">
-                                    <span class="category-badge">${c.category || 'Allgemein'}</span>
+                                    <span class="category-badge">${escapeHTML(c.category || 'Allgemein')}</span>
                                     <span class="badge ${c.status === 'Aktiv' ? 'badge-success' : 'badge-warning'}">${c.status}</span>
                                 </div>
-                                <h3 class="contract-title">${c.title}</h3>
-                                <p class="contract-partner">🤝 Vertragspartner: <strong>${c.partner}</strong></p>
-                                <p class="contract-summary">${c.summary || ''}</p>
+                                <h3 class="contract-title">${escapeHTML(c.title)}</h3>
+                                <p class="contract-partner">🤝 Vertragspartner: <strong>${escapeHTML(c.partner)}</strong></p>
+                                <p class="contract-summary">${escapeHTML(c.summary || '')}</p>
                                 
                                 <div class="contract-dates-box mb-2">
                                     <div>📅 Beginn: <strong>${c.startDate || '-'}</strong></div>
@@ -97,7 +97,7 @@ export class ContractsModule {
 
                                 ${c.costNotice ? `
                                     <div class="contract-cost-badge mb-2">
-                                        💡 ${c.costNotice}
+                                        💡 ${escapeHTML(c.costNotice)}
                                     </div>
                                 ` : ''}
 
@@ -109,9 +109,9 @@ export class ContractsModule {
                                 <!-- INLINE EDIT FORM INSIDE CARD -->
                                 <form class="inline-con-edit-form p-2 mt-2 hidden" id="inline-con-edit-${c.id}" data-id="${c.id}" style="background: rgba(0,0,0,0.5); border-radius: 6px; border: 1px dashed var(--border-color);">
                                     <strong style="color: #34d399; font-size: 0.85rem;" class="d-block mb-1">✏️ Vertrag vor Ort bearbeiten</strong>
-                                    <input type="text" class="form-control form-control-sm mb-1 edit-con-title" value="${c.title}" required placeholder="Titel" />
-                                    <input type="text" class="form-control form-control-sm mb-1 edit-con-partner" value="${c.partner}" required placeholder="Partner" />
-                                    <input type="text" class="form-control form-control-sm mb-1 edit-con-category" value="${c.category || ''}" placeholder="Kategorie" />
+                                    <input type="text" class="form-control form-control-sm mb-1 edit-con-title" value="${escapeHTML(c.title)}" required placeholder="Titel" />
+                                    <input type="text" class="form-control form-control-sm mb-1 edit-con-partner" value="${escapeHTML(c.partner)}" required placeholder="Partner" />
+                                    <input type="text" class="form-control form-control-sm mb-1 edit-con-category" value="${escapeHTML(c.category || '')}" placeholder="Kategorie" />
                                     
                                     <div class="d-flex gap-1 mb-1">
                                         <select class="form-select form-select-sm edit-con-status">
@@ -123,8 +123,8 @@ export class ContractsModule {
                                         <input type="date" class="form-control form-control-sm edit-con-end" value="${c.endDate || ''}" />
                                     </div>
                                     
-                                    <input type="text" class="form-control form-control-sm mb-1 edit-con-cost" value="${c.costNotice || ''}" placeholder="Kosten/Hinweis" />
-                                    <textarea class="form-control form-control-sm mb-2 edit-con-summary" rows="2" placeholder="Details...">${c.summary || ''}</textarea>
+                                    <input type="text" class="form-control form-control-sm mb-1 edit-con-cost" value="${escapeHTML(c.costNotice || '')}" placeholder="Kosten/Hinweis" />
+                                    <textarea class="form-control form-control-sm mb-2 edit-con-summary" rows="2" placeholder="Details...">${escapeHTML(c.summary || '')}</textarea>
                                     
                                     <div class="d-flex justify-content-end gap-1">
                                         <button type="button" class="btn btn-sm btn-ghost cancel-con-edit-btn" data-id="${c.id}">Abbrechen</button>

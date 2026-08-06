@@ -1,7 +1,7 @@
 /**
  * Finance & Cashbook Module - Direct In-Box & In-Table Creation & Editing (PIN Protected)
  */
-import { StorageEngine } from '../storage.js';
+import { StorageEngine, escapeHTML } from '../storage.js';
 
 export class FinanceModule {
     static render(containerEl) {
@@ -120,11 +120,11 @@ export class FinanceModule {
                                     <tr class="finance-row">
                                         <td>${f.date}</td>
                                         <td>
-                                            <strong>${f.title}</strong>
-                                            ${f.notes ? `<br><small class="text-muted">${f.notes}</small>` : ''}
+                                            <strong>${escapeHTML(f.title)}</strong>
+                                            ${f.notes ? `<br><small class="text-muted">${escapeHTML(f.notes)}</small>` : ''}
                                         </td>
-                                        <td><span class="badge badge-neutral">${f.category || 'Allgemein'}</span></td>
-                                        <td><code>${f.receipt || '-'}</code></td>
+                                        <td><span class="badge badge-neutral">${escapeHTML(f.category || 'Allgemein')}</span></td>
+                                        <td><code>${escapeHTML(f.receipt || '-')}</code></td>
                                         <td>
                                             <span class="badge ${f.type === 'einnahme' ? 'badge-success' : 'badge-danger'}">
                                                 ${f.type === 'einnahme' ? 'Einnahme' : 'Ausgabe'}
@@ -157,7 +157,7 @@ export class FinanceModule {
                                                     </div>
                                                     <div class="col-md-3">
                                                         <label class="form-label small mb-1">Titel / Verwendungszweck *</label>
-                                                        <input type="text" class="form-control form-control-sm fin-edit-title" value="${f.title}" required />
+                                                        <input type="text" class="form-control form-control-sm fin-edit-title" value="${escapeHTML(f.title)}" required />
                                                     </div>
                                                     <div class="col-md-2">
                                                         <label class="form-label small mb-1">Typ</label>
@@ -172,18 +172,18 @@ export class FinanceModule {
                                                     </div>
                                                     <div class="col-md-3">
                                                         <label class="form-label small mb-1">Kategorie</label>
-                                                        <input type="text" class="form-control form-control-sm fin-edit-category" value="${f.category || ''}" />
+                                                        <input type="text" class="form-control form-control-sm fin-edit-category" value="${escapeHTML(f.category || '')}" />
                                                     </div>
                                                 </div>
 
                                                 <div class="row g-2 align-items-end">
                                                     <div class="col-md-4">
                                                         <label class="form-label small mb-1">Beleg-Nr.</label>
-                                                        <input type="text" class="form-control form-control-sm fin-edit-receipt" value="${f.receipt || ''}" />
+                                                        <input type="text" class="form-control form-control-sm fin-edit-receipt" value="${escapeHTML(f.receipt || '')}" />
                                                     </div>
                                                     <div class="col-md-5">
                                                         <label class="form-label small mb-1">Notizen</label>
-                                                        <input type="text" class="form-control form-control-sm fin-edit-notes" value="${f.notes || ''}" />
+                                                        <input type="text" class="form-control form-control-sm fin-edit-notes" value="${escapeHTML(f.notes || '')}" />
                                                     </div>
                                                     <div class="col-md-3 text-end">
                                                         <button type="submit" class="btn btn-sm btn-emerald w-100">💾 Speichern</button>

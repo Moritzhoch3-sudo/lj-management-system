@@ -2,7 +2,7 @@
  * Settings Module: Public Member & Category Management + Admin PIN, Passwords & System Reset Section
  */
 import { BOARD_ROLE_OPTIONS } from '../data.js';
-import { StorageEngine } from '../storage.js';
+import { StorageEngine, escapeHTML } from '../storage.js';
 import { AppAuth } from './auth.js';
 import { VaultGuard } from './vault.js';
 
@@ -66,14 +66,14 @@ export class SettingsModule {
                                                 <input type="text" class="form-control form-control-sm m-avatar" value="${m.avatar}" style="width: 42px; text-align: center;" />
                                             </td>
                                             <td>
-                                                <input type="text" class="form-control form-control-sm m-name" value="${m.name}" placeholder="Name..." />
+                                                <input type="text" class="form-control form-control-sm m-name" value="${escapeHTML(m.name)}" placeholder="Name..." />
                                             </td>
                                             <td>
                                                 <select class="form-select form-select-sm m-role">
                                                     ${BOARD_ROLE_OPTIONS.map(r => `
                                                         <option value="${r}" ${m.role.startsWith(r) || m.role.includes(r) ? 'selected' : ''}>${r}</option>
                                                     `).join('')}
-                                                    <option value="${m.role}" ${!BOARD_ROLE_OPTIONS.some(r => m.role.startsWith(r)) ? 'selected' : ''}>Sonstiges (${m.role})</option>
+                                                    <option value="${escapeHTML(m.role)}" ${!BOARD_ROLE_OPTIONS.some(r => m.role.startsWith(r)) ? 'selected' : ''}>Sonstiges (${escapeHTML(m.role)})</option>
                                                 </select>
                                             </td>
                                             <td>
@@ -114,7 +114,7 @@ export class SettingsModule {
                                                 <input type="text" class="form-control form-control-sm c-icon" value="${c.icon}" style="width: 48px; text-align: center; font-size: 1.1rem;" />
                                             </td>
                                             <td>
-                                                <input type="text" class="form-control form-control-sm c-name" value="${c.name}" placeholder="Kategorie Name..." />
+                                                <input type="text" class="form-control form-control-sm c-name" value="${escapeHTML(c.name)}" placeholder="Kategorie Name..." />
                                             </td>
                                             <td>
                                                 <button class="btn btn-sm btn-ghost danger-text delete-c-btn" data-id="${c.id}" title="Löschen">🗑️</button>
@@ -162,7 +162,7 @@ export class SettingsModule {
                                         
                                         <!-- PROMINENT RED BUTTON TO RESET ALL MEMBER PASSWORDS -->
                                         <button type="button" class="btn btn-danger text-nowrap" id="reset-member-passwords-btn" style="padding: 0.65rem; font-weight: 800; border: 1px solid rgba(239,68,68,0.5); box-shadow: 0 4px 15px rgba(239,68,68,0.3);">
-                                            🔴 Alle Mitglieds-Passwörter auf Standard zurücksetzen
+                                            🔴 Alle Mitglieds-Passwörter zurücksetzen
                                         </button>
                                     </div>
                                 </form>
@@ -190,14 +190,15 @@ export class SettingsModule {
                                                     return `
                                                         <tr>
                                                             <td>
-                                                                <strong style="color: #fff;">${m.avatar} ${m.name}</strong>
-                                                                <small class="d-block text-muted">${m.role}</small>
+                                                                <strong style="color: #fff;">${m.avatar} ${escapeHTML(m.name)}</strong>
+                                                                <small class="d-block text-muted">${escapeHTML(m.role)}</small>
                                                             </td>
                                                             <td>
                                                                 <code style="color: #38bdf8;">${uname}</code>
                                                             </td>
                                                             <td>
-                                                                <span class="badge bg-dark border text-emerald p-2" style="font-family: monospace; font-size: 0.85rem;">${pass}</span>
+                                                                <span class="badge bg-dark border text-emerald p-2 me-2" style="font-family: monospace; font-size: 0.85rem;">${pass ? '••••••••' : '(Leer)'}</span>
+                                                                <button type="button" class="btn btn-sm btn-ghost danger-text admin-reset-pass-btn" data-id="${m.id}">Reset</button>
                                                             </td>
                                                         </tr>
                                                     `;
@@ -408,7 +409,7 @@ export class SettingsModule {
 
                     <div class="modal-body p-3">
                         <p class="mb-3" style="font-size: 0.95rem; color: #ffffff; line-height: 1.4;">
-                            Wollen Sie wirklich alle Passwörter aller Mitglieder auf das Standard-Passwort <strong>'landjugend-scheuring'</strong> zurücksetzen?
+                            Wollen Sie wirklich alle Passwörter aller Mitglieder zurücksetzen?
                         </p>
                         
                         <small class="text-muted d-block mb-4" style="font-size: 0.8rem;">
@@ -436,9 +437,21 @@ export class SettingsModule {
             modal.querySelector('.confirm-reset-btn')?.addEventListener('click', () => {
                 StorageEngine.resetAllMemberPasswordsExceptAdmin();
                 closeModal();
-                alert("✅ Alle Mitglieds-Passwörter (außer Admin Moritz Kubik) wurden erfolgreich auf 'landjugend-scheuring' zurückgesetzt!");
+                alert("✅ Alle Mitglieds-Passwörter (außer Admin Moritz Kubik) wurden erfolgreich zurückgesetzt!");
                 this.render(containerEl, onMembersUpdatedCallback);
                 setActiveTab(btnPin, viewPin);
+            });
+        });
+
+        // Individual Member Password Reset Button
+        containerEl.querySelectorAll('.admin-reset-pass-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.currentTarget.dataset.id;
+                if (confirm('Passwort für dieses Mitglied wirklich zurücksetzen?')) {
+                    StorageEngine.deleteMemberPassword(id);
+                    this.render(containerEl, onMembersUpdatedCallback);
+                    setActiveTab(btnPin, viewPin);
+                }
             });
         });
 
