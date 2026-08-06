@@ -180,8 +180,12 @@ class App {
                             💾 1. Lokale Aufgaben & Daten herunterladen (.json)
                         </button>
 
+                        <button class="btn btn-primary w-100 p-2 font-bold" id="push-cloud-now-action" style="background: #00873D; border-color: #00873D;">
+                            ⚡ 2. Aktuelle Laptop-Aufgaben JETZT live in die Cloud pushen
+                        </button>
+
                         <div class="p-3 border rounded" style="background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.1) !important;">
-                            <label class="form-label small text-emerald font-bold mb-2">📤 2. Sicherungsdatei hochladen & für den Vorstand freigeben:</label>
+                            <label class="form-label small text-emerald font-bold mb-2">📤 3. Sicherungsdatei hochladen & für den Vorstand freigeben:</label>
                             <input type="file" id="backup-upload-input" accept=".json" class="form-control form-control-sm" />
                         </div>
                     </div>
@@ -200,6 +204,12 @@ class App {
 
         modal.querySelector('#backup-download-action').onclick = () => {
             StorageEngine.exportFullBackupJSON();
+        };
+
+        modal.querySelector('#push-cloud-now-action').onclick = async () => {
+            await CloudStorageEngine.pushAllToCloud();
+            alert('🚀 Alle deinen aktuellen Laptop-Aufgaben wurden erfolgreich live in die Cloud hochgeladen!');
+            closeModal();
         };
 
         modal.querySelector('#backup-upload-input').onchange = (e) => {

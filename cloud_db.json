@@ -1,5 +1,5 @@
 {
-  "_updatedAt": 1786013617177,
+  "_updatedAt": 1786015771616,
   "members": [
     {
       "id": "m0",
@@ -7,7 +7,7 @@
       "role": "Beisitzer",
       "avatar": "👤",
       "color": "#64748b",
-      "bgLight": "rgba(100, 116, 139, 0.15)"
+      "bgLight": "#64748b22"
     },
     {
       "id": "m1",
@@ -15,7 +15,7 @@
       "role": "1. Vorstand",
       "avatar": "👱‍♂️",
       "color": "#10b981",
-      "bgLight": "rgba(16, 185, 129, 0.15)"
+      "bgLight": "#10b98122"
     },
     {
       "id": "m2",
@@ -23,7 +23,7 @@
       "role": "2. Vorstand",
       "avatar": "👱‍♀️",
       "color": "#06b6d4",
-      "bgLight": "rgba(6, 182, 212, 0.15)"
+      "bgLight": "#06b6d422"
     },
     {
       "id": "m3",
@@ -31,7 +31,7 @@
       "role": "1. Kassier",
       "avatar": "👩‍💻",
       "color": "#f59e0b",
-      "bgLight": "rgba(245, 158, 11, 0.15)"
+      "bgLight": "#f59e0b22"
     },
     {
       "id": "m4",
@@ -47,7 +47,7 @@
       "role": "1. Schriftführer",
       "avatar": "📝",
       "color": "#ec4899",
-      "bgLight": "rgba(236, 72, 153, 0.15)"
+      "bgLight": "#ec489922"
     },
     {
       "id": "m6",
@@ -55,7 +55,7 @@
       "role": "2. Schriftführer",
       "avatar": "📋",
       "color": "#6366f1",
-      "bgLight": "rgba(99, 102, 241, 0.15)"
+      "bgLight": "#6366f122"
     },
     {
       "id": "m7",
@@ -63,7 +63,7 @@
       "role": "Getränkewart",
       "avatar": "🍺",
       "color": "#ef4444",
-      "bgLight": "rgba(239, 68, 68, 0.15)"
+      "bgLight": "#ef444422"
     },
     {
       "id": "m8",
@@ -71,7 +71,7 @@
       "role": "Beisitzer",
       "avatar": "🎪",
       "color": "#8b5cf6",
-      "bgLight": "rgba(139, 92, 246, 0.15)"
+      "bgLight": "#8b5cf622"
     },
     {
       "id": "m9",
@@ -79,7 +79,7 @@
       "role": "Beisitzer",
       "avatar": "🌱",
       "color": "#14b8a6",
-      "bgLight": "rgba(20, 184, 166, 0.15)"
+      "bgLight": "#14b8a622"
     },
     {
       "id": "m10",
@@ -87,7 +87,7 @@
       "role": "Beisitzer",
       "avatar": "🔧",
       "color": "#3b82f6",
-      "bgLight": "rgba(59, 130, 246, 0.15)"
+      "bgLight": "#3b82f622"
     },
     {
       "id": "m11",
@@ -95,7 +95,7 @@
       "role": "Beisitzer",
       "avatar": "📸",
       "color": "#a855f7",
-      "bgLight": "rgba(168, 85, 247, 0.15)"
+      "bgLight": "#a855f722"
     },
     {
       "id": "m12",
@@ -103,7 +103,7 @@
       "role": "Beisitzer",
       "avatar": "🔊",
       "color": "#f97316",
-      "bgLight": "rgba(249, 115, 22, 0.15)"
+      "bgLight": "#f9731622"
     }
   ],
   "categories": [
