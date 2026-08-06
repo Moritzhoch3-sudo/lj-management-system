@@ -4,50 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Landjugend Scheuring | Vorstands-Zentrale</title>
-    <meta name="description" content="Zentrales Verwaltungssystem für die Vorstandschaft der Landjugend Scheuring. Aufgaben-Verwaltung, Personen-Dashboard mit Prozentanzeigen, PIN-geschütztes Kassenbuch, Verträge & Audio-Sitzungstranskription.">
+    <meta name="description" content="Zentrales Verwaltungssystem für die Vorstandschaft der Landjugend Scheuring. Aufgaben-Verwaltung, Personen-Dashboard, Kassenbuch, Verträge & Audio-Sitzungstranskription.">
     
     <!-- Google Fonts: Montserrat & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Stylesheets with Cache-Buster Tags -->
-    <link rel="stylesheet" href="css/main.css?v=5.0">
-    <link rel="stylesheet" href="css/components.css?v=5.0">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/main.css?v=6.0">
+    <link rel="stylesheet" href="css/components.css?v=6.0">
 </head>
 <body>
-    <!-- Streamlined App Header & Navigation Bar -->
+    <!-- Streamlined App Header -->
     <header class="app-header">
         <div class="header-container d-flex align-items-center justify-content-between">
             <!-- Brand Logo & Title -->
             <div class="brand-logo d-flex align-items-center gap-2">
                 <img src="assets/logo_white.png" alt="Landjugend Scheuring Logo" class="brand-logo-img" />
                 <div class="brand-text">
-                    <div class="brand-header-row d-flex align-items-center gap-2">
-                        <h1 class="font-logo-heading m-0" style="font-size: 1.25rem;">Vorstands-Zentrale</h1>
-                        <span class="version-badge">v1.0</span>
+                    <div class="brand-header-row d-flex align-items-center gap-1.5">
+                        <h1 class="font-logo-heading m-0" style="font-size: 1.1rem; color: #fff;">Vorstands-Zentrale</h1>
+                        <span class="version-badge" style="font-size: 0.68rem; padding: 0.15rem 0.4rem;">v1.0</span>
                     </div>
-                    <span class="brand-sub">Landjugend Scheuring</span>
+                    <span class="brand-sub" style="font-size: 0.76rem; color: rgba(255,255,255,0.85);">Landjugend Scheuring</span>
                 </div>
             </div>
 
-            <!-- Current Active View Pill Indicator (Desktop & Tablet) -->
-            <div class="active-view-pill-badge d-none d-md-flex align-items-center gap-2 p-2 rounded" id="header-active-view-badge" style="background: rgba(0,135,61,0.2); border: 1px solid rgba(0,135,61,0.4); font-size: 0.9rem; font-weight: 700; color: #34d399;">
-                <span class="view-icon">✅</span>
-                <span class="view-title">Aufgaben</span>
-            </div>
-
-            <!-- Header Actions & Navigation Drawer Toggle -->
+            <!-- Header Right Actions: Side-by-side Buttons & Hamburger Menu -->
             <div class="header-right-actions d-flex align-items-center gap-2">
-                <!-- SIDE-BY-SIDE EXPORT/BACKUP BUTTONS ON DESKTOP -->
-                <div class="action-buttons-pair d-none d-lg-flex align-items-center gap-2">
-                    <button class="btn btn-sm btn-ghost text-nowrap" id="import-backup-btn" title="Aufgaben & Daten sichern/importieren">💾 Sicherung / Import</button>
-                    <button class="btn btn-sm btn-emerald text-nowrap" id="export-excel-btn" title="Dashboard als Excel exportieren">📊 Export Excel</button>
+                <!-- Side-by-side Action Buttons -->
+                <div class="action-buttons-pair d-none d-md-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-ghost text-nowrap" id="import-backup-btn" title="Daten sichern / wiederherstellen" style="font-size: 0.82rem; padding: 0.35rem 0.65rem;">💾 Sicherung</button>
+                    <button class="btn btn-sm btn-emerald text-nowrap" id="export-excel-btn" title="Dashboard als Excel exportieren" style="font-size: 0.82rem; padding: 0.35rem 0.65rem;">📊 Excel Export</button>
                 </div>
 
-                <!-- Hamburger Navigation Drawer Toggle Button -->
-                <button class="btn btn-emerald btn-hamburger-menu d-flex align-items-center gap-2" id="open-nav-drawer-btn" title="Hauptmenü öffnen" style="padding: 0.55rem 0.95rem; font-weight: 800; box-shadow: 0 4px 15px rgba(0,135,61,0.35);">
-                    <span class="hamburger-icon" style="font-size: 1.3rem; line-height: 1;">☰</span>
+                <!-- Compact Hamburger Menu Button -->
+                <button class="btn btn-emerald btn-hamburger-menu d-flex align-items-center gap-1.5" id="open-nav-drawer-btn" title="Hauptmenü öffnen" style="padding: 0.4rem 0.8rem; font-size: 0.88rem; font-weight: 700;">
+                    <span class="hamburger-icon" style="font-size: 1.1rem; line-height: 1;">☰</span>
                     <span class="menu-label">Menü</span>
                 </button>
             </div>

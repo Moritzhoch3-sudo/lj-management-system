@@ -1,5 +1,5 @@
 /**
- * Main Application Orchestrator & View Controller (Smooth Navigation & Sleek Navigation Drawer)
+ * Main Application Orchestrator & View Controller (Bright Friendly Light Theme & Compact Navigation Drawer)
  */
 import { StorageEngine, escapeHTML } from './storage.js';
 import { CloudStorageEngine } from './cloud-storage.js';
@@ -44,7 +44,6 @@ class App {
         if (headerEl) headerEl.style.display = 'block';
 
         this.bindGlobalEvents();
-        this.updateHeaderActivePill();
         this.switchTab(activeTab);
     }
 
@@ -59,31 +58,13 @@ class App {
         return authorizedKeywords.some(kw => role.includes(kw));
     }
 
-    static updateHeaderActivePill() {
-        const badgeEl = document.getElementById('header-active-view-badge');
-        if (!badgeEl) return;
-
-        const titles = {
-            tasks: { icon: '✅', name: 'Aufgaben' },
-            dashboard: { icon: '📊', name: 'Dashboard' },
-            finance: { icon: '💰', name: 'Finanzen' },
-            contracts: { icon: '📋', name: 'Verträge' },
-            minutes: { icon: '🎙️', name: 'Sitzungen & Audio' },
-            settings: { icon: '⚙️', name: 'Einstellungen' },
-            password: { icon: '🔑', name: 'Passwort ändern' }
-        };
-
-        const current = titles[activeTab] || titles.tasks;
-        badgeEl.innerHTML = `<span class="view-icon">${current.icon}</span> <span class="view-title">${current.name}</span>`;
-    }
-
     static bindGlobalEvents() {
         // Open Navigation Drawer on Hamburger Menu Click
         document.getElementById('open-nav-drawer-btn')?.addEventListener('click', () => {
             this.openNavDrawer();
         });
 
-        // Desktop Action Buttons (Side-by-side backup/import & Excel export)
+        // Side-by-side Action Buttons
         document.getElementById('export-excel-btn')?.addEventListener('click', () => {
             StorageEngine.exportExcelDashboard();
         });
@@ -106,13 +87,13 @@ class App {
         const isAdmin = StorageEngine.isSuperAdmin(currentUserId);
 
         const tabItems = [
-            { id: 'tasks', name: 'Aufgaben', icon: '✅', desc: 'Zentrale Aufgabenliste' },
-            { id: 'dashboard', name: 'Dashboard', icon: '📊', desc: 'Vorstands-Fortschritte (%)' },
-            { id: 'finance', name: 'Finanzen 🔒', icon: '💰', desc: 'Kassenbuch & Belegnachweis', protected: true },
-            { id: 'contracts', name: 'Verträge 🔒', icon: '📋', desc: 'Pacht & Sponsoring', protected: true },
-            { id: 'minutes', name: 'Sitzungen & Audio 🔒', icon: '🎙️', desc: 'Protokolle & KI-Transkript', protected: true },
-            { id: 'settings', name: 'Einstellungen (Admin)', icon: '⚙️', desc: 'Mitglieder & Kategorien', adminOnly: true },
-            { id: 'password', name: 'Passwort ändern', icon: '🔑', desc: 'Persönliches Passwort' }
+            { id: 'tasks', name: 'Aufgaben-Verwaltung', icon: '✅' },
+            { id: 'dashboard', name: 'Vorstands-Dashboard', icon: '📊' },
+            { id: 'finance', name: 'Finanzen & Kassenbuch 🔒', icon: '💰', protected: true },
+            { id: 'contracts', name: 'Verträge & Sponsoring 🔒', icon: '📋', protected: true },
+            { id: 'minutes', name: 'Sitzungen & KI-Audio 🔒', icon: '🎙️', protected: true },
+            { id: 'settings', name: 'Einstellungen (Admin)', icon: '⚙️', adminOnly: true },
+            { id: 'password', name: 'Passwort ändern', icon: '🔑' }
         ];
 
         const closeModal = () => {
@@ -121,29 +102,29 @@ class App {
         };
 
         modal.innerHTML = `
-            <div class="modal-card nav-drawer-card" style="max-width: 480px; width: 95vw; border: 1px solid rgba(0,135,61,0.4); box-shadow: 0 25px 60px rgba(0,0,0,0.9); padding: 0;">
-                <div class="modal-header d-flex align-items-center justify-content-between p-3" style="border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3);">
+            <div class="modal-card nav-drawer-card" style="max-width: 440px; width: 95vw; padding: 0;">
+                <div class="modal-header d-flex align-items-center justify-content-between p-3" style="border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
                     <div class="d-flex align-items-center gap-2">
-                        <img src="assets/logo_white.png" style="width: 28px; height: 28px; object-fit: contain;" />
-                        <h3 style="font-size: 1.15rem; color: #fff; margin: 0; font-weight: 800;">Navigation & Menü</h3>
+                        <img src="assets/logo_white.png" style="width: 24px; height: 24px; object-fit: contain; filter: invert(1);" />
+                        <h3 style="font-size: 1.05rem; color: #0f172a; margin: 0; font-weight: 800;">Navigation & Menü</h3>
                     </div>
-                    <button class="btn btn-ghost modal-close modal-close-x" style="font-size: 1.6rem; line-height: 1; padding: 0.2rem 0.6rem;">&times;</button>
+                    <button class="btn btn-ghost modal-close modal-close-x" style="font-size: 1.4rem; line-height: 1; padding: 0.15rem 0.5rem;">&times;</button>
                 </div>
 
-                <div class="modal-body p-3" style="max-height: 78vh; overflow-y: auto;">
+                <div class="modal-body p-3" style="max-height: 80vh; overflow-y: auto;">
                     <!-- User Profile & Switcher Box -->
-                    <div class="p-3 mb-3 rounded d-flex align-items-center justify-content-between gap-2" style="background: rgba(0,0,0,0.4); border: 1px solid ${currentUser.color || '#00873D'}66;">
+                    <div class="p-2.5 mb-3 rounded d-flex align-items-center justify-content-between gap-2" style="background: #f8fafc; border: 1px solid #e2e8f0;">
                         <div class="d-flex align-items-center gap-2">
-                            <span style="font-size: 1.6rem; background: rgba(255,255,255,0.06); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid ${currentUser.color || '#00873D'};">
+                            <span style="font-size: 1.3rem; background: #ffffff; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid ${currentUser.color || '#00873D'};">
                                 ${currentUser.avatar}
                             </span>
                             <div>
-                                <strong style="color: #fff; display: block; font-size: 0.95rem;">${escapeHTML(currentUser.name)}</strong>
-                                <small style="color: ${currentUser.color || '#34d399'}; font-weight: bold;">${escapeHTML(currentUser.role)}</small>
+                                <strong style="color: #0f172a; display: block; font-size: 0.88rem;">${escapeHTML(currentUser.name)}</strong>
+                                <small style="color: #00873D; font-weight: 700;">${escapeHTML(currentUser.role)}</small>
                             </div>
                         </div>
 
-                        <select id="drawer-user-select" class="form-select form-select-sm" style="max-width: 140px; font-size: 0.82rem; background: rgba(0,0,0,0.5); font-weight: 600;">
+                        <select id="drawer-user-select" class="form-select form-select-sm" style="max-width: 140px; font-size: 0.8rem; font-weight: 600;">
                             ${members.map(m => `
                                 <option value="${m.id}" ${m.id === currentUserId ? 'selected' : ''}>
                                     ${m.avatar} ${escapeHTML(m.name)}
@@ -152,50 +133,43 @@ class App {
                         </select>
                     </div>
 
-                    <!-- Navigation Items List -->
-                    <h5 style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.6rem; font-weight: 700;">📌 BEREICHE WÄHLEN:</h5>
-                    <div class="drawer-nav-list d-flex flex-column gap-2 mb-3">
+                    <!-- Single-Line Navigation Items List (Compact & Sleek) -->
+                    <h5 style="font-size: 0.78rem; color: #64748b; margin-bottom: 0.4rem; font-weight: 700; text-transform: uppercase;">📌 SEITE WÄHLEN:</h5>
+                    <div class="drawer-nav-list d-flex flex-column gap-1 mb-3">
                         ${tabItems.map(item => {
                             if (item.protected && !isVaultAuthorized) return '';
                             if (item.adminOnly && !isAdmin) return '';
                             const isActive = activeTab === item.id;
                             return `
-                                <button class="btn nav-drawer-item p-2.5 rounded text-start d-flex align-items-center justify-content-between ${isActive ? 'active' : ''}" 
-                                        data-drawer-tab="${item.id}"
-                                        style="${isActive 
-                                            ? 'background: rgba(0, 135, 61, 0.25); border: 1px solid #00873D; color: #34d399;' 
-                                            : 'background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #e2e8f0;'}">
+                                <button class="btn nav-drawer-item-compact ${isActive ? 'active' : ''}" data-drawer-tab="${item.id}">
                                     <div class="d-flex align-items-center gap-2">
-                                        <span style="font-size: 1.25rem;">${item.icon}</span>
-                                        <div>
-                                            <strong style="display: block; font-size: 0.95rem;">${item.name}</strong>
-                                            <small style="color: var(--text-muted); font-size: 0.76rem;">${item.desc}</small>
-                                        </div>
+                                        <span style="font-size: 1.1rem;">${item.icon}</span>
+                                        <span style="font-size: 0.88rem; font-weight: 600;">${item.name}</span>
                                     </div>
-                                    ${isActive ? '<span class="badge badge-success">Aktiv</span>' : ''}
+                                    ${isActive ? '<span class="badge badge-success" style="font-size: 0.7rem; padding: 0.15rem 0.45rem;">Aktiv</span>' : '<span style="color: #94a3b8;">›</span>'}
                                 </button>
                             `;
                         }).join('')}
                     </div>
 
-                    <!-- SIDE-BY-SIDE EXPORT & BACKUP BUTTONS (Exact user requirement!) -->
-                    <h5 style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.6rem; font-weight: 700; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.8rem;">💾 DATEN-AKTIONEN:</h5>
+                    <!-- Side-by-Side Export & Backup Actions -->
+                    <h5 style="font-size: 0.78rem; color: #64748b; margin-bottom: 0.4rem; font-weight: 700; text-transform: uppercase; border-top: 1px solid #e2e8f0; padding-top: 0.6rem;">💾 DATEN & EXPORT:</h5>
                     <div class="drawer-action-pair d-flex gap-2">
-                        <button class="btn btn-sm btn-ghost text-nowrap flex-1 w-50 p-2 font-bold" id="drawer-import-backup-btn" style="border: 1px solid rgba(255,255,255,0.15); font-size: 0.85rem;">
-                            💾 Sicherung / Import
+                        <button class="btn btn-sm btn-ghost text-nowrap flex-1 w-50 p-2 font-bold" id="drawer-import-backup-btn" style="font-size: 0.82rem;">
+                            💾 Sicherung
                         </button>
-                        <button class="btn btn-sm btn-emerald text-nowrap flex-1 w-50 p-2 font-bold" id="drawer-export-excel-btn" style="font-size: 0.85rem;">
-                            📊 Export Excel
+                        <button class="btn btn-sm btn-emerald text-nowrap flex-1 w-50 p-2 font-bold" id="drawer-export-excel-btn" style="font-size: 0.82rem;">
+                            📊 Excel Export
                         </button>
                     </div>
                 </div>
 
-                <div class="modal-footer p-3 d-flex align-items-center justify-content-between" style="border-top: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3);">
-                    <button class="btn btn-sm btn-ghost danger-text font-bold" id="drawer-logout-btn" style="font-size: 0.88rem;">
+                <div class="modal-footer p-2.5 d-flex align-items-center justify-content-between" style="border-top: 1px solid #e2e8f0; background: #f8fafc;">
+                    <button class="btn btn-sm btn-ghost danger-text font-bold" id="drawer-logout-btn" style="font-size: 0.82rem;">
                         🚪 Abmelden
                     </button>
-                    <button class="btn btn-sm btn-secondary modal-close p-2 font-bold" style="font-size: 0.88rem;">
-                        ✖️ Menü Schließen
+                    <button class="btn btn-sm btn-secondary modal-close p-1.5 font-bold" style="font-size: 0.82rem;">
+                        ✖️ Schließen
                     </button>
                 </div>
             </div>
@@ -276,9 +250,9 @@ class App {
         modal.className = 'modal-backdrop active';
 
         modal.innerHTML = `
-            <div class="modal-card" style="max-width: 480px; width: 100%; border: 1px solid rgba(0,135,61,0.4);">
+            <div class="modal-card" style="max-width: 460px; width: 100%; border: 1px solid #00873D;">
                 <div class="modal-header">
-                    <h3 style="font-size: 1.1rem; color: #fff;">💾 Daten-Sicherung & Cloud-Transfer</h3>
+                    <h3 style="font-size: 1.05rem; color: #0f172a;">💾 Daten-Sicherung & Cloud-Transfer</h3>
                     <button class="btn btn-ghost modal-close modal-close-x">&times;</button>
                 </div>
                 <div class="modal-body p-3">
@@ -286,17 +260,17 @@ class App {
                         Übertrage deine erstellten Aufgaben, Kassenbucheinträge & Verträge zwischen deinem Rechner und der Online-Webapplikation.
                     </p>
 
-                    <div class="d-flex flex-column gap-3 mb-2">
+                    <div class="d-flex flex-column gap-2 mb-2">
                         <button class="btn btn-emerald w-100 p-2 font-bold" id="backup-download-action">
-                            💾 1. Lokale Aufgaben & Daten herunterladen (.json)
+                            💾 1. Lokale Aufgaben herunterladen (.json)
                         </button>
 
                         <button class="btn btn-primary w-100 p-2 font-bold" id="push-cloud-now-action" style="background: #00873D; border-color: #00873D;">
-                            ⚡ 2. Aktuelle Laptop-Aufgaben JETZT live in die Cloud pushen
+                            ⚡ 2. Aktuelle Aufgaben JETZT live in die Cloud pushen
                         </button>
 
-                        <div class="p-3 border rounded" style="background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.1) !important;">
-                            <label class="form-label small text-emerald font-bold mb-2">📤 3. Sicherungsdatei hochladen & für den Vorstand freigeben:</label>
+                        <div class="p-3 border rounded" style="background: #f8fafc; border-color: #cbd5e1 !important;">
+                            <label class="form-label small text-emerald font-bold mb-2">📤 3. Sicherungsdatei hochladen & freigeben:</label>
                             <input type="file" id="backup-upload-input" accept=".json" class="form-control form-control-sm" />
                         </div>
                     </div>
@@ -319,7 +293,7 @@ class App {
 
         modal.querySelector('#push-cloud-now-action').onclick = async () => {
             await CloudStorageEngine.pushAllToCloud();
-            alert('🚀 Alle deinen aktuellen Laptop-Aufgaben wurden erfolgreich live in die Cloud hochgeladen!');
+            alert('🚀 Alle deinen aktuellen Aufgaben wurden erfolgreich live in die Cloud hochgeladen!');
             closeModal();
         };
 
@@ -331,7 +305,7 @@ class App {
             reader.onload = (event) => {
                 const res = StorageEngine.importFullBackupJSON(event.target.result);
                 if (res.success) {
-                    alert('✅ Deine Aufgaben wurden erfolgreich importiert und live in die Cloud übertragen!');
+                    alert('✅ Deine Aufgaben wurden erfolgreich importiert!');
                     closeModal();
                     this.switchTab(activeTab);
                 } else {
@@ -350,7 +324,7 @@ class App {
 
         const currentUserId = StorageEngine.getCurrentUserId();
 
-        // Settings Tab: Only accessible to Moritz Kubik (Admin), opens immediately!
+        // Settings Tab: Only accessible to Moritz Kubik (Admin)
         if (targetTab === 'settings') {
             if (!StorageEngine.isSuperAdmin(currentUserId)) {
                 alert('🔒 Zugriffsverweigerung: Die Einstellungen sind ausschließlich für den Admin (Moritz Kubik) reserviert.');
@@ -360,7 +334,7 @@ class App {
             return;
         }
 
-        // Password change tab: Opens immediately for logged-in user!
+        // Password change tab
         if (targetTab === 'password') {
             this.switchTab('password');
             return;
@@ -369,7 +343,6 @@ class App {
         const protectedTabs = ['finance', 'contracts', 'minutes'];
 
         if (protectedTabs.includes(targetTab)) {
-            // Role Authorization Check
             if (!this.isUserAuthorizedForVault(currentUserId)) {
                 alert('🔒 Zugriffsverweigerung: Nur Vorstände, Kassiere und Schriftführer dürfen diesen Bereich einsehen.');
                 return;
@@ -384,7 +357,6 @@ class App {
                     minutes: '🎙️ Sitzungsprotokolle & Audio-Aufnahme'
                 };
                 activeTab = targetTab;
-                this.updateHeaderActivePill();
                 const mainContentEl = document.getElementById('main-content-view');
                 if (mainContentEl) {
                     VaultGuard.renderPinLockPage(mainContentEl, names[targetTab], () => {
@@ -397,12 +369,21 @@ class App {
         }
     }
 
+    static renderPageHeader(containerEl, title, subtitle) {
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'page-view-header';
+        headerDiv.innerHTML = `
+            <h2>${title}</h2>
+            ${subtitle ? `<p>${subtitle}</p>` : ''}
+        `;
+        containerEl.appendChild(headerDiv);
+    }
+
     static switchTab(tabName) {
         const protectedTabs = ['finance', 'contracts', 'minutes'];
         const isLeavingProtected = protectedTabs.includes(activeTab) && !protectedTabs.includes(tabName);
         
         activeTab = tabName;
-        this.updateHeaderActivePill();
 
         if (isLeavingProtected) {
             VaultGuard.lock();
@@ -412,6 +393,19 @@ class App {
         if (!mainContentEl) return;
 
         mainContentEl.innerHTML = '';
+
+        const titles = {
+            tasks: { title: '✅ Aufgaben-Verwaltung', sub: 'Übersicht & Bearbeitung aller Vorstandsaufgaben' },
+            dashboard: { title: '📊 Vorstands-Dashboard', sub: 'Erfüllungsgrad (%) & Fortschritt pro Mitglied' },
+            finance: { title: '💰 Finanzen & Kassenbuch 🔒', sub: 'Transaktions-Journal, Belege & Einnahmen/Ausgaben' },
+            contracts: { title: '📋 Verträge & Sponsoring 🔒', sub: 'Vereinsdokumente, Pachtverträge & Vereinbarungen' },
+            minutes: { title: '🎙️ Sitzungen & KI-Audio 🔒', sub: 'Protokollarchiv & KI-Sprachaufnahme' },
+            settings: { title: '⚙️ Vorstands-Einstellungen (Admin)', sub: 'Verwaltung von Vorstandsmitgliedern & Aufgaben-Kategorien' },
+            password: { title: '🔑 Passwort ändern', sub: 'Persönliches Zugangspasswort anpassen' }
+        };
+
+        const pageInfo = titles[tabName] || titles.tasks;
+        this.renderPageHeader(mainContentEl, pageInfo.title, pageInfo.sub);
 
         switch (tabName) {
             case 'tasks':
@@ -437,7 +431,7 @@ class App {
                 break;
             case 'settings':
                 SettingsModule.render(mainContentEl, () => {
-                    this.updateHeaderActivePill();
+                    this.switchTab('settings');
                 });
                 break;
             case 'password':
@@ -455,55 +449,51 @@ class App {
         const members = StorageEngine.getMembers();
         const currentUser = members.find(m => m.id === currentUserId) || { name: 'Mitglied', avatar: '👤' };
 
-        containerEl.innerHTML = `
-            <div class="password-change-wrapper p-3">
-                <div class="section-banner settings-banner mb-4">
-                    <div class="banner-title">
-                        <h2>🔑 Passwort ändern</h2>
-                        <p>Ändere dein persönliches Vereinspasswort für ${escapeHTML(currentUser.name)}.</p>
-                    </div>
+        const wrapper = document.createElement('div');
+        wrapper.className = 'password-change-wrapper p-3';
+
+        wrapper.innerHTML = `
+            <div class="card-glow p-4" style="max-width: 440px; margin: 0 auto;">
+                <div class="text-center mb-3">
+                    <span style="font-size: 2rem; background: #f8fafc; width: 56px; height: 56px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; border: 2px solid ${currentUser.color || '#00873D'}">
+                        ${currentUser.avatar}
+                    </span>
+                    <h3 style="font-size: 1.15rem; color: #0f172a; margin-top: 8px;">${escapeHTML(currentUser.name)}</h3>
+                    <small style="color: #00873D; font-weight: bold;">${escapeHTML(currentUser.role)}</small>
                 </div>
 
-                <div class="card-glow p-4" style="max-width: 480px; margin: 0 auto; border: 1px solid rgba(0,135,61,0.4);">
-                    <div class="text-center mb-3">
-                        <span style="font-size: 2.2rem; background: rgba(0,0,0,0.3); width: 60px; height: 60px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; border: 2px solid ${currentUser.color || '#00873D'}">
-                            ${currentUser.avatar}
-                        </span>
-                        <h3 style="font-size: 1.2rem; color: #fff; margin-top: 8px;">${escapeHTML(currentUser.name)}</h3>
-                        <small style="color: ${currentUser.color || '#34d399'}; font-weight: bold;">${escapeHTML(currentUser.role)}</small>
+                <form id="change-my-password-form" autocomplete="off">
+                    <div class="form-group mb-3">
+                        <label class="form-label small font-bold text-muted mb-1">Aktuelles Passwort *</label>
+                        <input type="password" id="cur-pass-input" class="form-control" placeholder="Aktuelles Passwort eingeben..." required autofocus autocomplete="off" />
                     </div>
 
-                    <form id="change-my-password-form" autocomplete="off">
-                        <div class="form-group mb-3">
-                            <label class="form-label small font-bold text-muted mb-1">Aktuelles Passwort *</label>
-                            <input type="password" id="cur-pass-input" class="form-control" placeholder="Aktuelles Passwort eingeben..." required autofocus autocomplete="off" />
-                        </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label small font-bold text-muted mb-1">Neues Passwort *</label>
+                        <input type="password" id="new-pass-input" class="form-control" placeholder="Neues Passwort eingeben..." required autocomplete="off" />
+                    </div>
 
-                        <div class="form-group mb-3">
-                            <label class="form-label small font-bold text-muted mb-1">Neues Passwort *</label>
-                            <input type="password" id="new-pass-input" class="form-control" placeholder="Neues Passwort eingeben..." required autocomplete="off" />
-                        </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label small font-bold text-muted mb-1">Neues Passwort wiederholen *</label>
+                        <input type="password" id="confirm-pass-input" class="form-control" placeholder="Passwort wiederholen..." required autocomplete="off" />
+                    </div>
 
-                        <div class="form-group mb-3">
-                            <label class="form-label small font-bold text-muted mb-1">Neues Passwort wiederholen *</label>
-                            <input type="password" id="confirm-pass-input" class="form-control" placeholder="Passwort wiederholen..." required autocomplete="off" />
-                        </div>
+                    <div id="pass-change-msg" class="mb-3 hidden small font-bold text-center"></div>
 
-                        <div id="pass-change-msg" class="mb-3 hidden small font-bold text-center"></div>
-
-                        <button type="submit" class="btn btn-emerald btn-glow w-100" style="padding: 0.7rem; font-weight: bold;">
-                            💾 Neues Passwort Speichern
-                        </button>
-                    </form>
-                </div>
+                    <button type="submit" class="btn btn-emerald w-100" style="padding: 0.65rem; font-weight: bold;">
+                        💾 Neues Passwort Speichern
+                    </button>
+                </form>
             </div>
         `;
 
-        const form = containerEl.querySelector('#change-my-password-form');
-        const curPassInput = containerEl.querySelector('#cur-pass-input');
-        const newPassInput = containerEl.querySelector('#new-pass-input');
-        const confirmPassInput = containerEl.querySelector('#confirm-pass-input');
-        const msgEl = containerEl.querySelector('#pass-change-msg');
+        containerEl.appendChild(wrapper);
+
+        const form = wrapper.querySelector('#change-my-password-form');
+        const curPassInput = wrapper.querySelector('#cur-pass-input');
+        const newPassInput = wrapper.querySelector('#new-pass-input');
+        const confirmPassInput = wrapper.querySelector('#confirm-pass-input');
+        const msgEl = wrapper.querySelector('#pass-change-msg');
 
         setTimeout(() => curPassInput?.focus(), 50);
 
@@ -519,8 +509,6 @@ class App {
             if (actualPassHash && hashedCurVal !== actualPassHash) {
                 msgEl.className = 'mb-3 small font-bold text-center text-danger';
                 msgEl.textContent = '⚠️ Das aktuelle Passwort ist falsch!';
-                curPassInput.classList.add('shake');
-                setTimeout(() => curPassInput.classList.remove('shake'), 500);
                 return;
             }
 
@@ -540,7 +528,7 @@ class App {
             CloudStorageEngine.pushAllToCloud();
 
             msgEl.className = 'mb-3 small font-bold text-center text-success';
-            msgEl.textContent = '✅ Dein Passwort wurde erfolgreich geändert! Das neue Passwort ist ab sofort aktiv.';
+            msgEl.textContent = '✅ Dein Passwort wurde erfolgreich geändert!';
             curPassInput.value = '';
             newPassInput.value = '';
             confirmPassInput.value = '';

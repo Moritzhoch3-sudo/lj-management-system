@@ -2,50 +2,92 @@
    LANDJUGEND SCHEURUNG - COMPONENT STYLES & COMPACT RESPONSIVE LAYOUT
    ========================================================================== */
 
-/* Cards & Glassmorphism Containers with 3D Depth Shadows */
+/* Cards & Light Glassmorphism Containers */
 .card-glow {
-    background: rgba(18, 22, 28, 0.88);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-top: 1px solid rgba(255, 255, 255, 0.22);
-    border-radius: var(--radius-md);
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    transition: var(--transition-fast);
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+    transition: var(--transition-fast) !important;
 }
 
 .card-glow:hover {
-    transform: translateY(-3px);
-    border-color: rgba(52, 211, 153, 0.45);
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.8), 0 0 25px rgba(0, 135, 61, 0.3);
+    transform: translateY(-2px);
+    border-color: rgba(0, 135, 61, 0.4) !important;
+    box-shadow: 0 8px 24px rgba(0, 135, 61, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04) !important;
 }
 
 .card-glow-sm {
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: var(--radius-sm);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: var(--radius-sm) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03) !important;
+}
+
+/* Page View Title Header (Unboxed, Crisp & Clear Page Heading) */
+.page-view-header {
+    margin-bottom: 1.1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.page-view-header h2 {
+    font-size: 1.3rem !important;
+    color: #0f172a !important;
+    margin: 0 0 0.15rem 0 !important;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.page-view-header p {
+    font-size: 0.84rem;
+    color: #64748b;
+    margin: 0;
 }
 
 /* Navigation Drawer Modal Backdrop */
 .nav-drawer-backdrop {
-    background: rgba(4, 6, 8, 0.85) !important;
-    backdrop-filter: blur(8px);
+    background: rgba(15, 23, 42, 0.6) !important;
+    backdrop-filter: blur(6px);
 }
 
 .nav-drawer-card {
-    background: rgba(16, 20, 26, 0.96) !important;
-    border: 1px solid rgba(0, 135, 61, 0.4) !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2) !important;
+    border-radius: 12px !important;
 }
 
-.nav-drawer-item {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+/* 1-Line Compact Nav Drawer Item (Single Line per Page!) */
+.nav-drawer-item-compact {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0.45rem 0.85rem !important;
+    border-radius: 8px !important;
+    font-size: 0.88rem !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    margin-bottom: 0.3rem !important;
+    transition: all 0.15s ease !important;
+    height: 40px !important;
 }
 
-.nav-drawer-item:hover {
-    transform: translateX(4px);
+.nav-drawer-item-compact:hover {
+    background: #f1f5f9 !important;
     border-color: #00873D !important;
-    background: rgba(0, 135, 61, 0.2) !important;
+    color: #00873D !important;
+    transform: translateX(3px) !important;
+}
+
+.nav-drawer-item-compact.active {
+    background: #e6f4ea !important;
+    border-color: #00873D !important;
+    color: #00873D !important;
+    font-weight: 700 !important;
 }
 
 /* Dashboard Banner */

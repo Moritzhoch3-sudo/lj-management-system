@@ -1,37 +1,37 @@
 /* ==========================================================================
-   LANDJUGEND SCHEURUNG - SCHLICHTES GRAUTON DESIGN SYSTEM
+   LANDJUGEND SCHEURUNG - HELL, FREUNDLICH & COMPACT DESIGN SYSTEM
    ========================================================================== */
 
 :root {
-    /* Edle, schlichte Grautöne */
-    --bg-dark: #111318;
-    --bg-card: #1a1d24;
-    --bg-card-hover: #222630;
-    --bg-card-glass: rgba(26, 29, 36, 0.92);
+    /* Freundliches, helles & einladendes Farbschema */
+    --bg-dark: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f1f5f9;
+    --bg-card-glass: rgba(255, 255, 255, 0.95);
     
-    --border-color: rgba(255, 255, 255, 0.08);
-    --border-glow: rgba(148, 163, 184, 0.25);
+    --border-color: #e2e8f0;
+    --border-glow: rgba(0, 135, 61, 0.35);
 
     /* Original Landjugend Scheuring Akzentfarben */
     --lj-green: #00873D;
+    --lj-green-dark: #007032;
     --lj-green-light: #10b981;
-    --lj-yellow: #FFD100;
-    --lj-dark-gray: #1a1a1a;
+    --lj-yellow: #f59e0b;
 
     --danger: #ef4444;
     --warning: #f59e0b;
-    --info: #3b82f6;
+    --info: #2563eb;
 
-    --text-main: #f1f5f9;
-    --text-muted: #94a3b8;
+    --text-main: #0f172a;
+    --text-muted: #475569;
     --text-dim: #64748b;
 
     --radius-sm: 6px;
     --radius-md: 10px;
-    --radius-lg: 16px;
+    --radius-lg: 14px;
     --radius-full: 9999px;
 
-    --shadow-slate: 0 10px 30px rgba(0, 0, 0, 0.35);
+    --shadow-slate: 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
     --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -44,210 +44,111 @@
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background-color: #080a0c;
-    background-image: radial-gradient(circle at 50% -10%, #0d2417 0%, #0a0e12 55%, #050708 100%);
+    font-size: 14px;
+    background-color: #f1f5f9;
+    background-image: radial-gradient(circle at 50% -10%, #e6f4ea 0%, #f1f5f9 60%, #e2e8f0 100%);
     background-attachment: fixed;
     color: var(--text-main);
     min-height: 100vh;
-    line-height: 1.5;
+    line-height: 1.45;
     -webkit-font-smoothing: antialiased;
 }
 
 /* Überschriften: Gestaltet wie das LANDJUGEND SCHEURUNG Logo */
-h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .dashboard-banner h2, .section-banner h2 {
+h1, h2, h3, h4, h5, h6, .font-logo-heading {
     font-family: 'Montserrat', sans-serif;
     font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: #ffffff;
+    letter-spacing: -0.01em;
+    color: #0f172a;
 }
+
+h2 { font-size: 1.25rem; }
+h3 { font-size: 1.05rem; }
+h4 { font-size: 0.92rem; }
 
 /* Header & Navbar */
 .app-header {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(17, 19, 24, 0.95);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border-color);
-    padding: 0.65rem 1.25rem;
+    background: linear-gradient(135deg, #007032 0%, #00873D 100%);
+    box-shadow: 0 4px 20px rgba(0, 135, 61, 0.25);
+    padding: 0.5rem 1.25rem;
 }
 
 .header-container {
     max-width: 1400px;
     margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
 }
 
-/* Subtil feinverpflegtes Logo */
 .brand-logo {
     display: flex;
     align-items: center;
-    gap: 0.85rem;
+    gap: 0.65rem;
 }
 
 .brand-logo-img {
-    height: 44px;
+    height: 38px;
     width: auto;
-    max-height: 50px;
     display: block;
     object-fit: contain;
-    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
-    transition: var(--transition-fast);
 }
 
-.brand-logo-img:hover {
-    transform: scale(1.03);
-}
-
-.brand-header-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.brand-text h1 {
-    font-size: 1.1rem;
-    letter-spacing: 0.06em;
-    color: #ffffff;
-    line-height: 1.1;
-    margin: 0;
+.brand-header-row h1 {
+    font-size: 1.1rem !important;
+    font-weight: 900;
+    color: #ffffff !important;
 }
 
 .version-badge {
-    display: inline-block;
-    padding: 0.12rem 0.4rem;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.65rem;
-    font-weight: 800;
-    color: #10b981;
-    background: rgba(16, 185, 129, 0.15);
-    border: 1px solid rgba(16, 185, 129, 0.4);
-    border-radius: 4px;
-    letter-spacing: 0.05em;
-    line-height: 1;
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border-radius: var(--radius-full);
+    font-weight: 700;
 }
 
 .brand-sub {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.68rem;
-    font-weight: 800;
-    color: var(--lj-green-light);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    font-size: 0.76rem;
+    color: rgba(255, 255, 255, 0.9);
 }
 
-/* Navigation Tabs - Mobile Optimized Touch Scroll */
-.nav-menu {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    background: #181b22;
-    padding: 0.3rem;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    overflow-x: auto;
-    max-width: 100%;
-    -webkit-overflow-scrolling: touch;
-}
-
-.nav-menu::-webkit-scrollbar {
-    display: none;
-}
-
-.nav-link {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.5rem 0.85rem;
-    border-radius: var(--radius-sm);
-    color: var(--text-muted);
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    white-space: nowrap;
-    transition: var(--transition-fast);
-}
-
-.nav-link.active {
-    color: #ffffff;
-    background: #2a2e3a;
-    border: 1px solid var(--border-glow);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-/* User Simulator Control */
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    flex-wrap: wrap;
-}
-
-.user-simulator-box {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    background: #181b22;
-    border: 1px solid var(--border-color);
-    padding: 0.3rem 0.6rem;
-    border-radius: var(--radius-sm);
-}
-
-.user-simulator-box label {
-    font-size: 0.72rem;
-    color: var(--text-muted);
-}
-
-/* Layout Container */
+/* Main Container Layout */
 .main-container {
-    max-width: 1400px;
-    margin: 1.5rem auto;
-    padding: 0 1.25rem;
+    max-width: 1350px;
+    margin: 0 auto;
+    padding: 1.25rem 1rem;
 }
 
-/* Card Styling: Elegant Dark Slate Gray */
-.card-glow {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    padding: 1.25rem;
-    box-shadow: var(--shadow-slate);
+/* Form Elements - Compact & Touch-Friendly */
+.form-control, .form-select {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius-sm);
+    color: #0f172a;
+    padding: 0.4rem 0.65rem;
+    font-size: 14px;
     transition: var(--transition-fast);
 }
 
-/* Buttons */
+.form-control:focus, .form-select:focus {
+    outline: none;
+    border-color: var(--lj-green);
+    box-shadow: 0 0 0 3px rgba(0, 135, 61, 0.15);
+}
+
+/* Buttons System */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.4rem;
-    padding: 0.6rem 1.1rem;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    border-radius: var(--radius-md);
+    padding: 0.45rem 0.85rem;
+    font-size: 0.86rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
     border: 1px solid transparent;
     cursor: pointer;
-    min-height: 40px; /* Mobile touch friendly */
     transition: var(--transition-fast);
-}
-
-.btn-primary {
-    background: #2a2e3a;
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .btn-emerald {
@@ -255,241 +156,49 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .dashboard-banner h2
     color: #ffffff;
 }
 
+.btn-emerald:hover {
+    background: var(--lj-green-dark);
+    box-shadow: 0 4px 12px rgba(0, 135, 61, 0.3);
+}
+
 .btn-ghost {
-    background: transparent;
-    color: var(--text-muted);
-    border-color: var(--border-color);
+    background: #ffffff;
+    color: #0f172a;
+    border-color: #cbd5e1;
 }
 
-.btn-sm {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.75rem;
-    min-height: 36px;
+.btn-ghost:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.btn-danger {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+.btn-secondary {
+    background: #64748b;
+    color: #ffffff;
+}
+
+/* Badges */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.55rem;
     border-radius: var(--radius-sm);
+    font-size: 0.76rem;
+    font-weight: 700;
 }
 
-/* Form Controls */
-.form-control, .form-select {
-    width: 100%;
-    padding: 0.65rem 0.85rem;
-    background: #111318;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    color: var(--text-main);
-    font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
-    min-height: 42px; /* Touch friendly */
-    transition: var(--transition-fast);
-}
+.badge-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.badge-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.badge-neutral { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
 
-.form-group {
-    margin-bottom: 1.25rem;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.4rem;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--text-muted);
-}
-
-.form-row {
-    display: flex;
-    gap: 1rem;
-}
-
-.form-row .col {
-    flex: 1;
-}
-
-/* MOBILE RESPONSIVE MEDIA QUERIES (Ultra-Sleek Smartphone Version) */
-@media (max-width: 768px) {
-    .app-header {
-        padding: 0.5rem 0.5rem;
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-        background: rgba(17, 19, 24, 0.98);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .header-container {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.5rem;
-    }
-
-    /* Smartphone Header Brand Row: Show Logo, App Title & v1.0.0 Badge cleanly */
-    .brand-logo {
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        gap: 0.6rem;
-        width: 100%;
-        padding: 0.1rem 0;
-    }
-
-    .brand-logo-img {
-        height: 34px;
-        width: auto;
-        max-height: 38px;
-        object-fit: contain;
-        flex-shrink: 0;
-    }
-
-    .brand-text {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        min-width: 0;
-    }
-
-    .brand-header-row {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        flex-wrap: nowrap;
-    }
-
-    .brand-text h1 {
-        font-size: 0.92rem !important;
-        letter-spacing: 0.03em;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        margin: 0;
-    }
-
-    .version-badge {
-        font-size: 0.58rem !important;
-        padding: 0.1rem 0.3rem !important;
-        line-height: 1;
-        flex-shrink: 0;
-    }
-
-    .brand-sub {
-        font-size: 0.58rem;
-        letter-spacing: 0.06em;
-        margin-top: 1px;
-    }
-
-    /* Smartphone Navigation Bar: Touch-Friendly Horizontal Scrollbar */
-    .nav-menu {
-        display: flex;
-        width: 100%;
-        overflow-x: auto;
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
-        scroll-snap-type: x mandatory;
-        gap: 0.35rem;
-        padding: 0.25rem;
-        background: rgba(0, 0, 0, 0.35);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 8px;
-        scrollbar-width: none; /* Firefox */
-    }
-
-    .nav-menu::-webkit-scrollbar {
-        display: none; /* Safari & Chrome */
-    }
-
-    .nav-link {
-        flex: 0 0 auto;
-        scroll-snap-align: start;
-        padding: 0.5rem 0.75rem;
-        font-size: 0.78rem;
-        font-weight: 700;
-        border-radius: 6px;
-        white-space: nowrap;
-        touch-action: manipulation;
-    }
-
-    /* Smartphone Actions & Logged-In User Selector */
-    .header-actions {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        gap: 0.4rem;
-    }
-
-    .user-simulator-box {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-        gap: 0.5rem;
-        background: rgba(0, 0, 0, 0.25);
-        padding: 0.35rem 0.5rem;
-        border-radius: 6px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .user-simulator-box label {
-        font-size: 0.72rem;
-        white-space: nowrap;
-        color: var(--text-muted);
-        margin: 0;
-    }
-
-    .user-simulator-box select {
-        flex: 1;
-        font-size: 16px !important; /* Prevents iOS auto-zoom */
-        padding: 0.3rem 0.5rem;
-        border-radius: 4px;
-        background: #111318;
-        color: #fff;
-    }
-
-    .header-actions-buttons {
-        display: flex;
-        gap: 0.4rem;
-        width: 100%;
-    }
-
-    .header-actions .btn {
-        flex: 1;
-        font-size: 0.72rem;
-        padding: 0.4rem 0.5rem;
-        text-align: center;
-        justify-content: center;
-        white-space: nowrap;
-    }
-
-    .main-container {
-        padding: 0 0.5rem;
-        margin: 0.6rem auto;
-    }
-
-    .form-row {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    /* Input zoom fix for iOS */
-    input[type="text"], input[type="number"], input[type="date"], input[type="password"], select, textarea {
-        font-size: 16px !important;
-    }
-}
-
-/* Extra small smartphones (<= 480px) */
-@media (max-width: 480px) {
-    .brand-logo-img {
-        height: 30px;
-    }
-
-    .nav-link {
-        padding: 0.45rem 0.6rem;
-        font-size: 0.74rem;
-    }
-
-    .header-actions .btn {
-        font-size: 0.68rem;
-        padding: 0.35rem 0.4rem;
-    }
-}
+.hidden { display: none !important; }
