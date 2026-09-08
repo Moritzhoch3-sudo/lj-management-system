@@ -3,19 +3,18 @@
  */
 
 export const INITIAL_MEMBERS = [
-    { id: 'm0', name: 'Allgemein', role: 'Beisitzer', avatar: '👤', color: '#64748b', bgLight: 'rgba(100, 116, 139, 0.15)' },
     { id: 'm1', name: 'Valentin Müllner', role: '1. Vorstand', avatar: '👱‍♂️', color: '#10b981', bgLight: 'rgba(16, 185, 129, 0.15)' },
-    { id: 'm2', name: 'Linda Schweiger', role: '2. Vorstand', avatar: '👱‍♀️', color: '#06b6d4', bgLight: 'rgba(6, 182, 212, 0.15)' },
+    { id: 'm2', name: 'Linda Schweiger', role: '2. Vorstand', avatar: '👱‍♀️', color: '#0284c7', bgLight: 'rgba(2, 132, 199, 0.15)' },
     { id: 'm3', name: 'Anja Löb', role: '1. Kassier', avatar: '👩‍💻', color: '#f59e0b', bgLight: 'rgba(245, 158, 11, 0.15)' },
-    { id: 'm4', name: 'Moritz Kubik', role: '2. Kassier', avatar: '👨‍💻', color: '#00873D', bgLight: 'rgba(0, 135, 61, 0.15)' },
+    { id: 'm4', name: 'Moritz Kubik', role: '2. Kassier', avatar: '👨‍💻', color: '#16a34a', bgLight: 'rgba(22, 163, 74, 0.15)' },
     { id: 'm5', name: 'Lena Senior', role: '1. Schriftführer', avatar: '📝', color: '#ec4899', bgLight: 'rgba(236, 72, 153, 0.15)' },
-    { id: 'm6', name: 'Rosa Krieglmeier', role: '2. Schriftführer', avatar: '📋', color: '#6366f1', bgLight: 'rgba(99, 102, 241, 0.15)' },
-    { id: 'm7', name: 'Cassandra Wunner', role: 'Getränkewart', avatar: '🍺', color: '#ef4444', bgLight: 'rgba(239, 68, 68, 0.15)' },
-    { id: 'm8', name: 'Felix Premer', role: 'Beisitzer', avatar: '🎪', color: '#8b5cf6', bgLight: 'rgba(139, 92, 246, 0.15)' },
-    { id: 'm9', name: 'Johannes Erhard', role: 'Beisitzer', avatar: '🌱', color: '#14b8a6', bgLight: 'rgba(20, 184, 166, 0.15)' },
-    { id: 'm10', name: 'Dominique Zahn', role: 'Beisitzer', avatar: '🔧', color: '#3b82f6', bgLight: 'rgba(59, 130, 246, 0.15)' },
-    { id: 'm11', name: 'Michaela Grabmaier', role: 'Beisitzer', avatar: '📸', color: '#a855f7', bgLight: 'rgba(168, 85, 247, 0.15)' },
-    { id: 'm12', name: 'Kilian Salai', role: 'Beisitzer', avatar: '🔊', color: '#f97316', bgLight: 'rgba(249, 115, 22, 0.15)' }
+    { id: 'm6', name: 'Rosa Krieglmeier', role: '2. Schriftführer', avatar: '📋', color: '#4f46e5', bgLight: 'rgba(79, 70, 229, 0.15)' },
+    { id: 'm7', name: 'Cassandra Wunner', role: 'Getränkewart', avatar: '🍺', color: '#dc2626', bgLight: 'rgba(220, 38, 38, 0.15)' },
+    { id: 'm8', name: 'Felix Premer', role: 'Beisitzer', avatar: '🎪', color: '#7c3aed', bgLight: 'rgba(124, 58, 237, 0.15)' },
+    { id: 'm9', name: 'Johannes Erhard', role: 'Beisitzer', avatar: '🌱', color: '#0d9488', bgLight: 'rgba(13, 148, 136, 0.15)' },
+    { id: 'm10', name: 'Dominique Zahn', role: 'Beisitzer', avatar: '🔧', color: '#2563eb', bgLight: 'rgba(37, 99, 235, 0.15)' },
+    { id: 'm11', name: 'Michaela Grabmaier', role: 'Beisitzer', avatar: '📸', color: '#d97706', bgLight: 'rgba(217, 119, 6, 0.15)' },
+    { id: 'm12', name: 'Kilian Salai', role: 'Beisitzer', avatar: '🔊', color: '#ea580c', bgLight: 'rgba(234, 88, 12, 0.15)' }
 ];
 
 export const BOARD_ROLE_OPTIONS = [

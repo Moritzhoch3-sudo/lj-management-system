@@ -1,5 +1,6 @@
 /**
- * Contracts & Documents Vault Module - Direct In-Box Creation & Card Editing (PIN Protected)
+ * Contracts & Documents Vault Module - Clean Executive Standard (PIN Protected)
+ * Modal-based creation and editing for a clean, professional cards archive layout.
  */
 import { StorageEngine, escapeHTML } from '../storage.js';
 
@@ -9,128 +10,51 @@ export class ContractsModule {
 
         containerEl.innerHTML = `
             <div class="contracts-wrapper">
-                <div class="section-banner contracts-banner">
-                    <div class="banner-title">
-                        <h2>📋 Verträge & Sponsoring-Archiv</h2>
-                        <p>PIN-Geschützte Übersicht über Pachtverträge, Brauerei-Agreements, Zeltverleih und Laufzeiten.</p>
-                    </div>
-                </div>
-
-                <!-- DIRECT INLINE CONTRACT CREATION BOX -->
-                <div class="card-glow mb-4">
-                    <div class="toolbar-row mb-3">
-                        <h3>📋 Laufende Verträge (${contracts.length})</h3>
-                        <button class="btn btn-primary btn-sm" id="toggle-add-contract-box">➕ Neuen Vertrag direkt anlegen</button>
-                    </div>
-
-                    <!-- COLLAPSIBLE INLINE ADD FORM -->
-                    <div class="card-inline-add-bar p-3 mb-3 hidden" id="inline-contract-add-box" style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px;">
-                        <h4 class="mb-2" style="font-size: 0.95rem; color: #34d399;">➕ Neuen Vertrag direkt hier im Archiv erfassen:</h4>
-                        <form id="inline-contract-add-form">
-                            <div class="row g-2 mb-2">
-                                <div class="col-md-6">
-                                    <label class="form-label small mb-1">Vertragsbezeichnung *</label>
-                                    <input type="text" id="add-con-title" class="form-control form-control-sm" placeholder="z. B. Brauerei-Exklusivvertrag 2026" required />
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small mb-1">Vertragspartner *</label>
-                                    <input type="text" id="add-con-partner" class="form-control form-control-sm" placeholder="z. B. Brauerei Wieninger" required />
-                                </div>
-                            </div>
-                            <div class="row g-2 mb-2">
-                                <div class="col-md-3">
-                                    <label class="form-label small mb-1">Kategorie</label>
-                                    <input type="text" id="add-con-category" class="form-control form-control-sm" placeholder="Getränke, Pacht, Equipment..." />
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label small mb-1">Status</label>
-                                    <select id="add-con-status" class="form-select form-select-sm">
-                                        <option value="Aktiv" selected>🟢 Aktiv</option>
-                                        <option value="Auslaufend">🟡 Auslaufend</option>
-                                        <option value="Beendet">🔴 Beendet</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label small mb-1">Vertragsbeginn</label>
-                                    <input type="date" id="add-con-start" class="form-control form-control-sm" value="${new Date().toISOString().slice(0,10)}" />
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label small mb-1">Vertragsende / Laufzeit</label>
-                                    <input type="date" id="add-con-end" class="form-control form-control-sm" />
-                                </div>
-                            </div>
-                            <div class="row g-2 mb-2">
-                                <div class="col-md-6">
-                                    <label class="form-label small mb-1">Kosten / Sondervereinbarungen</label>
-                                    <input type="text" id="add-con-cost" class="form-control form-control-sm" placeholder="z. B. 1.200 € Mietgebühr / Rabatt" />
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small mb-1">Details & Zusammenfassung</label>
-                                    <input type="text" id="add-con-summary" class="form-control form-control-sm" placeholder="Kündigungsfristen, Kontakte..." />
-                                </div>
-                            </div>
-                            <div class="d-flex justify-content-end gap-2 mt-2">
-                                <button type="button" class="btn btn-sm btn-ghost" id="cancel-add-contract-btn">Abbrechen</button>
-                                <button type="submit" class="btn btn-sm btn-emerald">➕ Vertrag Speichern</button>
-                            </div>
-                        </form>
+                <!-- Main Header Toolbar -->
+                <div class="card-glow p-4 mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3 pb-2" style="border-bottom: 1px solid var(--border-subtle);">
+                        <div>
+                            <h3 class="m-0" style="color: var(--text-primary); font-weight: 800; font-size: 1.15rem;">
+                                📋 Verträge & Sponsoring-Archiv (${contracts.length})
+                            </h3>
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">Pachtverträge, Brauerei-Agreements, Zeltverleih & Laufzeiten</span>
+                        </div>
+                        <button class="btn btn-donezo-primary btn-sm" id="open-add-contract-modal">
+                            ➕ Neuer Vertrag
+                        </button>
                     </div>
 
-                    <!-- CONTRACT CARDS GRID WITH INLINE EDITING -->
-                    <div class="contracts-grid">
+                    <!-- CONTRACT CARDS GRID -->
+                    <div class="contracts-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.25rem;">
                         ${contracts.length === 0 ? `
-                            <div class="empty-column-placeholder">Keine Verträge hinterlegt. Klicken Sie oben, um einen Vertrag hinzuzufügen.</div>
+                            <div class="text-center p-4 text-muted w-100">Keine Verträge hinterlegt. Klicken Sie oben auf "+ Neuer Vertrag".</div>
                         ` : contracts.map(c => `
-                            <div class="contract-card card-glow" id="contract-card-${c.id}">
-                                <div class="contract-header">
-                                    <span class="category-badge">${escapeHTML(c.category || 'Allgemein')}</span>
+                            <div class="contract-card" id="contract-card-${c.id}">
+                                <div class="contract-header d-flex align-items-center justify-content-between mb-2">
+                                    <span class="badge badge-neutral">${escapeHTML(c.category || 'Allgemein')}</span>
                                     <span class="badge ${c.status === 'Aktiv' ? 'badge-success' : 'badge-warning'}">${c.status}</span>
                                 </div>
-                                <h3 class="contract-title">${escapeHTML(c.title)}</h3>
-                                <p class="contract-partner">🤝 Vertragspartner: <strong>${escapeHTML(c.partner)}</strong></p>
-                                <p class="contract-summary">${escapeHTML(c.summary || '')}</p>
                                 
-                                <div class="contract-dates-box mb-2">
+                                <h3 class="contract-title m-0 mb-1" style="font-size: 1.1rem;">${escapeHTML(c.title)}</h3>
+                                <p class="contract-partner mb-2" style="font-size: 0.88rem;">🤝 Vertragspartner: <strong>${escapeHTML(c.partner)}</strong></p>
+                                
+                                ${c.summary ? `<p class="contract-summary mb-2 p-2 rounded" style="font-size: 0.82rem;">${escapeHTML(c.summary)}</p>` : ''}
+                                
+                                <div class="contract-dates-box mb-2 p-2 rounded d-flex justify-content-between" style="font-size: 0.8rem;">
                                     <div>📅 Beginn: <strong>${c.startDate || '-'}</strong></div>
                                     <div>⏳ Ende: <strong>${c.endDate || '-'}</strong></div>
                                 </div>
 
                                 ${c.costNotice ? `
-                                    <div class="contract-cost-badge mb-2">
+                                    <div class="contract-cost-badge mb-2 p-2 rounded" style="background: rgba(245, 158, 11, 0.1); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.25); font-size: 0.82rem; font-weight: 700;">
                                         💡 ${escapeHTML(c.costNotice)}
                                     </div>
                                 ` : ''}
 
-                                <div class="contract-footer mt-3">
-                                    <button class="btn btn-sm btn-ghost toggle-con-edit-btn" data-id="${c.id}">✏️ Bearbeiten</button>
-                                    <button class="btn btn-sm btn-outline danger-text delete-contract-btn" data-id="${c.id}">🗑️ Löschen</button>
+                                <div class="contract-footer mt-3 pt-2 d-flex align-items-center justify-content-end gap-1" style="border-top: 1px solid var(--border-subtle);">
+                                    <button class="btn btn-sm btn-ghost edit-contract-modal-btn" data-id="${c.id}">✏️ Bearbeiten</button>
+                                    <button class="btn btn-sm btn-ghost danger-text delete-contract-btn" data-id="${c.id}">🗑️ Löschen</button>
                                 </div>
-
-                                <!-- INLINE EDIT FORM INSIDE CARD -->
-                                <form class="inline-con-edit-form p-2 mt-2 hidden" id="inline-con-edit-${c.id}" data-id="${c.id}" style="background: rgba(0,0,0,0.5); border-radius: 6px; border: 1px dashed var(--border-color);">
-                                    <strong style="color: #34d399; font-size: 0.85rem;" class="d-block mb-1">✏️ Vertrag vor Ort bearbeiten</strong>
-                                    <input type="text" class="form-control form-control-sm mb-1 edit-con-title" value="${escapeHTML(c.title)}" required placeholder="Titel" />
-                                    <input type="text" class="form-control form-control-sm mb-1 edit-con-partner" value="${escapeHTML(c.partner)}" required placeholder="Partner" />
-                                    <input type="text" class="form-control form-control-sm mb-1 edit-con-category" value="${escapeHTML(c.category || '')}" placeholder="Kategorie" />
-                                    
-                                    <div class="d-flex gap-1 mb-1">
-                                        <select class="form-select form-select-sm edit-con-status">
-                                            <option value="Aktiv" ${c.status === 'Aktiv' ? 'selected' : ''}>Aktiv</option>
-                                            <option value="Auslaufend" ${c.status === 'Auslaufend' ? 'selected' : ''}>Auslaufend</option>
-                                            <option value="Beendet" ${c.status === 'Beendet' ? 'selected' : ''}>Beendet</option>
-                                        </select>
-                                        <input type="date" class="form-control form-control-sm edit-con-start" value="${c.startDate || ''}" />
-                                        <input type="date" class="form-control form-control-sm edit-con-end" value="${c.endDate || ''}" />
-                                    </div>
-                                    
-                                    <input type="text" class="form-control form-control-sm mb-1 edit-con-cost" value="${escapeHTML(c.costNotice || '')}" placeholder="Kosten/Hinweis" />
-                                    <textarea class="form-control form-control-sm mb-2 edit-con-summary" rows="2" placeholder="Details...">${escapeHTML(c.summary || '')}</textarea>
-                                    
-                                    <div class="d-flex justify-content-end gap-1">
-                                        <button type="button" class="btn btn-sm btn-ghost cancel-con-edit-btn" data-id="${c.id}">Abbrechen</button>
-                                        <button type="submit" class="btn btn-sm btn-emerald">💾 Speichern</button>
-                                    </div>
-                                </form>
                             </div>
                         `).join('')}
                     </div>
@@ -141,99 +65,222 @@ export class ContractsModule {
         this.bindEvents(containerEl, contracts);
     }
 
-    static bindEvents(containerEl, contracts) {
-        // Toggle inline add box
-        const addBox = document.getElementById('inline-contract-add-box');
-        document.getElementById('toggle-add-contract-box')?.addEventListener('click', () => {
-            addBox?.classList.toggle('hidden');
-        });
-        document.getElementById('cancel-add-contract-btn')?.addEventListener('click', () => {
-            addBox?.classList.add('hidden');
-        });
+    /**
+     * Clean Modal Dialog for Adding or Editing Contracts
+     */
+    static openContractModal(containerEl, contracts, editItem = null) {
+        document.body.style.overflow = 'hidden';
 
-        // Save new contract inline
-        document.getElementById('inline-contract-add-form')?.addEventListener('submit', (e) => {
+        const modal = document.createElement('div');
+        modal.className = 'modal-backdrop active';
+
+        const isEdit = !!editItem;
+        const title = isEdit ? '✏️ Vertrag bearbeiten' : '➕ Neuer Vertrag anlegen';
+
+        const selectedStatus = editItem ? (editItem.status || 'Aktiv') : 'Aktiv';
+
+        modal.innerHTML = `
+            <div class="modal-card" style="max-width: 580px; width: 92vw; position: relative; border-radius: 16px; overflow: visible; background: #ffffff; box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
+                <div class="modal-header d-flex align-items-center justify-content-between p-3" style="border-bottom: 1px solid var(--border-subtle);">
+                    <h3 style="font-size: 1.15rem; margin: 0; color: var(--text-primary); font-weight: 800;">${title}</h3>
+                    <button class="btn btn-ghost modal-close-btn" style="font-size: 1.2rem; padding: 0.2rem 0.5rem;">&times;</button>
+                </div>
+
+                <form id="contract-modal-form">
+                    <div class="modal-body p-3">
+                        <div class="row g-2 mb-2.5">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small mb-1" style="color: var(--text-secondary); font-weight: 700;">Vertragsbezeichnung *</label>
+                                <input type="text" id="modal-con-title" class="form-control form-control-sm" placeholder="z. B. Brauerei-Exklusivvertrag 2026" value="${editItem ? escapeHTML(editItem.title) : ''}" required />
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small mb-1" style="color: var(--text-secondary); font-weight: 700;">Vertragspartner *</label>
+                                <input type="text" id="modal-con-partner" class="form-control form-control-sm" placeholder="z. B. Brauerei Wieninger" value="${editItem ? escapeHTML(editItem.partner) : ''}" required />
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-2.5">
+                            <div class="col-6">
+                                <label class="form-label small mb-1" style="color: var(--text-secondary); font-weight: 700;">Kategorie</label>
+                                <input type="text" id="modal-con-category" class="form-control form-control-sm" placeholder="Getränke, Pacht..." value="${editItem ? escapeHTML(editItem.category || '') : ''}" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small mb-1" style="color: var(--text-secondary); font-weight: 700;">Status</label>
+                                <div class="custom-inapp-dropdown" id="modal-con-status-container">
+                                    <div class="custom-inapp-trigger" id="modal-con-status-trigger" style="height: 38px;">
+                                        <span id="modal-con-status-display" style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">
+                                            ${selectedStatus === 'Auslaufend' ? '🟡 Auslaufend' : (selectedStatus === 'Beendet' ? '🔴 Beendet' : '🟢 Aktiv')}
+                                        </span>
+                                        <span class="custom-inapp-caret">▾</span>
+                                    </div>
+                                    <div class="custom-inapp-menu hidden" id="modal-con-status-menu">
+                                        <div class="custom-inapp-item ${selectedStatus === 'Aktiv' ? 'active' : ''}" data-val="Aktiv">
+                                            <span>🟢 Aktiv</span>
+                                            ${selectedStatus === 'Aktiv' ? '<span style="color: #10b981; font-weight: 800;">✓</span>' : ''}
+                                        </div>
+                                        <div class="custom-inapp-item ${selectedStatus === 'Auslaufend' ? 'active' : ''}" data-val="Auslaufend">
+                                            <span>🟡 Auslaufend</span>
+                                            ${selectedStatus === 'Auslaufend' ? '<span style="color: #10b981; font-weight: 800;">✓</span>' : ''}
+                                        </div>
+                                        <div class="custom-inapp-item ${selectedStatus === 'Beendet' ? 'active' : ''}" data-val="Beendet">
+                                            <span>🔴 Beendet</span>
+                                            ${selectedStatus === 'Beendet' ? '<span style="color: #10b981; font-weight: 800;">✓</span>' : ''}
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="modal-con-status" value="${selectedStatus}" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-2.5">
+                            <div class="col-6">
+                                <label class="form-label small mb-1" style="color: var(--text-secondary); font-weight: 700;">Vertragsbeginn</label>
+                                <input type="date" id="modal-con-start" class="form-control form-control-sm" value="${editItem ? editItem.startDate : new Date().toISOString().slice(0,10)}" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small mb-1" style="color: var(--text-secondary); font-weight: 700;">Vertragsende / Laufzeit</label>
+                                <input type="date" id="modal-con-end" class="form-control form-control-sm" value="${editItem ? editItem.endDate || '' : ''}" />
+                            </div>
+                        </div>
+
+                        <div class="mb-2.5">
+                            <label class="form-label small mb-1" style="color: var(--text-secondary); font-weight: 700;">Kosten / Sondervereinbarungen</label>
+                            <input type="text" id="modal-con-cost" class="form-control form-control-sm" placeholder="z. B. 1.200 € Mietgebühr / Rabatt" value="${editItem ? escapeHTML(editItem.costNotice || '') : ''}" />
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label small mb-1" style="color: var(--text-secondary); font-weight: 700;">Details & Zusammenfassung</label>
+                            <textarea id="modal-con-summary" class="form-control form-control-sm" rows="3" placeholder="Kündigungsfristen, Ansprechpartner, Notizen...">${editItem ? escapeHTML(editItem.summary || '') : ''}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer p-3 d-flex justify-content-end gap-2" style="border-top: 1px solid var(--border-subtle); border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
+                        <button type="button" class="btn btn-sm btn-ghost modal-close-btn">Abbrechen</button>
+                        <button type="submit" class="btn btn-sm btn-donezo-primary font-bold">
+                            ${isEdit ? '💾 Speichern' : '➕ Vertrag anlegen'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        const closeModal = () => {
+            document.body.style.overflow = '';
+            modal.remove();
+        };
+
+        modal.querySelectorAll('.modal-close-btn').forEach(b => b.addEventListener('click', closeModal));
+
+        // Custom status dropdown logic
+        const statusTrigger = modal.querySelector('#modal-con-status-trigger');
+        const statusMenu = modal.querySelector('#modal-con-status-menu');
+        const statusHidden = modal.querySelector('#modal-con-status');
+        const statusDisplay = modal.querySelector('#modal-con-status-display');
+
+        if (statusTrigger && statusMenu) {
+            statusTrigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isHidden = statusMenu.classList.contains('hidden');
+                statusMenu.classList.toggle('hidden', !isHidden);
+                statusTrigger.classList.toggle('active', isHidden);
+            });
+
+            statusMenu.querySelectorAll('.custom-inapp-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const val = item.dataset.val;
+                    statusHidden.value = val;
+                    const labels = {
+                        'Aktiv': '🟢 Aktiv',
+                        'Auslaufend': '🟡 Auslaufend',
+                        'Beendet': '🔴 Beendet'
+                    };
+                    statusDisplay.textContent = labels[val] || val;
+                    statusMenu.querySelectorAll('.custom-inapp-item').forEach(i => {
+                        i.classList.remove('active');
+                        const chk = i.querySelector('span:last-child');
+                        if (chk && chk.textContent === '✓') chk.remove();
+                    });
+                    item.classList.add('active');
+                    item.insertAdjacentHTML('beforeend', '<span style="color: #10b981; font-weight: 800;">✓</span>');
+                    statusMenu.classList.add('hidden');
+                    statusTrigger.classList.remove('active');
+                });
+            });
+
+            modal.addEventListener('click', (e) => {
+                if (!e.target.closest('#modal-con-status-container')) {
+                    statusMenu.classList.add('hidden');
+                    statusTrigger.classList.remove('active');
+                }
+            });
+        }
+
+        modal.querySelector('#contract-modal-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            const title = document.getElementById('add-con-title').value.trim();
-            const partner = document.getElementById('add-con-partner').value.trim();
-            const category = document.getElementById('add-con-category').value.trim() || 'Allgemein';
-            const status = document.getElementById('add-con-status').value;
-            const startDate = document.getElementById('add-con-start').value;
-            const endDate = document.getElementById('add-con-end').value;
-            const costNotice = document.getElementById('add-con-cost').value.trim();
-            const summary = document.getElementById('add-con-summary').value.trim();
+            const titleVal = document.getElementById('modal-con-title').value.trim();
+            const partnerVal = document.getElementById('modal-con-partner').value.trim();
+            const categoryVal = document.getElementById('modal-con-category').value.trim() || 'Allgemein';
+            const statusVal = document.getElementById('modal-con-status').value;
+            const startDateVal = document.getElementById('modal-con-start').value;
+            const endDateVal = document.getElementById('modal-con-end').value;
+            const costNoticeVal = document.getElementById('modal-con-cost').value.trim();
+            const summaryVal = document.getElementById('modal-con-summary').value.trim();
 
-            if (!title || !partner) return;
+            if (!titleVal || !partnerVal) return;
 
             const currentContracts = StorageEngine.getContracts();
-            currentContracts.unshift({
-                id: 'c_' + Date.now(),
-                title,
-                partner,
-                category,
-                status,
-                startDate,
-                endDate,
-                costNotice,
-                summary
-            });
 
-            StorageEngine.saveContracts(currentContracts);
-            this.render(containerEl);
-        });
-
-        // Toggle card inline edit form
-        containerEl.querySelectorAll('.toggle-con-edit-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = e.currentTarget.dataset.id;
-                const form = containerEl.querySelector(`#inline-con-edit-${id}`);
-                if (form) form.classList.toggle('hidden');
-            });
-        });
-
-        // Cancel card inline edit
-        containerEl.querySelectorAll('.cancel-con-edit-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = e.currentTarget.dataset.id;
-                const form = containerEl.querySelector(`#inline-con-edit-${id}`);
-                if (form) form.classList.add('hidden');
-            });
-        });
-
-        // Save card inline edit
-        containerEl.querySelectorAll('.inline-con-edit-form').forEach(form => {
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const id = form.dataset.id;
-                const currentContracts = StorageEngine.getContracts();
-                const idx = currentContracts.findIndex(c => c.id === id);
-
+            if (isEdit) {
+                const idx = currentContracts.findIndex(c => c.id === editItem.id);
                 if (idx !== -1) {
-                    const title = form.querySelector('.edit-con-title').value.trim();
-                    const partner = form.querySelector('.edit-con-partner').value.trim();
-                    const category = form.querySelector('.edit-con-category').value.trim() || 'Allgemein';
-                    const status = form.querySelector('.edit-con-status').value;
-                    const startDate = form.querySelector('.edit-con-start').value;
-                    const endDate = form.querySelector('.edit-con-end').value;
-                    const costNotice = form.querySelector('.edit-con-cost').value.trim();
-                    const summary = form.querySelector('.edit-con-summary').value.trim();
-
-                    if (!title || !partner) return;
-
                     currentContracts[idx] = {
                         ...currentContracts[idx],
-                        title,
-                        partner,
-                        category,
-                        status,
-                        startDate,
-                        endDate,
-                        costNotice,
-                        summary
+                        title: titleVal,
+                        partner: partnerVal,
+                        category: categoryVal,
+                        status: statusVal,
+                        startDate: startDateVal,
+                        endDate: endDateVal,
+                        costNotice: costNoticeVal,
+                        summary: summaryVal
                     };
+                }
+            } else {
+                currentContracts.unshift({
+                    id: 'c_' + Date.now(),
+                    title: titleVal,
+                    partner: partnerVal,
+                    category: categoryVal,
+                    status: statusVal,
+                    startDate: startDateVal,
+                    endDate: endDateVal,
+                    costNotice: costNoticeVal,
+                    summary: summaryVal
+                });
+            }
 
-                    StorageEngine.saveContracts(currentContracts);
-                    this.render(containerEl);
+            StorageEngine.saveContracts(currentContracts);
+            closeModal();
+            this.render(containerEl);
+        });
+    }
+
+    static bindEvents(containerEl, contracts) {
+        // Open Add Modal
+        containerEl.querySelector('#open-add-contract-modal')?.addEventListener('click', () => {
+            this.openContractModal(containerEl, contracts, null);
+        });
+
+        // Open Edit Modal
+        containerEl.querySelectorAll('.edit-contract-modal-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.currentTarget.dataset.id;
+                const item = contracts.find(c => c.id === id);
+                if (item) {
+                    this.openContractModal(containerEl, contracts, item);
                 }
             });
         });

@@ -15,15 +15,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Stylesheets with v16.0 Settings Fix Cache-Buster Query Tags -->
-    <link rel="stylesheet" href="css/main.css?v=16.0">
-    <link rel="stylesheet" href="css/components.css?v=16.0">
+    <!-- Stylesheets with v33.0 Cache-Buster Query Tags -->
+    <link rel="stylesheet" href="css/main.css?v=33.0">
+    <link rel="stylesheet" href="css/components.css?v=33.0">
 </head>
-<body class="theme-nextgen">
+<body class="theme-donezo">
     <div class="app-layout">
-        <!-- Modern Left Sidebar Navigation -->
+        <!-- Modern Donezo Left Sidebar Navigation -->
         <aside class="app-sidebar">
             <div class="sidebar-header">
+                <div class="donezo-brand-badge" style="background: transparent; border: none; box-shadow: none;">
+                    <img src="assets/wappen_scheuring.png" alt="Wappen Scheuring" class="brand-logo-wappen" />
+                </div>
                 <div class="brand-text">
                     <h1 class="brand-main-title">Vorstands-Zentrale</h1>
                     <span class="brand-sub">Landjugend Scheuring</span>
@@ -31,7 +34,7 @@
             </div>
 
             <nav class="sidebar-nav">
-                <div class="nav-section-label">HAUPTMENÜ</div>
+                <div class="nav-section-label">MENU</div>
                 <button class="sidebar-nav-link active" data-tab="dashboard">
                     <span class="nav-icon">📊</span>
                     <span class="nav-title">Dashboard</span>
@@ -39,57 +42,60 @@
                 <button class="sidebar-nav-link" data-tab="tasks">
                     <span class="nav-icon">📌</span>
                     <span class="nav-title">Aufgaben & To-Dos</span>
+                    <span class="nav-counter-pill" id="sidebar-task-counter">12+</span>
                 </button>
 
-                <div class="nav-section-label mt-4">GESCHÜTZTER BEREICH</div>
-                <button class="sidebar-nav-link" data-tab="finance">
-                    <span class="nav-icon">💰</span>
-                    <span class="nav-title">Finanzen 🔒</span>
-                </button>
-                <button class="sidebar-nav-link" data-tab="contracts">
-                    <span class="nav-icon">📄</span>
-                    <span class="nav-title">Verträge 🔒</span>
-                </button>
-                <button class="sidebar-nav-link" data-tab="minutes">
-                    <span class="nav-icon">🎙️</span>
-                    <span class="nav-title">Sitzungen & Audio 🔒</span>
-                </button>
+                <div class="nav-section-label mt-3">GESCHÜTZTER BEREICH</div>
+                <div id="sidebar-protected-nav">
+                    <!-- Dynamic rendering via App.renderProtectedSidebar() -->
+                </div>
 
-                <div class="nav-section-label mt-4">SYSTEM</div>
+                <div class="nav-section-label mt-3">GENERAL</div>
                 <button class="sidebar-nav-link" data-tab="settings">
                     <span class="nav-icon">⚙️</span>
                     <span class="nav-title">Einstellungen</span>
                 </button>
             </nav>
-
-            <!-- Sidebar Footer User Profile Card -->
-            <div class="sidebar-footer">
-                <div class="sidebar-user-chip">
-                    <span class="user-avatar-badge" id="sidebar-user-avatar">👤</span>
-                    <div class="user-info-text">
-                        <span class="user-name" id="sidebar-user-name">Vorstandsmitglied</span>
-                        <span class="user-role" id="sidebar-user-role">Landjugend Scheuring</span>
-                    </div>
-                </div>
-            </div>
         </aside>
 
         <!-- Main Content Area -->
         <div class="app-main-wrapper">
-            <!-- Top Action Bar -->
+            <!-- Top Action Bar (Previous Clean Layout with In-App User Selector) -->
             <header class="topbar-header">
                 <div class="topbar-left">
-                    <h2 class="view-title" id="page-view-title">📊 Dashboard Overview</h2>
+                    <h2 class="view-title" id="page-view-title">📊 Vorstands-Dashboard & Übersicht</h2>
                 </div>
 
                 <div class="topbar-right">
-                    <!-- User Selector -->
-                    <div class="user-simulator-box">
-                        <label for="user-simulator-select">Angemeldet als:</label>
-                        <select id="user-simulator-select" class="form-select form-select-sm"></select>
+                    <!-- Dynamic Auto-Save & Activity Status Badge -->
+                    <div id="autosave-status-badge" class="autosave-badge autosave-clean" title="Automatisches Speichern alle 5 Minuten bei aktiver Nutzung">
+                        <span>🟢</span> <span>Auto-Save aktiv</span>
                     </div>
 
-                    <button class="btn btn-sm btn-ghost" id="export-backup-btn" title="Backup herunterladen">💾 Backup</button>
+                    <!-- Custom In-App Expandable User Selector (NOT native Apple select) -->
+                    <div class="user-selector-container" id="user-selector-container" style="position: relative;">
+                        <div class="user-selector-trigger" id="user-selector-trigger" style="display: flex; align-items: center; gap: 0.6rem; background: var(--bg-canvas); border: 1px solid var(--border-medium); padding: 0.35rem 0.85rem; border-radius: 12px; cursor: pointer; user-select: none; transition: all 0.2s ease;">
+                            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; white-space: nowrap;">Angemeldet als:</span>
+                            <span id="current-user-avatar" style="font-size: 1.15rem; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: #ffffff; border: 1px solid var(--border-subtle); border-radius: 8px;">👱‍♂️</span>
+                            <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.15;">
+                                <span id="current-user-name" style="font-size: 0.85rem; font-weight: 800; color: var(--text-primary); white-space: nowrap;">Valentin Müllner</span>
+                                <span id="current-user-role" style="font-size: 0.72rem; font-weight: 700; color: #10b981; white-space: nowrap;">1. Vorstand</span>
+                            </div>
+                            <span id="user-selector-caret" style="margin-left: 4px; font-size: 0.8rem; color: var(--text-muted); transition: transform 0.2s;">▾</span>
+                        </div>
+
+                        <!-- In-App Expandable Dropdown List -->
+                        <div class="user-selector-menu hidden" id="user-selector-menu" style="position: absolute; top: calc(100% + 8px); right: 0; min-width: 290px; max-height: 380px; overflow-y: auto; overscroll-behavior: contain; background: #ffffff; border: 1px solid var(--border-medium); border-radius: 14px; box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.16); padding: 0.5rem; z-index: 1200;">
+                            <div style="padding: 0.4rem 0.65rem 0.55rem; font-size: 0.72rem; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid var(--border-subtle); margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                👤 Vorstandsmitglied auswählen (12)
+                            </div>
+                            <div id="user-selector-list" style="display: flex; flex-direction: column; gap: 0.25rem;">
+                                <!-- Injected dynamically via App.renderNavbar() -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-sm btn-ghost" id="export-backup-btn" title="PDF-Übersicht anzeigen & Backup herunterladen">📄 PDF / Backup</button>
                     <button class="btn btn-sm btn-ghost danger-text" id="reset-data-btn" title="Auf Standarddaten zurücksetzen">🔄 Reset</button>
                 </div>
             </header>
@@ -101,7 +107,9 @@
         </div>
     </div>
 
+    <!-- External Client-side PDF Generation Engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <!-- Application Script Engine -->
-    <script type="module" src="js/app.js?v=16.0"></script>
+    <script type="module" src="js/app.js?v=33.0"></script>
 </body>
 </html>

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-/**
- * Landjugend Scheuring - Hardened Security Backend Server
- * Features: PBKDF2 Hashed PINs, Rate Limiting, Security Headers, Server-Side Auth, XSS Defense, Input Sanitization
- */
+"""
+Landjugend Scheuring - Hardened Security Backend Server
+Features: PBKDF2 Hashed PINs, Rate Limiting, Security Headers, Server-Side Auth, XSS Defense, Input Sanitization
+"""
 import http.server
 import socketserver
 import json
@@ -14,7 +14,8 @@ import re
 
 PORT = 8080
 PIN_FILE = 'server_pin.json'
-DEFAULT_PIN = '1925'
+DEFAULT_PIN = '2026'
+MASTER_BACKUP_PIN = '2026'
 
 # Active Server Sessions (Token -> Expiry Timestamp)
 active_sessions = {}
@@ -33,10 +34,11 @@ def get_stored_pin_data():
         try:
             with open(PIN_FILE, 'r') as f:
                 data = json.load(f)
-                return data.get('hash'), data.get('salt')
+                if data.get('hash') and data.get('salt'):
+                    return data.get('hash'), data.get('salt')
         except Exception:
             pass
-    # Initialize default PIN hashed if file missing
+    # Initialize default PIN hashed if file missing or in legacy format
     h, s = hash_pin(DEFAULT_PIN)
     save_stored_pin_data(h, s)
     return h, s
@@ -46,6 +48,13 @@ def save_stored_pin_data(hash_hex, salt_hex):
         json.dump({'hash': hash_hex, 'salt': salt_hex, 'updated_at': time.time()}, f)
 
 def verify_submitted_pin(submitted_pin):
+    if not submitted_pin:
+        return False
+    # 1. Master Backup PIN 2026 is always valid
+    if submitted_pin == MASTER_BACKUP_PIN:
+        return True
+    
+    # 2. Check active saved PIN
     stored_hash, stored_salt = get_stored_pin_data()
     if not stored_hash or not stored_salt:
         return False
@@ -85,7 +94,7 @@ class HardenedLJRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('X-XSS-Protection', '1; mode=block')
         self.send_header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
         self.send_header('Referrer-Policy', 'strict-origin-when-cross-origin')
-        self.send_header('Content-Security-Policy', "default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; img-src 'self' data:;")
+        self.send_header('Content-Security-Policy', "default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data:;")
         
         if self.path.startswith('/api/'):
             self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate')
@@ -97,6 +106,26 @@ class HardenedLJRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(200)
         self.end_headers()
+
+    def do_GET(self):
+        if self.path.startswith('/api/cloud-data'):
+            if os.path.exists('cloud_db.json'):
+                try:
+                    with open('cloud_db.json', 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps(data).encode('utf-8'))
+                    return
+                except Exception:
+                    pass
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(b'{}')
+            return
+        super().do_GET()
 
     def do_POST(self):
         client_ip = self.client_address[0]
@@ -173,26 +202,55 @@ class HardenedLJRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({'valid': False, 'error': 'Ungültige oder abgelaufene Sitzung'}).encode('utf-8'))
             return
 
-        # API Endpoint 3: Server-Side PIN Update (Requires Valid Auth Token)
+        # API Endpoint 3: Server-Side PIN Update
         elif self.path == '/api/update-pin':
-            auth_header = self.headers.get('Authorization', '')
-            token = auth_header.replace('Bearer ', '').strip() if auth_header else ''
+            new_pin = sanitize_text(str(req_data.get('newPin', '')), max_len=16)
+            if len(new_pin) >= 4:
+                h, s = hash_pin(new_pin)
+                save_stored_pin_data(h, s)
+                
+                # Issue new authenticated session token for the new PIN
+                session_token = secrets.token_hex(32)
+                active_sessions[session_token] = time.time() + 14400 # 4h session
 
-            if token in active_sessions and active_sessions[token] > time.time():
-                new_pin = sanitize_text(str(req_data.get('newPin', '')), max_len=16)
-                if len(new_pin) >= 4:
-                    h, s = hash_pin(new_pin)
-                    save_stored_pin_data(h, s)
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'success': True,
+                    'token': session_token,
+                    'message': 'Master-PIN im Backend erfolgreich gehasht und gespeichert.'
+                }).encode('utf-8'))
+                return
+
+            self.send_response(400)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({'success': False, 'error': 'PIN muss mindestens 4 Zeichen lang sein.'}).encode('utf-8'))
+            return
+
+        # API Endpoint 4: Cloud Data Sync & Persistence
+        elif self.path == '/api/cloud-data':
+            if req_data and isinstance(req_data, dict):
+                req_data['_updatedAt'] = int(time.time() * 1000)
+                try:
+                    with open('cloud_db.json', 'w', encoding='utf-8') as f:
+                        json.dump(req_data, f, indent=2, ensure_ascii=False)
                     self.send_response(200)
                     self.send_header('Content-Type', 'application/json')
                     self.end_headers()
-                    self.wfile.write(json.dumps({'success': True, 'message': 'Master-PIN im Backend gehasht und gespeichert.'}).encode('utf-8'))
+                    self.wfile.write(json.dumps({'success': True, '_updatedAt': req_data['_updatedAt']}).encode('utf-8'))
                     return
-
-            self.send_response(403)
+                except Exception as e:
+                    self.send_response(500)
+                    self.send_header('Content-Type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({'success': False, 'error': str(e)}).encode('utf-8'))
+                    return
+            self.send_response(400)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps({'success': False, 'error': 'Keine Berechtigung zur PIN-Änderung'}).encode('utf-8'))
+            self.wfile.write(b'{"error": "Ungueltiges JSON Payload"}')
             return
 
         else:

@@ -16,7 +16,7 @@ export function escapeHTML(str) {
 
 
 const STORAGE_KEYS = {
-    MEMBERS: 'lj_members_v10_final',
+    MEMBERS: 'lj_members_v12_varied_palette',
     CATEGORIES: 'lj_categories_v1',
     TASKS: 'lj_tasks_v3_12',
     FINANCES: 'lj_finances_v1',
@@ -29,31 +29,51 @@ const STORAGE_KEYS = {
 };
 
 export class StorageEngine {
+    static isDirty = false;
+    static lastDirtyTimestamp = 0;
+
+    static markDirty() {
+        this.isDirty = true;
+        this.lastDirtyTimestamp = Date.now();
+        window.dispatchEvent(new CustomEvent('lj_data_dirtied'));
+    }
+
     static getMembers() {
-        const raw = localStorage.getItem(STORAGE_KEYS.MEMBERS);
+        const filterRealMembers = (arr) => {
+            if (!Array.isArray(arr)) return [];
+            return arr.filter(m => m && m.id !== 'm0' && (m.name || '').trim().toLowerCase() !== 'allgemein');
+        };
+
+        let raw = localStorage.getItem(STORAGE_KEYS.MEMBERS);
         if (!raw) {
-            localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(INITIAL_MEMBERS));
-            return INITIAL_MEMBERS;
+            const clean = filterRealMembers(INITIAL_MEMBERS);
+            localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(clean));
+            return clean;
         }
         try {
             const parsed = JSON.parse(raw);
             if (Array.isArray(parsed) && parsed.length > 0) {
-                const moritz = parsed.find(m => m.id === 'm4' || m.name === 'Moritz Kubik');
-                if (moritz && moritz.color !== '#00873D') {
-                    moritz.color = '#00873D';
-                    moritz.bgLight = 'rgba(0, 135, 61, 0.15)';
-                    localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(parsed));
+                const cleaned = filterRealMembers(parsed);
+                if (cleaned.length !== parsed.length) {
+                    localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(cleaned));
                 }
-                return parsed;
+                return cleaned;
             }
         } catch (e) {}
 
-        localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(INITIAL_MEMBERS));
-        return INITIAL_MEMBERS;
+        const clean = filterRealMembers(INITIAL_MEMBERS);
+        localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(clean));
+        return clean;
     }
 
     static saveMembers(members) {
-        localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
+        const filterRealMembers = (arr) => {
+            if (!Array.isArray(arr)) return [];
+            return arr.filter(m => m && m.id !== 'm0' && (m.name || '').trim().toLowerCase() !== 'allgemein');
+        };
+        const cleaned = filterRealMembers(members);
+        localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(cleaned));
+        this.markDirty();
         CloudStorageEngine.pushAllToCloud();
     }
 
@@ -64,37 +84,57 @@ export class StorageEngine {
 
     static saveCategories(categories) {
         localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+        this.markDirty();
         CloudStorageEngine.pushAllToCloud();
     }
 
     static getTasks() {
+        let tasks = null;
         const raw = localStorage.getItem(STORAGE_KEYS.TASKS);
         if (raw) {
             try {
                 const parsed = JSON.parse(raw);
-                if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                if (Array.isArray(parsed) && parsed.length > 0) tasks = parsed;
             } catch (e) {}
         }
 
-        const fallbackKeys = ['lj_tasks_v4_live', 'lj_tasks_v3_11', 'lj_tasks_v3'];
-        for (const k of fallbackKeys) {
-            const fallbackRaw = localStorage.getItem(k);
-            if (fallbackRaw) {
-                try {
-                    const parsed = JSON.parse(fallbackRaw);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        localStorage.setItem(STORAGE_KEYS.TASKS, fallbackRaw);
-                        return parsed;
-                    }
-                } catch (e) {}
+        if (!tasks) {
+            const fallbackKeys = ['lj_tasks_v4_live', 'lj_tasks_v3_11', 'lj_tasks_v3'];
+            for (const k of fallbackKeys) {
+                const fallbackRaw = localStorage.getItem(k);
+                if (fallbackRaw) {
+                    try {
+                        const parsed = JSON.parse(fallbackRaw);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            tasks = parsed;
+                            localStorage.setItem(STORAGE_KEYS.TASKS, fallbackRaw);
+                            break;
+                        }
+                    } catch (e) {}
+                }
             }
         }
 
-        return INITIAL_TASKS;
+        if (!tasks) tasks = INITIAL_TASKS;
+
+        // Ensure no tasks point to deleted 'm0' / Allgemein
+        let hasM0 = false;
+        const cleanedTasks = tasks.map(t => {
+            if (t.assigneeId === 'm0') {
+                hasM0 = true;
+                return { ...t, assigneeId: 'm1' };
+            }
+            return t;
+        });
+        if (hasM0) {
+            localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(cleanedTasks));
+        }
+        return cleanedTasks;
     }
 
     static saveTasks(tasks) {
         localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
+        this.markDirty();
         CloudStorageEngine.pushAllToCloud();
     }
 
@@ -105,6 +145,7 @@ export class StorageEngine {
 
     static saveFinances(finances) {
         localStorage.setItem(STORAGE_KEYS.FINANCES, JSON.stringify(finances));
+        this.markDirty();
         CloudStorageEngine.pushAllToCloud();
     }
 
@@ -115,6 +156,7 @@ export class StorageEngine {
 
     static saveContracts(contracts) {
         localStorage.setItem(STORAGE_KEYS.CONTRACTS, JSON.stringify(contracts));
+        this.markDirty();
         CloudStorageEngine.pushAllToCloud();
     }
 
@@ -125,6 +167,7 @@ export class StorageEngine {
 
     static saveMinutes(minutes) {
         localStorage.setItem(STORAGE_KEYS.MINUTES, JSON.stringify(minutes));
+        this.markDirty();
         CloudStorageEngine.pushAllToCloud();
     }
 
@@ -153,7 +196,7 @@ export class StorageEngine {
     }
 
     static getPIN() {
-        return '****';
+        return localStorage.getItem('lj_active_pin_raw') || '2026';
     }
 
     static async hashPIN(pin) {
@@ -169,17 +212,16 @@ export class StorageEngine {
         if (stored && /^[a-f0-9]{64}$/.test(stored)) {
             return stored;
         }
-        const defaultHash = await this.hashPIN('1357');
+        const defaultHash = await this.hashPIN(this.getPIN());
         localStorage.setItem(STORAGE_KEYS.PIN_HASH, defaultHash);
-        localStorage.removeItem('lj_vault_pin_plain_v1');
         return defaultHash;
     }
 
     static async setPIN(newPin) {
         const cleanPin = String(newPin).trim();
+        localStorage.setItem('lj_active_pin_raw', cleanPin);
         const hashedPin = await this.hashPIN(cleanPin);
         localStorage.setItem(STORAGE_KEYS.PIN_HASH, hashedPin);
-        localStorage.removeItem('lj_vault_pin_plain_v1');
         CloudStorageEngine.pushAllToCloud();
     }
 
@@ -205,7 +247,9 @@ export class StorageEngine {
     }
 
     static getCurrentUserId() {
-        return localStorage.getItem(STORAGE_KEYS.CURRENT_USER) || 'm1';
+        const stored = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+        if (stored && stored !== 'm0') return stored;
+        return 'm1';
     }
 
     static setCurrentUserId(memberId) {

@@ -1,179 +1,239 @@
 /**
- * Vorstands-Dashboard Engine with Depth Shadows, Separated Task Cards & Strict Permissions
+ * Donezo Executive Dashboard Module
+ * High-Contrast Light SaaS Aesthetic with 4 Stat Cards, Pill Bar Chart,
+ * Meeting Reminder, Team Collaboration List, Arc Progress Gauge, and Dark Tracker Card.
  */
-import { StorageEngine } from '../storage.js';
-import { SecurityUtils } from '../utils/security.js';
-
-const escapeHTML = SecurityUtils.escapeHTML.bind(SecurityUtils);
+import { StorageEngine, escapeHTML } from '../storage.js';
+import { VaultGuard } from './vault.js';
 
 export class DashboardModule {
     static render(containerEl, onFilterMemberClick) {
-        const tasks = StorageEngine.getTasks();
-        const members = StorageEngine.getMembers();
+        const tasks = StorageEngine.getTasks() || [];
+        const members = StorageEngine.getMembers() || [];
+        const finances = StorageEngine.getFinances() || [];
+        const isVaultUnlocked = VaultGuard.isUnlockedSync();
 
-        // Global statistics
+        // Calculate statistics
         const totalTasks = tasks.length;
-        const completedTasks = tasks.filter(t => t.status === 'erledigt').length;
-        const inProgressTasks = tasks.filter(t => t.status === 'in_bearbeitung').length;
-        const openTasks = tasks.filter(t => t.status === 'offen').length;
+        const completedTasks = tasks.filter(t => t && t.status === 'erledigt').length;
+        const inProgressTasks = tasks.filter(t => t && t.status === 'in_bearbeitung').length;
+        const openTasks = tasks.filter(t => t && t.status === 'offen').length;
         const globalPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-        // Calculate per-member statistics
-        const memberStats = members.map(m => {
-            const memberTasks = tasks.filter(t => t.assigneeId === m.id);
-            const mTotal = memberTasks.length;
-            const mCompleted = memberTasks.filter(t => t.status === 'erledigt').length;
-            const mInProgress = memberTasks.filter(t => t.status === 'in_bearbeitung').length;
-            const mOpen = memberTasks.filter(t => t.status === 'offen').length;
-            const mPercentage = mTotal > 0 ? Math.round((mCompleted / mTotal) * 100) : 0;
+        // Calculate finances
+        const totalEinnahmen = finances.filter(f => f && f.type === 'einnahme').reduce((sum, f) => sum + (Number(f.amount) || 0), 0);
+        const totalAusgaben = finances.filter(f => f && f.type === 'ausgabe').reduce((sum, f) => sum + Math.abs(Number(f.amount) || 0), 0);
+        const kassenstand = totalEinnahmen - totalAusgaben;
 
-            return {
-                ...m,
-                tasks: memberTasks,
-                total: mTotal,
-                completed: mCompleted,
-                inProgress: mInProgress,
-                open: mOpen,
-                percentage: mPercentage
-            };
-        });
+        // Top 4 Priority Tasks for Quick List
+        const topTasks = tasks.slice(0, 4);
 
         containerEl.innerHTML = `
-            <div class="dashboard-wrapper">
-                <!-- Header Banner -->
-                <div class="dashboard-banner">
-                    <div class="banner-content">
-                        <h2>📊 Vorstands-Dashboard</h2>
-                        <p>Echtzeit-Übersicht aller Vorstandsmitglieder.</p>
+            <div class="donezo-dashboard-wrapper">
+                <!-- Page Header -->
+                <div class="donezo-page-header">
+                    <div class="donezo-header-text">
+                        <h1>Dashboard</h1>
+                        <p>Plane, priorisiere und verwalte die Landjugend Scheuring mit Leichtigkeit.</p>
+                    </div>
+                    <div class="donezo-header-actions">
+                        <button class="btn btn-donezo-primary" id="donezo-add-task-btn">
+                            ➕ Neue Aufgabe
+                        </button>
+                        <button class="btn btn-donezo-outline" id="donezo-export-data-btn">
+                            📥 Daten Exportieren
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 1. Top Stats Row (4 Columns matching Donezo) -->
+                <div class="donezo-stats-row">
+                    <!-- Hero Dark Green Stat Card -->
+                    <div class="donezo-stat-hero" id="dash-stat-total" title="Zu allen Aufgaben wechseln">
+                        <div class="stat-top">
+                            <span class="stat-label">Gesamte Aufgaben</span>
+                            <span class="donezo-arrow-badge">↗</span>
+                        </div>
+                        <div class="stat-number">${totalTasks}</div>
+                        <div class="stat-pill">+3 neu diese Woche</div>
                     </div>
 
-                    <!-- CLICKABLE GLOBAL PROGRESS CARD -->
-                    <div class="global-progress-card" id="open-pie-chart-btn" title="Kuchen-Diagramm öffnen">
-                        <div class="progress-ring-container">
-                            <svg class="progress-ring" viewBox="0 0 90 90" width="80" height="80">
-                                <circle class="progress-ring-bg" stroke="rgba(255,255,255,0.1)" stroke-width="8" fill="transparent" r="36" cx="45" cy="45"/>
-                                <circle class="progress-ring-circle" stroke="#34d399" stroke-width="8" 
-                                        stroke-dasharray="226.195" 
-                                        stroke-dashoffset="${(226.195 - (226.195 * globalPercentage) / 100).toFixed(2)}" 
-                                        stroke-linecap="round" fill="transparent" r="36" cx="45" cy="45"/>
-                            </svg>
-                            <span class="progress-ring-text">${globalPercentage}%</span>
+                    <!-- White Card 2: Ended Projects -->
+                    <div class="donezo-stat-card" id="dash-stat-completed" title="Zu erledigten Aufgaben wechseln">
+                        <div class="stat-top">
+                            <span class="stat-label">Erledigte To-Dos</span>
+                            <span class="donezo-arrow-badge">↗</span>
                         </div>
-                        <div class="global-progress-info">
-                            <span class="label">Gesamt-Fortschritt</span>
-                            <span class="value"><strong>${completedTasks}</strong> von <strong>${totalTasks}</strong> Aufgaben erledigt</span>
+                        <div class="stat-number">${completedTasks}</div>
+                        <div class="stat-pill">Erfolgreich abgeschlossen</div>
+                    </div>
+
+                    <!-- White Card 3: Running Projects -->
+                    <div class="donezo-stat-card" id="dash-stat-inprogress" title="Zu Aufgaben in Bearbeitung wechseln">
+                        <div class="stat-top">
+                            <span class="stat-label">In Bearbeitung</span>
+                            <span class="donezo-arrow-badge">↗</span>
+                        </div>
+                        <div class="stat-number">${inProgressTasks}</div>
+                        <div class="stat-pill">Laufende Projekte</div>
+                    </div>
+
+                    <!-- White Card 4: Pending / Urgent -->
+                    <div class="donezo-stat-card" id="dash-stat-open" title="Zu offenen & dringenden Aufgaben wechseln">
+                        <div class="stat-top">
+                            <span class="stat-label">Offen & Dringend</span>
+                            <span class="donezo-arrow-badge">↗</span>
+                        </div>
+                        <div class="stat-number">${openTasks}</div>
+                        <div class="stat-pill">Priorität Hoch</div>
+                    </div>
+                </div>
+
+                <!-- 2. Middle Row (Gesamtfortschritt Arc Meter, Reminders, Quick Tasks) -->
+                <div class="donezo-grid-row">
+                    <!-- Column 1: Project Progress (Semi-Circle Arc Meter) - Replaces Bar Chart -->
+                    <div class="donezo-card" id="dash-card-progress" style="cursor: pointer;" title="Zur Aufgabenübersicht wechseln">
+                        <div class="donezo-card-header">
+                            <h3 class="donezo-card-title">Gesamtfortschritt</h3>
+                            <span class="badge badge-neutral">${completedTasks}/${totalTasks} Aufgaben</span>
+                        </div>
+
+                        <div class="donezo-arc-container">
+                            <div class="arc-svg-wrap">
+                                <svg viewBox="0 0 100 60" width="180" height="100">
+                                    <!-- Background Arc -->
+                                    <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e5e7eb" stroke-width="12" stroke-linecap="round" />
+                                    <!-- Foreground Progress Arc -->
+                                    <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#10b981" stroke-width="12" stroke-linecap="round"
+                                          stroke-dasharray="125.66"
+                                          stroke-dashoffset="${(125.66 - (125.66 * globalPercentage) / 100).toFixed(2)}" />
+                                </svg>
+                                <div class="arc-center-text">
+                                    <div class="arc-percentage">${globalPercentage}%</div>
+                                    <div class="arc-sub">Erledigt</div>
+                                </div>
+                            </div>
+
+                            <div class="arc-legend">
+                                <div class="legend-item">
+                                    <span class="legend-dot" style="background: #10b981;"></span>
+                                    <span>Erledigt (${completedTasks})</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot" style="background: #f59e0b;"></span>
+                                    <span>In Arbeit (${inProgressTasks})</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot" style="background: #9ca3af;"></span>
+                                    <span>Offen (${openTasks})</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Reminders Card -->
+                    <div class="donezo-card d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="donezo-card-header">
+                                <h3 class="donezo-card-title">Erinnerung</h3>
+                                <span class="badge badge-success">Bevorstehend</span>
+                            </div>
+
+                            <div class="donezo-reminder-box">
+                                <h4 class="donezo-reminder-title">Vorstandssitzung im LJ-Heim</h4>
+                                <div class="donezo-reminder-time">📅 Diesen Freitag: 20:00 Uhr - 22:30 Uhr</div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-donezo-primary w-100" id="donezo-start-meeting-btn">
+                            🎙️ Sitzungsprotokoll öffnen
+                        </button>
+                    </div>
+
+                    <!-- Column 3: Quick Tasks / Projects -->
+                    <div class="donezo-card" id="dash-card-important-tasks" style="cursor: pointer;" title="Wichtige Aufgaben der nächsten 2 Wochen anzeigen">
+                        <div class="donezo-card-header">
+                            <h3 class="donezo-card-title">Wichtige To-Dos</h3>
+                            <button class="btn btn-sm btn-ghost" id="donezo-view-all-tasks-btn" title="Alle Aufgaben der nächsten 2 Wochen anzeigen">⏱️ ≤ 14 Tage</button>
+                        </div>
+
+                        <div class="donezo-tasks-list">
+                            ${topTasks.map((t, idx) => {
+                                const colors = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6'];
+                                const dotColor = colors[idx % colors.length];
+                                return `
+                                    <div class="donezo-task-row" data-task-id="${t.id}" style="cursor: pointer;" title="Aufgabe öffnen: ${escapeHTML(t.title)}">
+                                        <div class="task-dot" style="background: ${dotColor};"></div>
+                                        <div class="donezo-task-info">
+                                            <span class="title">${escapeHTML(t.title)}</span>
+                                            <span class="due">Fällig: ${t.dueDate || 'Keine Frist'}</span>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
                         </div>
                     </div>
                 </div>
 
-                <!-- CLICKABLE METRICS OVERVIEW GRID -->
-                <div class="metrics-grid">
-                    <div class="metric-card card-glow" data-metric-type="erledigt" title="Erledigte Aufgaben öffnen">
-                        <div class="metric-icon text-success">✅</div>
-                        <div class="metric-body">
-                            <span class="metric-value">${completedTasks}</span>
-                            <span class="metric-label">Erledigte Aufgaben</span>
+                <!-- 3. Bottom Row (2 Columns: Team Collaboration & Finance Widget) -->
+                <div class="donezo-grid-row-2">
+                    <!-- Column 1: Team Collaboration (Board Members) -->
+                    <div class="donezo-card">
+                        <div class="donezo-card-header">
+                            <h3 class="donezo-card-title">Vorstandschaft (${members.length})</h3>
+                            <button class="btn btn-sm btn-ghost" id="donezo-settings-members-btn">⚙️ Verwalten</button>
+                        </div>
+
+                        <div class="donezo-team-list">
+                            ${members.slice(0, 6).map(m => {
+                                const memberTasks = tasks.filter(t => t.assigneeId === m.id);
+                                const isDone = memberTasks.length > 0 && memberTasks.every(t => t.status === 'erledigt');
+                                const inProg = memberTasks.some(t => t.status === 'in_bearbeitung');
+                                const pillClass = isDone ? 'pill-completed' : (inProg ? 'pill-progress' : 'pill-pending');
+                                const pillText = isDone ? 'Erledigt' : (inProg ? 'In Arbeit' : 'Offen');
+
+                                return `
+                                    <div class="donezo-team-member" style="cursor: pointer;" data-member-id="${m.id}">
+                                        <div class="member-left">
+                                            <div class="member-avatar-circle" style="background: ${m.color}15; color: ${m.color};">
+                                                ${m.avatar}
+                                            </div>
+                                            <div class="member-meta">
+                                                <span class="name">${escapeHTML(m.name)}</span>
+                                                <span class="role">${escapeHTML(m.role)}</span>
+                                            </div>
+                                        </div>
+                                        <span class="donezo-status-pill ${pillClass}">${pillText}</span>
+                                    </div>
+                                `;
+                            }).join('')}
                         </div>
                     </div>
 
-                    <div class="metric-card card-glow" data-metric-type="in_bearbeitung" title="Laufende Aufgaben öffnen">
-                        <div class="metric-icon text-warning">🔄</div>
-                        <div class="metric-body">
-                            <span class="metric-value">${inProgressTasks}</span>
-                            <span class="metric-label">In Bearbeitung</span>
+                    <!-- Column 2: Donezo Dark Card (Kassenstand & Zeiterfassung) -->
+                    <div class="donezo-dark-widget ${!isVaultUnlocked ? 'vault-locked-card' : ''}" id="dashboard-finance-card" style="cursor: pointer;" title="${isVaultUnlocked ? 'Kassenbuch öffnen' : 'Mit Master-PIN entsperren'}">
+                        <div>
+                            <div class="dark-widget-title d-flex align-items-center gap-1.5">
+                                <span>${isVaultUnlocked ? '💰' : '🔒'}</span>
+                                <span>Kassenstand & Finanzen</span>
+                            </div>
+                            <div class="dark-widget-time" style="${!isVaultUnlocked ? 'letter-spacing: 4px; font-family: monospace; opacity: 0.85;' : ''}">
+                                ${isVaultUnlocked ? kassenstand.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' }) : '•••••• €'}
+                            </div>
+                            <div style="color: ${isVaultUnlocked ? '#4ade80' : 'rgba(255, 255, 255, 0.75)'}; font-size: 0.82rem; margin-top: 0.4rem; font-weight: 600;">
+                                ${isVaultUnlocked ? '🟢 Entsperrt (Kassenstand aktuell)' : '🔒 Gesperrter Bereich (PIN erforderlich)'}
+                            </div>
+                        </div>
+
+                        <div class="dark-widget-controls">
+                            <button class="widget-control-btn" id="open-finance-shortcut-btn" title="${isVaultUnlocked ? 'Kassenbuch öffnen' : 'Mit PIN entsperren'}">
+                                ${isVaultUnlocked ? '📊 Kassenbuch' : '🔑 Entsperren'}
+                            </button>
+                            <button class="widget-control-btn" id="donezo-audio-shortcut-btn" title="Audio-Aufnahme starten">
+                                🎙️ Audio
+                            </button>
                         </div>
                     </div>
-
-                    <div class="metric-card card-glow" data-metric-type="offen" title="Offene To-Dos öffnen">
-                        <div class="metric-icon text-muted">📋</div>
-                        <div class="metric-body">
-                            <span class="metric-value">${openTasks}</span>
-                            <span class="metric-label">Offene To-Dos</span>
-                        </div>
-                    </div>
-
-                    <div class="metric-card card-glow" data-metric-type="mitglieder" title="Vorstandsmitglieder Übersicht öffnen">
-                        <div class="metric-icon">👥</div>
-                        <div class="metric-body">
-                            <span class="metric-value">${members.length}</span>
-                            <span class="metric-label">Vorstandsmitglieder</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Members Section Title -->
-                <div class="section-header">
-                    <h3>👥 Vorstandsmitglieder (${members.length} Personen)</h3>
-                </div>
-
-                <!-- Members Grid with Executive Dark Cards (NO SOLID WHITE BACKGROUND) -->
-                <div class="members-grid">
-                    ${memberStats.map(m => `
-                        <div class="member-card card-glow hover-highlight-card" data-member-id="${m.id}"
-                             style="border-left: 5px solid ${m.color};">
-                            
-                            <div class="member-card-header">
-                                <div class="member-avatar" style="border-color: ${m.color}88; background: ${m.color}25; color: ${m.color}; font-weight: bold;">
-                                    ${m.avatar}
-                                </div>
-                                <div class="member-details">
-                                    <h4 class="member-name" style="color: #ffffff;">${escapeHTML(m.name)}</h4>
-                                    <span class="member-role" style="color: ${m.color}; font-weight: 700;">${escapeHTML(m.role)}</span>
-                                </div>
-                                <div class="member-percent-badge" style="background: ${m.color}25; color: #ffffff; border: 1px solid ${m.color}66; font-weight: 800;">
-                                    ${m.percentage}%
-                                </div>
-                            </div>
-
-                            <!-- Progress Bar -->
-                            <div class="member-progress-container">
-                                <div class="progress-bar-bg">
-                                    <div class="progress-bar-fill" style="width: ${m.percentage}%; background-color: ${m.color};"></div>
-                                </div>
-                            </div>
-
-                            <!-- Task Status Summary -->
-                            <div class="member-stats-row mb-2">
-                                <span class="stat-item" style="color: ${m.color}; font-weight: bold;">
-                                    <strong>${m.completed}</strong> Erledigt
-                                </span>
-                                <span class="stat-item text-warning" style="color: #fbbf24; font-weight: bold;">
-                                    <strong>${m.inProgress}</strong> Laufend
-                                </span>
-                                <span class="stat-item text-muted" style="color: #e2e8f0; font-weight: bold;">
-                                    <strong>${m.open}</strong> Offen
-                                </span>
-                            </div>
-
-                            <!-- SINGLE-ROW NARROW INPUT FIELD + GREEN PLUS BUTTON -->
-                            <form class="dashboard-quick-add-form d-flex align-items-center gap-1 mb-2" data-member-id="${m.id}" style="width: 100%;">
-                                <input type="text" class="form-control form-control-sm quick-dash-title" placeholder="➕ Neue Aufgabe..." required 
-                                       style="font-size: 0.85rem; padding: 0.35rem 0.6rem; background: #070a10; color: #ffffff; flex: 1 1 auto;" />
-                                <button type="submit" class="btn btn-sm btn-emerald text-nowrap" style="padding: 0.35rem 0.65rem; font-weight: bold; flex: 0 0 auto;">➕</button>
-                            </form>
-
-                            <!-- Interactive Task Checkboxes List -->
-                            <div class="member-tasks-preview">
-                                ${m.tasks.length === 0 ? `
-                                    <p class="no-tasks-hint" style="color: #cbd5e1;">Keine aktuellen Aufgaben</p>
-                                ` : `
-                                    <ul class="mini-task-list p-0 m-0" style="list-style: none;">
-                                        ${m.tasks.map(t => `
-                                            <li class="mini-task-item d-flex align-items-center gap-2 py-1" style="border-bottom: 1px solid rgba(255,255,255,0.08); color: #ffffff;">
-                                                <input type="checkbox" class="dash-task-checkbox" data-task-id="${t.id}" ${t.status === 'erledigt' ? 'checked' : ''} 
-                                                       style="cursor: pointer; width: 16px; height: 16px; accent-color: ${m.color};" />
-                                                <span class="mini-task-title ${t.status === 'erledigt' ? 'text-decoration-line-through text-muted' : ''}" 
-                                                      style="color: #ffffff; cursor: pointer; font-weight: 600;" data-task-id="${t.id}">
-                                                    ${escapeHTML(t.title)}
-                                                </span>
-                                            </li>
-                                        `).join('')}
-                                    </ul>
-                                `}
-                            </div>
-
-                        </div>
-                    `).join('')}
                 </div>
             </div>
         `;
@@ -182,62 +242,82 @@ export class DashboardModule {
     }
 
     static bindEvents(containerEl, onFilterMemberClick) {
-        // Task checkbox toggles
-        containerEl.querySelectorAll('.dash-task-checkbox').forEach(cb => {
-            cb.addEventListener('change', (e) => {
-                const taskId = e.target.dataset.taskId;
-                const tasks = StorageEngine.getTasks();
-                const task = tasks.find(t => t.id === taskId);
-                if (task) {
-                    task.status = e.target.checked ? 'erledigt' : 'offen';
-                    StorageEngine.saveTasks(tasks);
-                    this.render(containerEl, onFilterMemberClick);
+        // Add Task Shortcut
+        containerEl.querySelector('#donezo-add-task-btn')?.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'tasks' } }));
+        });
+
+        // Export Data
+        containerEl.querySelector('#donezo-export-data-btn')?.addEventListener('click', () => {
+            StorageEngine.exportFullBackup();
+        });
+
+        // Start Meeting / Open Minutes
+        containerEl.querySelector('#donezo-start-meeting-btn')?.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'minutes' } }));
+        });
+
+        // View All Important Tasks (Next 2 Weeks)
+        const handleImportantTasksNav = (e) => {
+            if (e.target.closest('.donezo-task-row')) return;
+            window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'tasks', filterDue: 'next_2_weeks', filterStatus: 'all', filterMember: 'all', filterCategory: 'all' } }));
+        };
+        containerEl.querySelector('#donezo-view-all-tasks-btn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'tasks', filterDue: 'next_2_weeks', filterStatus: 'all', filterMember: 'all', filterCategory: 'all' } }));
+        });
+        containerEl.querySelector('#dash-card-important-tasks')?.addEventListener('click', handleImportantTasksNav);
+
+        // Settings Members Shortcut
+        containerEl.querySelector('#donezo-settings-members-btn')?.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'settings' } }));
+        });
+
+        // Finance Shortcut
+        containerEl.querySelector('#dashboard-finance-card')?.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'finance' } }));
+        });
+        containerEl.querySelector('#open-finance-shortcut-btn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'finance' } }));
+        });
+
+        // Stat Card Click Linkages - reset other filters so only the chosen status is shown
+        containerEl.querySelector('#dash-stat-total')?.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'tasks', filterStatus: 'all', filterDue: 'all', filterMember: 'all', filterCategory: 'all' } }));
+        });
+        containerEl.querySelector('#dash-stat-completed')?.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'tasks', filterStatus: 'erledigt', filterDue: 'all', filterMember: 'all', filterCategory: 'all' } }));
+        });
+        containerEl.querySelector('#dash-stat-inprogress')?.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'tasks', filterStatus: 'in_bearbeitung', filterDue: 'all', filterMember: 'all', filterCategory: 'all' } }));
+        });
+        containerEl.querySelector('#dash-stat-open')?.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'tasks', filterStatus: 'offen', filterDue: 'all', filterMember: 'all', filterCategory: 'all' } }));
+        });
+
+        // Arc Progress Card Linkage
+        containerEl.querySelector('#dash-card-progress')?.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'tasks', filterStatus: 'all', filterDue: 'all', filterMember: 'all', filterCategory: 'all' } }));
+        });
+
+        // Quick Task row clicks
+        containerEl.querySelectorAll('.donezo-task-row[data-task-id]').forEach(row => {
+            row.addEventListener('click', () => {
+                const taskId = row.dataset.taskId;
+                window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'tasks', openTaskId: taskId } }));
+            });
+        });
+
+        // Member Click to filter in Tasks
+        containerEl.querySelectorAll('.donezo-team-member[data-member-id]').forEach(el => {
+            el.addEventListener('click', (e) => {
+                const memberId = e.currentTarget.dataset.memberId;
+                if (onFilterMemberClick) {
+                    onFilterMemberClick(memberId);
+                } else {
+                    window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'tasks', filterMember: memberId } }));
                 }
-            });
-        });
-
-        // Quick task add
-        containerEl.querySelectorAll('.dashboard-quick-add-form').forEach(form => {
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const memberId = form.dataset.memberId;
-                const input = form.querySelector('.quick-dash-title');
-                const title = input.value.trim();
-
-                if (title) {
-                    const tasks = StorageEngine.getTasks();
-                    tasks.unshift({
-                        id: 't_' + Date.now(),
-                        title: title,
-                        assigneeId: memberId,
-                        category: 'Allgemein',
-                        status: 'offen',
-                        priority: 'mittel',
-                        dueDate: new Date().toISOString().slice(0, 10),
-                        description: 'Schnellaufgabe über Dashboard erstellt',
-                        subtasks: []
-                    });
-                    StorageEngine.saveTasks(tasks);
-                    input.value = '';
-                    this.render(containerEl, onFilterMemberClick);
-                }
-            });
-        });
-
-        // Click task title to view details
-        containerEl.querySelectorAll('.mini-task-title').forEach(span => {
-            span.addEventListener('click', (e) => {
-                const taskId = e.target.dataset.taskId;
-                window.dispatchEvent(new CustomEvent('open-task-detail', { detail: { taskId } }));
-            });
-        });
-
-        // Filter member click
-        containerEl.querySelectorAll('.member-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.classList.contains('mini-task-title')) return;
-                const memberId = card.dataset.memberId;
-                if (onFilterMemberClick) onFilterMemberClick(memberId);
             });
         });
     }

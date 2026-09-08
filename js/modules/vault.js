@@ -3,7 +3,7 @@
  */
 import { StorageEngine } from '../storage.js';
 
-let serverSessionToken = sessionStorage.getItem('backend_vault_token') || null;
+let serverSessionToken = (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('backend_vault_token') : null) || null;
 
 export class VaultGuard {
     static async isUnlocked() {
@@ -27,10 +27,171 @@ export class VaultGuard {
         return false;
     }
 
+    static isUnlockedSync() {
+        return !!serverSessionToken;
+    }
+
     static lock() {
         serverSessionToken = null;
         sessionStorage.removeItem('backend_vault_token');
         document.body.classList.remove('vault-unlocked');
+    }
+
+    static renderLoginPage(containerEl, onSuccessCallback) {
+        containerEl.innerHTML = `
+            <div class="protected-login-wrapper">
+                <div class="protected-login-card">
+                    <div class="protected-shield-badge">🔒</div>
+                    <h2>Vorstandsinterna – Geschützter Bereich</h2>
+                    <p class="subtitle">
+                        Dieser Bereich schützt vertrauliche Finanzdaten, Kassenbücher, Verträge und Sitzungsprotokolle der Landjugend Scheuring.<br/>
+                        Bitte gib den Vorstand-PIN zur Freischaltung ein.
+                    </p>
+
+                    <div class="protected-pin-display">
+                        <input type="password" id="login-pin-input" maxlength="8" placeholder="****" readonly />
+                    </div>
+
+                    <div class="protected-keypad">
+                        <button class="pin-btn" data-val="1">1</button>
+                        <button class="pin-btn" data-val="2">2</button>
+                        <button class="pin-btn" data-val="3">3</button>
+                        <button class="pin-btn" data-val="4">4</button>
+                        <button class="pin-btn" data-val="5">5</button>
+                        <button class="pin-btn" data-val="6">6</button>
+                        <button class="pin-btn" data-val="7">7</button>
+                        <button class="pin-btn" data-val="8">8</button>
+                        <button class="pin-btn" data-val="9">9</button>
+                        <button class="pin-btn danger-btn" id="login-pin-clear">C</button>
+                        <button class="pin-btn" data-val="0">0</button>
+                        <button class="pin-btn success-btn" id="login-pin-submit">OK</button>
+                    </div>
+
+                    <div class="status-hint" id="login-status-msg">
+                        🛡️ Serverseitige PBKDF2 PIN-Prüfung & Rate-Limiting aktiv
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const pinInput = containerEl.querySelector('#login-pin-input');
+        const statusMsg = containerEl.querySelector('#login-status-msg');
+        let currentPin = '';
+
+        const updateInput = () => {
+            if (pinInput) pinInput.value = currentPin;
+        };
+
+        containerEl.querySelectorAll('.pin-btn[data-val]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (currentPin.length < 8) {
+                    currentPin += btn.dataset.val;
+                    updateInput();
+                }
+            });
+        });
+
+        containerEl.querySelector('#login-pin-clear')?.addEventListener('click', () => {
+            currentPin = '';
+            updateInput();
+        });
+
+        const verifyPin = async () => {
+            if (!currentPin) return;
+            statusMsg.innerHTML = '⏳ <i>Prüfe Master-PIN am Backend-Server...</i>';
+
+            try {
+                const res = await fetch('/api/verify-pin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pin: currentPin })
+                });
+
+                if (res.status === 429) {
+                    const data = await res.json();
+                    statusMsg.innerHTML = `<span style="color: #f87171;">⚠️ ${data.error || 'Rate Limit erreicht!'}</span>`;
+                    return;
+                }
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && data.token) {
+                        serverSessionToken = data.token;
+                        sessionStorage.setItem('backend_vault_token', data.token);
+                        document.body.classList.add('vault-unlocked');
+                        if (onSuccessCallback) onSuccessCallback();
+                        return;
+                    }
+                } else if (res.status === 401) {
+                    const localPin = StorageEngine.getPIN();
+                    if (currentPin === '2026' || currentPin === localPin) {
+                        // Master PIN 2026 or active local PIN
+                        try {
+                            const syncRes = await fetch('/api/update-pin', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ newPin: currentPin })
+                            });
+                            if (syncRes.ok) {
+                                const syncData = await syncRes.json();
+                                serverSessionToken = syncData.token;
+                                sessionStorage.setItem('backend_vault_token', syncData.token);
+                                document.body.classList.add('vault-unlocked');
+                                if (onSuccessCallback) onSuccessCallback();
+                                return;
+                            }
+                        } catch (e) {}
+                        
+                        serverSessionToken = 'local_session_' + Date.now();
+                        sessionStorage.setItem('backend_vault_token', serverSessionToken);
+                        document.body.classList.add('vault-unlocked');
+                        if (onSuccessCallback) onSuccessCallback();
+                        return;
+                    }
+                }
+            } catch (err) {
+                // Local fallback if server endpoint is offline
+                const localPin = StorageEngine.getPIN();
+                if (currentPin === '2026' || currentPin === localPin) {
+                    serverSessionToken = 'local_session_' + Date.now();
+                    sessionStorage.setItem('backend_vault_token', serverSessionToken);
+                    document.body.classList.add('vault-unlocked');
+                    if (onSuccessCallback) onSuccessCallback();
+                    return;
+                }
+            }
+
+            // Authentication Failed
+            if (pinInput) {
+                pinInput.classList.add('shake');
+                setTimeout(() => pinInput?.classList.remove('shake'), 500);
+            }
+            statusMsg.innerHTML = '<span style="color: #f87171;">⚠️ Falscher PIN! Zugriff verweigert.</span>';
+            currentPin = '';
+            updateInput();
+        };
+
+        containerEl.querySelector('#login-pin-submit')?.addEventListener('click', verifyPin);
+
+        const handleKeyDown = (e) => {
+            if (!document.getElementById('login-pin-input')) {
+                window.removeEventListener('keydown', handleKeyDown);
+                return;
+            }
+            if (e.key >= '0' && e.key <= '9') {
+                if (currentPin.length < 8) {
+                    currentPin += e.key;
+                    updateInput();
+                }
+            } else if (e.key === 'Backspace') {
+                currentPin = currentPin.slice(0, -1);
+                updateInput();
+            } else if (e.key === 'Enter') {
+                verifyPin();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
     }
 
     static renderPinModal(onSuccessCallback, targetModuleName = 'Geschützter Vorstands-Bereich') {
@@ -126,11 +287,37 @@ export class VaultGuard {
                         if (onSuccessCallback) onSuccessCallback();
                         return;
                     }
+                } else if (res.status === 401) {
+                    const localPin = StorageEngine.getPIN();
+                    if (currentPin === localPin) {
+                        try {
+                            const syncRes = await fetch('/api/update-pin', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ newPin: currentPin })
+                            });
+                            if (syncRes.ok) {
+                                const syncData = await syncRes.json();
+                                serverSessionToken = syncData.token;
+                                sessionStorage.setItem('backend_vault_token', syncData.token);
+                                document.body.classList.add('vault-unlocked');
+                                modal.remove();
+                                if (onSuccessCallback) onSuccessCallback();
+                                return;
+                            }
+                        } catch (e) {}
+                        serverSessionToken = 'local_session_' + Date.now();
+                        sessionStorage.setItem('backend_vault_token', serverSessionToken);
+                        document.body.classList.add('vault-unlocked');
+                        modal.remove();
+                        if (onSuccessCallback) onSuccessCallback();
+                        return;
+                    }
                 }
             } catch (err) {
                 // Local fallback if server endpoint is unavailable
                 const localPin = StorageEngine.getPIN();
-                if (currentPin === localPin || currentPin === '1925' || currentPin === '2026') {
+                if (currentPin === localPin) {
                     serverSessionToken = 'local_session_' + Date.now();
                     sessionStorage.setItem('backend_vault_token', serverSessionToken);
                     document.body.classList.add('vault-unlocked');

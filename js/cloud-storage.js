@@ -90,7 +90,19 @@ export class CloudStorageEngine {
         }
     }
 
+    static shouldSync() {
+        if (document.hidden) return false;
+        if (window.AutoSaveEngine && typeof window.AutoSaveEngine.isEligibleToSave === 'function') {
+            return window.AutoSaveEngine.isEligibleToSave();
+        }
+        const currentUserId = StorageEngine.getCurrentUserId();
+        return Boolean(currentUserId && currentUserId !== 'm0');
+    }
+
     static async pullAllFromCloud() {
+        if (!this.shouldSync()) {
+            return;
+        }
         let cloudData = null;
 
         // Strategy 1: Try Vercel Serverless Function or Python Local Backend (/api/cloud-data)
@@ -200,8 +212,13 @@ export class CloudStorageEngine {
             } catch (e) {}
         }
 
+        StorageEngine.isDirty = false;
+        if (window.AutoSaveEngine && typeof window.AutoSaveEngine.updateBadge === 'function') {
+            window.AutoSaveEngine.updateBadge('saved');
+        }
+
         if (pushedSuccess) {
-            this.updateStatus('online', '🟢 Live mit allen Geräten synchronisiert (10s)');
+            this.updateStatus('online', '🟢 Live synchronisiert (Auto-Save 5m)');
         } else {
             this.updateStatus('offline', '🟡 Lokale Änderungen gespeichert');
         }

@@ -24,13 +24,6 @@ export class MinutesModule {
 
         containerEl.innerHTML = `
             <div class="minutes-wrapper">
-                <div class="section-banner minutes-banner">
-                    <div class="banner-title">
-                        <h2>🎙️ Sitzungen, Audio-Aufnahme & Fakten-Protokolle</h2>
-                        <p>Nimmt Sitzungen auf und generiert hochkompakte Stichpunkt-Fakten ohne Smalltalk.</p>
-                    </div>
-                </div>
-
                 <!-- Recorder Widget Bar -->
                 <div class="card-glow recorder-widget">
                     <div class="recorder-left">
@@ -49,8 +42,8 @@ export class MinutesModule {
                     </div>
 
                     <div class="recorder-right">
-                        <button class="btn btn-primary btn-glow" id="start-rec-btn">🎙️ Aufnahme starten</button>
-                        <button class="btn btn-danger btn-glow hidden" id="stop-rec-btn">⏹️ Aufnahme beenden</button>
+                        <button class="btn btn-donezo-primary" id="start-rec-btn" style="padding: 0.65rem 1.35rem; font-weight: 700; font-size: 0.92rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.5rem; white-space: nowrap;">🎙️ Aufnahme starten</button>
+                        <button class="btn btn-danger hidden" id="stop-rec-btn" style="padding: 0.65rem 1.35rem; font-weight: 700; font-size: 0.92rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.5rem; white-space: nowrap;">⏹️ Aufnahme beenden</button>
                     </div>
                 </div>
 
@@ -80,10 +73,10 @@ export class MinutesModule {
                     ${minutes.length === 0 ? `
                         <div class="empty-column-placeholder">Noch keine Sitzungsprotokolle vorhanden.</div>
                     ` : minutes.map(m => `
-                        <div class="minute-card card-glow mb-4" style="border-left: 4px solid #10b981; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                        <div class="minute-card mb-4" style="border-left: 4px solid #10b981;">
                             <div class="minute-header d-flex justify-content-between align-items-center mb-2">
                                 <div>
-                                    <h3 class="minute-title" style="color: #34d399; font-size: 1.25rem; font-weight: 800; font-family: monospace; letter-spacing: 0.03em;">
+                                    <h3 class="minute-title" style="color: var(--text-primary); font-size: 1.15rem; font-weight: 800; margin: 0 0 0.25rem 0;">
                                         📁 ${escapeHTML(m.title)}
                                     </h3>
                                     <span class="minute-meta text-muted small">📅 Datum: ${m.date} | 📍 ${escapeHTML(m.location || 'Landjugendheim Scheuring')}</span>
@@ -92,24 +85,24 @@ export class MinutesModule {
                             </div>
 
                             <!-- Bullet Point Summary -->
-                            <div class="bullets-box card-glow-sm mt-3">
-                                <h5>📝 Wichtige Fakten & Beschlüsse (Stichpunkte):</h5>
-                                <ul class="bullet-list">
-                                    ${(m.bullets || [m.summary]).map(b => `<li>${escapeHTML(b)}</li>`).join('')}
+                            <div class="bullets-box mt-3" style="background: var(--bg-canvas); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 1rem;">
+                                <h5 style="color: var(--text-secondary); font-weight: 800; font-size: 0.88rem; margin-bottom: 0.5rem;">📝 Wichtige Fakten & Beschlüsse:</h5>
+                                <ul class="bullet-list" style="padding-left: 1.25rem; color: var(--text-secondary); font-size: 0.88rem;">
+                                    ${(m.bullets || [m.summary]).map(b => `<li style="margin-bottom: 0.25rem;">${escapeHTML(b)}</li>`).join('')}
                                 </ul>
                             </div>
 
                             <!-- Speaker Conversation Tracking -->
                             ${m.speakerMap && m.speakerMap.length > 0 ? `
                                 <div class="speaker-tracking-box mt-3">
-                                    <h5>💬 Wichtige Aussagen nach Personen:</h5>
+                                    <h5 style="color: var(--text-secondary); font-weight: 800; font-size: 0.88rem; margin-bottom: 0.5rem;">💬 Wichtige Aussagen nach Personen:</h5>
                                     <div class="speaker-dialogue-list">
                                         ${m.speakerMap.map(s => {
                                             const matchedMember = members.find(mem => mem.name.toLowerCase().includes(s.speaker.toLowerCase())) || { color: '#3b82f6', avatar: '👤' };
                                             return `
-                                                <div class="dialogue-chip mb-2" style="border-left: 3px solid ${matchedMember.color}">
+                                                <div class="dialogue-chip mb-2 p-2 rounded" style="background: var(--bg-canvas); border: 1px solid var(--border-subtle); border-left: 3px solid ${matchedMember.color}">
                                                     <strong style="color: ${matchedMember.color}">${matchedMember.avatar} ${escapeHTML(s.speaker)}:</strong>
-                                                    <span>${escapeHTML(s.text)}</span>
+                                                    <span style="color: var(--text-primary); font-size: 0.85rem;">${escapeHTML(s.text)}</span>
                                                 </div>
                                             `;
                                         }).join('')}

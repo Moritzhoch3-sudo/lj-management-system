@@ -1,12 +1,12 @@
 /**
- * Settings Module with Compact Full-Width Horizontal Tables & Safe Error Handling
+ * Settings Module with True Separate Sub-Pages (Render ONLY Active Sub-Tab)
  */
 import { BOARD_ROLE_OPTIONS } from '../data.js';
 import { StorageEngine } from '../storage.js';
 import { SecurityUtils } from '../utils/security.js';
 
 const escapeHTML = SecurityUtils.escapeHTML.bind(SecurityUtils);
-let activeSubTab = 'members';
+let activeSubTab = 'members'; // 'members', 'categories', 'security'
 
 export class SettingsModule {
     static render(containerEl, onMembersUpdatedCallback) {
@@ -17,130 +17,32 @@ export class SettingsModule {
 
             containerEl.innerHTML = `
                 <div class="settings-wrapper w-100">
-                    <!-- Header Banner -->
-                    <div class="section-banner settings-banner mb-3">
-                        <div class="banner-title">
-                            <h2>⚙️ Einstellungen & Vorstands-Verwaltung</h2>
-                            <p>Verwalte Vorstandsmitglieder, Kategorien und Bereichs-Sicherheit.</p>
-                        </div>
-                    </div>
-
-                    <!-- Sub-Tabs Navigation -->
-                    <div class="sub-tabs-bar mb-3">
-                        <button class="sub-tab-btn ${activeSubTab === 'members' ? 'active' : ''}" data-subtab="members">
-                            👥 Mitglieder (${members.length})
-                        </button>
-                        <button class="sub-tab-btn ${activeSubTab === 'categories' ? 'active' : ''}" data-subtab="categories">
-                            🏷️ Kategorien (${categories.length})
-                        </button>
-                        <button class="sub-tab-btn ${activeSubTab === 'security' ? 'active' : ''}" data-subtab="security">
-                            🔒 Admin-PIN
-                        </button>
-                    </div>
-
-                    <!-- Sub-Tab 1: Members Management -->
-                    <div class="sub-tab-content ${activeSubTab === 'members' ? '' : 'hidden'}" id="subtab-members-view">
-                        <div class="card-glow mb-3 p-3">
-                            <div class="toolbar-row d-flex justify-content-between align-items-center mb-2">
-                                <h3 class="m-0">👥 Vorstandsmitglieder (${members.length} Personen)</h3>
-                                <button class="btn btn-primary btn-sm" id="add-member-inline-btn">➕ Neues Mitglied</button>
+                    <!-- Unified Donezo Header Bar with Segmented Sub-Tab Switcher -->
+                    <div class="card-glow p-4 mb-4">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <div>
+                                <h2 class="m-0" style="font-size: 1.45rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.02em;">⚙️ Vorstands-Verwaltung & Einstellungen</h2>
+                                <p class="text-muted m-0 mt-1" style="font-size: 0.88rem;">Mitglieder, Kategorien und Bereichs-Sicherheit der Landjugend Scheuring</p>
                             </div>
-
-                            <div class="table-responsive mt-2">
-                                <table class="settings-table clean-tasks-table w-100">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 60px;">Icon</th>
-                                            <th>Name des Mitglieds</th>
-                                            <th style="width: 240px;">Vorstandsposition / Amt</th>
-                                            <th style="width: 100px;">Kennfarbe</th>
-                                            <th style="width: 70px; text-align: center;">Aktion</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${members.map(m => `
-                                            <tr data-member-id="${m.id}" class="member-inline-row">
-                                                <td>
-                                                    <input type="text" class="form-control form-control-sm inline-avatar-input text-center" value="${escapeHTML(m.avatar || '👤')}" style="width: 45px;" />
-                                                </td>
-                                                <td>
-                                                    <input type="text" class="form-control form-control-sm inline-name-input" value="${escapeHTML(m.name || '')}" placeholder="Name eingeben..." />
-                                                </td>
-                                                <td>
-                                                    <select class="form-select form-select-sm inline-role-select">
-                                                        ${BOARD_ROLE_OPTIONS.map(r => `
-                                                            <option value="${r}" ${m.role && (m.role.startsWith(r) || m.role.includes(r)) ? 'selected' : ''}>${r}</option>
-                                                        `).join('')}
-                                                        <option value="${escapeHTML(m.role || '')}" ${!BOARD_ROLE_OPTIONS.some(r => m.role && m.role.startsWith(r)) ? 'selected' : ''}>Sonstiges (${escapeHTML(m.role || 'Mitglied')})</option>
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <input type="color" class="form-control form-control-sm inline-color-input" value="${m.color || '#10b981'}" style="height: 34px; padding: 2px; cursor: pointer;" />
-                                                </td>
-                                                <td class="text-center">
-                                                    <button class="btn btn-sm btn-ghost danger-text delete-member-btn" data-id="${m.id}" title="Mitglied löschen">🗑️</button>
-                                                </td>
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sub-Tab 2: Categories Management -->
-                    <div class="sub-tab-content ${activeSubTab === 'categories' ? '' : 'hidden'}" id="subtab-categories-view">
-                        <div class="card-glow mb-3 p-3">
-                            <div class="toolbar-row d-flex justify-content-between align-items-center mb-2">
-                                <h3 class="m-0">🏷️ Aufgaben-Kategorien (${categories.length})</h3>
-                                <button class="btn btn-primary btn-sm" id="add-category-btn">➕ Neue Kategorie</button>
-                            </div>
-
-                            <div class="table-responsive mt-2">
-                                <table class="settings-table clean-tasks-table w-100">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 60px;">Icon</th>
-                                            <th>Kategorie-Name</th>
-                                            <th style="width: 100px;">Farbe</th>
-                                            <th style="width: 70px; text-align: center;">Aktion</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${categories.map(c => `
-                                            <tr data-cat-id="${c.id}" class="category-inline-row">
-                                                <td>
-                                                    <input type="text" class="form-control form-control-sm cat-icon-input text-center" value="${escapeHTML(c.icon || '📁')}" style="width: 45px;" />
-                                                </td>
-                                                <td>
-                                                    <input type="text" class="form-control form-control-sm cat-name-input" value="${escapeHTML(c.name || '')}" placeholder="Kategorie Name..." />
-                                                </td>
-                                                <td>
-                                                    <input type="color" class="form-control form-control-sm cat-color-input" value="${c.color || '#3b82f6'}" style="height: 34px; padding: 2px; cursor: pointer;" />
-                                                </td>
-                                                <td class="text-center">
-                                                    <button class="btn btn-sm btn-ghost danger-text delete-cat-btn" data-id="${c.id}" title="Kategorie löschen">🗑️</button>
-                                                </td>
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sub-Tab 3: Security & Master PIN -->
-                    <div class="sub-tab-content ${activeSubTab === 'security' ? '' : 'hidden'}" id="subtab-security-view">
-                        <div class="card-glow mb-3 p-3">
-                            <h3 class="m-0 mb-2">🔒 Admin-PIN & Backend-Sicherheit</h3>
-                            <p class="text-muted mb-3 font-size-sm">Die Authentifizierung erfolgt gehasht über das Backend.</p>
                             
-                            <div class="d-flex align-items-center gap-2">
-                                <label style="font-weight: 700;">Neuer Admin-PIN:</label>
-                                <input type="password" id="backend-pin-input" class="form-control form-control-sm" maxlength="8" placeholder="Neuer PIN..." style="max-width: 160px; font-weight: bold; text-align: center;" />
-                                <button class="btn btn-emerald btn-sm" id="save-pin-backend-btn">💾 PIN Speichern</button>
+                            <!-- Segmented Pill Button Group matching Dashboard / Tasks controls -->
+                            <div class="settings-nav-pill-group d-flex align-items-center gap-1.5 p-1" style="background: var(--bg-canvas); border: 1px solid var(--border-medium); border-radius: 12px;">
+                                <button type="button" class="sub-tab-btn ${activeSubTab === 'members' ? 'active' : ''}" data-subtab="members">
+                                    👥 Mitglieder (${members.length})
+                                </button>
+                                <button type="button" class="sub-tab-btn ${activeSubTab === 'categories' ? 'active' : ''}" data-subtab="categories">
+                                    🏷️ Kategorien (${categories.length})
+                                </button>
+                                <button type="button" class="sub-tab-btn ${activeSubTab === 'security' ? 'active' : ''}" data-subtab="security">
+                                    🔒 Admin-PIN
+                                </button>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Render ONLY the Selected Sub-Page Content -->
+                    <div class="sub-page-viewport">
+                        ${this.renderSubPageContent(activeSubTab, members, categories, currentPin)}
                     </div>
                 </div>
             `;
@@ -158,8 +60,121 @@ export class SettingsModule {
         }
     }
 
+    /**
+     * Renders strictly ONLY the active sub-tab view so no scrolling over other sections occurs!
+     */
+    static renderSubPageContent(subTab, members, categories, currentPin) {
+        if (subTab === 'members') {
+            return `
+                <div class="card-glow p-4">
+                    <div class="toolbar-row d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="m-0 font-size-md" style="font-weight: 800; font-size: 1.15rem;">👥 Vorstandsmitglieder verwalten (${members.length} Personen)</h3>
+                        <button class="btn btn-donezo-primary btn-sm" id="add-member-inline-btn">➕ Neues Mitglied</button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="settings-table clean-tasks-table w-100">
+                            <thead>
+                                <tr>
+                                    <th style="width: 54px;">Icon</th>
+                                    <th>Name des Mitglieds</th>
+                                    <th style="width: 240px;">Vorstandsposition / Amt</th>
+                                    <th style="width: 120px;">Kennfarbe</th>
+                                    <th style="width: 50px; text-align: center;">Aktion</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${members.map(m => `
+                                    <tr data-member-id="${m.id}" class="member-inline-row">
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm inline-avatar-input" value="${escapeHTML(m.avatar || '👤')}" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm inline-name-input" value="${escapeHTML(m.name || '')}" placeholder="Name eingeben..." />
+                                        </td>
+                                        <td>
+                                            <select class="form-select form-select-sm inline-role-select">
+                                                ${BOARD_ROLE_OPTIONS.map(r => `
+                                                    <option value="${r}" ${m.role && (m.role.startsWith(r) || m.role.includes(r)) ? 'selected' : ''}>${r}</option>
+                                                `).join('')}
+                                                <option value="${escapeHTML(m.role || '')}" ${!BOARD_ROLE_OPTIONS.some(r => m.role && m.role.startsWith(r)) ? 'selected' : ''}>Sonstiges (${escapeHTML(m.role || 'Mitglied')})</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <div class="color-tile-swatch" style="background-color: ${m.color || '#10b981'};" title="Klicken, um Farbe zu ändern">
+                                                <input type="color" class="inline-color-input color-picker-overlay" value="${m.color || '#10b981'}" />
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-ghost danger-text delete-member-btn" data-id="${m.id}" title="Mitglied löschen">🗑️</button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        } else if (subTab === 'categories') {
+            return `
+                <div class="card-glow p-4">
+                    <div class="toolbar-row d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="m-0 font-size-md" style="font-weight: 800; font-size: 1.15rem;">🏷️ Aufgaben-Kategorien verwalten (${categories.length})</h3>
+                        <button class="btn btn-donezo-primary btn-sm" id="add-category-btn">➕ Neue Kategorie</button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="settings-table clean-tasks-table w-100">
+                            <thead>
+                                <tr>
+                                    <th style="width: 70px; text-align: center;">Icon</th>
+                                    <th>Kategorie-Name</th>
+                                    <th style="width: 60px; text-align: center;">Aktion</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${categories.map(c => `
+                                    <tr data-cat-id="${c.id}" class="category-inline-row">
+                                        <td style="text-align: center;">
+                                            <input type="text" class="form-control form-control-sm cat-icon-input" value="${escapeHTML(c.icon || '📁')}" style="text-align: center; font-size: 1.15rem; width: 48px; margin: 0 auto;" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm cat-name-input" value="${escapeHTML(c.name || '')}" placeholder="Kategorie Name..." />
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-ghost danger-text delete-cat-btn" data-id="${c.id}" title="Kategorie löschen">🗑️</button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        } else if (subTab === 'security') {
+            return `
+                <div class="card-glow p-4" style="max-width: 600px;">
+                    <h3 class="m-0 mb-2 font-size-md" style="font-weight: 800; font-size: 1.2rem;">🔒 Admin-PIN & Bereichs-Sicherheit</h3>
+                    <p class="text-muted mb-3 font-size-sm" style="line-height: 1.5;">
+                        Der Admin-PIN schützt vertrauliche Finanzen, Verträge und Sitzungsprotokolle. 
+                        Sobald Sie eine neue PIN festlegen, werden alle alten benutzerdefinierten PINs ungültig. 
+                        Die Standard-Master-PIN <strong>2026</strong> bleibt als Notfallzugang stets erhalten.
+                    </p>
+                    
+                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                        <label style="font-weight: 700; white-space: nowrap;">Neuer Vorstand-PIN:</label>
+                        <input type="password" id="backend-pin-input" class="form-control form-control-sm" maxlength="8" placeholder="Neuer PIN..." style="max-width: 160px; font-weight: bold; text-align: center; font-size: 1rem; letter-spacing: 0.2rem;" />
+                        <button class="btn btn-donezo-primary btn-sm" id="save-pin-backend-btn">💾 PIN Speichern</button>
+                    </div>
+                    <div id="pin-feedback-msg" style="font-size: 0.85rem; font-weight: 600; margin-top: 0.5rem;"></div>
+                </div>
+            `;
+        }
+        return '';
+    }
+
     static bindEvents(containerEl, members, categories, onMembersUpdatedCallback) {
-        // Sub-Tabs Navigation
+        // Sub-Tabs Navigation (Strict Sub-Pages)
         containerEl.querySelectorAll('.sub-tab-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 activeSubTab = e.currentTarget.dataset.subtab;
@@ -170,6 +185,7 @@ export class SettingsModule {
         // Members Auto-Save
         const saveMembersState = () => {
             const rows = containerEl.querySelectorAll('.member-inline-row');
+            if (rows.length === 0) return;
             const updatedMembers = [];
             rows.forEach(row => {
                 const id = row.dataset.memberId;
@@ -185,6 +201,17 @@ export class SettingsModule {
 
         containerEl.querySelectorAll('.member-inline-row input, .member-inline-row select').forEach(input => {
             input.addEventListener('change', saveMembersState);
+        });
+
+        // Live preview for member color swatches
+        containerEl.querySelectorAll('.inline-color-input').forEach(input => {
+            input.addEventListener('input', (e) => {
+                const swatch = e.target.closest('.color-tile-swatch');
+                if (swatch) {
+                    swatch.style.backgroundColor = e.target.value;
+                }
+                saveMembersState();
+            });
         });
 
         // Add Member
@@ -219,12 +246,14 @@ export class SettingsModule {
         // Categories Auto-Save
         const saveCategoriesState = () => {
             const rows = containerEl.querySelectorAll('.category-inline-row');
+            if (rows.length === 0) return;
             const updatedCats = [];
             rows.forEach(row => {
                 const id = row.dataset.catId;
                 const icon = row.querySelector('.cat-icon-input').value.trim() || '📁';
                 const name = row.querySelector('.cat-name-input').value.trim() || 'Kategorie';
-                const color = row.querySelector('.cat-color-input').value;
+                const existing = categories.find(c => c.id === id);
+                const color = existing?.color || '#10b981';
                 updatedCats.push({ id, name, icon, color });
             });
             StorageEngine.saveCategories(updatedCats);
@@ -259,14 +288,18 @@ export class SettingsModule {
             });
         });
 
-        // Save PIN Backend
+        // Save PIN Backend & Synchronize All Protected Areas
         document.getElementById('save-pin-backend-btn')?.addEventListener('click', async () => {
-            const newPin = document.getElementById('backend-pin-input').value.trim();
+            const pinInput = document.getElementById('backend-pin-input');
+            const feedbackMsg = document.getElementById('pin-feedback-msg');
+            const newPin = pinInput?.value.trim() || '';
+
             if (newPin.length >= 4) {
+                if (feedbackMsg) feedbackMsg.innerHTML = '⏳ <i>Speichere neuen PIN und aktualisiere Backend...</i>';
                 await StorageEngine.setPIN(newPin);
                 try {
                     const token = sessionStorage.getItem('backend_vault_token') || '';
-                    await fetch('/api/update-pin', {
+                    const res = await fetch('/api/update-pin', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -274,10 +307,26 @@ export class SettingsModule {
                         },
                         body: JSON.stringify({ newPin })
                     });
-                } catch (e) {}
-                alert(`✅ Admin-PIN erfolgreich aktualisiert!`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.token) {
+                            sessionStorage.setItem('backend_vault_token', data.token);
+                        }
+                    }
+                } catch (e) {
+                    console.log('Backend sync offline, local PIN updated.');
+                }
+                if (feedbackMsg) {
+                    feedbackMsg.innerHTML = '<span style="color: #10b981;">✅ Neuer Admin-PIN aktiv! Der alte PIN wurde ungültig.</span>';
+                }
+                if (pinInput) pinInput.value = '';
+                setTimeout(() => {
+                    if (feedbackMsg) feedbackMsg.innerHTML = '';
+                }, 4000);
             } else {
-                alert('⚠️ Bitte mindestens 4 Zeichen als PIN eingeben.');
+                if (feedbackMsg) {
+                    feedbackMsg.innerHTML = '<span style="color: #ef4444;">⚠️ Bitte mindestens 4 Ziffern/Zeichen als PIN eingeben.</span>';
+                }
             }
         });
     }

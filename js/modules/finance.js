@@ -1,6 +1,6 @@
 /**
- * Finance & Cashbook Module - Direct In-Box & In-Table Creation & Editing (PIN Protected)
- * Supports interactive metric detail popups & color-coded responsive mobile card boxes.
+ * Finance & Cashbook Module - Clean Executive Standard (PIN Protected)
+ * Modal-based creation and editing to keep the page 100% clean and uncluttered.
  */
 import { StorageEngine, escapeHTML } from '../storage.js';
 
@@ -15,100 +15,50 @@ export class FinanceModule {
 
         containerEl.innerHTML = `
             <div class="finance-wrapper">
-                <!-- Header & Lock Status -->
-                <div class="section-banner finance-banner">
-                    <div class="banner-title">
-                        <h2>💰 Finanzen & Kassenbuch</h2>
-                        <p>PIN-Geschützter Vorstands-Bereich für Einnahmen, Ausgaben und Belegnachweisung.</p>
+                <!-- Financial Summary Metrics (Donezo 3-Card Row) -->
+                <div class="donezo-stats-row mb-4" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="donezo-stat-hero" data-finance-metric="kassenstand" title="Kassenstand-Details öffnen" style="cursor: pointer;">
+                        <div class="stat-top">
+                            <span class="stat-label">Aktueller Kassenstand</span>
+                            <span class="donezo-arrow-badge">📈</span>
+                        </div>
+                        <div class="stat-number">${kassenstand.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</div>
+                        <div class="stat-pill">🔍 Details anzeigen</div>
                     </div>
-                    <button class="btn btn-sm btn-ghost lock-vault-btn" id="relock-finance-btn">🔒 Bereich wieder sperren</button>
-                </div>
 
-                <!-- Financial Summary Cards (CLICKABLE POPUP MODALS) -->
-                <div class="metrics-grid">
-                    <div class="metric-card card-glow" data-finance-metric="kassenstand" title="Kassenstand-Details & Bilanz öffnen" style="cursor: pointer;">
-                        <div class="metric-icon" style="background: rgba(34, 197, 94, 0.15); color: #22c55e;">📈</div>
-                        <div class="metric-body">
-                            <span class="metric-value text-success">${kassenstand.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</span>
-                            <span class="metric-label">Aktueller Kassenstand <small style="color: #34d399; font-weight: bold;">(🔍 Details)</small></span>
+                    <div class="donezo-stat-card" data-finance-metric="einnahmen" title="Einnahmen öffnen" style="cursor: pointer;">
+                        <div class="stat-top">
+                            <span class="stat-label">Gesamte Einnahmen</span>
+                            <span class="donezo-arrow-badge">➕</span>
                         </div>
+                        <div class="stat-number" style="color: #10b981;">+${totalEinnahmen.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</div>
+                        <div class="stat-pill">🔍 Aufschlüsselung</div>
                     </div>
-                    <div class="metric-card card-glow" data-finance-metric="einnahmen" title="Einnahmen-Aufschlüsselung öffnen" style="cursor: pointer;">
-                        <div class="metric-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">➕</div>
-                        <div class="metric-body">
-                            <span class="metric-value">+${totalEinnahmen.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</span>
-                            <span class="metric-label">Gesamte Einnahmen <small style="color: #34d399; font-weight: bold;">(🔍 Details)</small></span>
+
+                    <div class="donezo-stat-card" data-finance-metric="ausgaben" title="Ausgaben öffnen" style="cursor: pointer;">
+                        <div class="stat-top">
+                            <span class="stat-label">Gesamte Ausgaben</span>
+                            <span class="donezo-arrow-badge">➖</span>
                         </div>
-                    </div>
-                    <div class="metric-card card-glow" data-finance-metric="ausgaben" title="Ausgaben-Aufschlüsselung öffnen" style="cursor: pointer;">
-                        <div class="metric-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">➖</div>
-                        <div class="metric-body">
-                            <span class="metric-value text-danger">-${totalAusgaben.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</span>
-                            <span class="metric-label">Gesamte Ausgaben <small style="color: #f87171; font-weight: bold;">(🔍 Details)</small></span>
-                        </div>
+                        <div class="stat-number" style="color: #ef4444;">-${totalAusgaben.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</div>
+                        <div class="stat-pill">🔍 Aufschlüsselung</div>
                     </div>
                 </div>
 
-                <!-- DIRECT INLINE TRANSACTION CREATION & JOURNAL IN THE BOX -->
-                <div class="card-glow mb-4 p-3">
-                    <div class="toolbar-row mb-3 d-flex align-items-center justify-content-between">
-                        <h3>📜 Transaktions-Journal (${finances.length} Einträge)</h3>
+                <!-- Main Transactions Journal Box -->
+                <div class="card-glow p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3 pb-2" style="border-bottom: 1px solid var(--border-subtle);">
+                        <h3 class="m-0" style="color: var(--text-primary); font-weight: 800; font-size: 1.15rem;">
+                            📜 Transaktions-Journal (${finances.length} Einträge)
+                        </h3>
+                        <button class="btn btn-donezo-primary btn-sm" id="open-add-finance-modal">
+                            ➕ Neue Buchung
+                        </button>
                     </div>
 
-                    <!-- DIRECT INLINE QUICK-ADD FORM AT TOP OF TABLE BOX -->
-                    <div class="card-inline-add-bar mb-3 p-3" style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 8px;">
-                        <h4 class="mb-3" style="font-size: 1rem; color: #34d399; font-weight: 700;">➕ Neue Buchung / Ausgabe erfassen:</h4>
-                        <form id="inline-finance-add-form">
-                            <div class="row g-2 mb-2">
-                                <div class="col-12 col-sm-4 col-md-3">
-                                    <label class="form-label small font-bold text-muted mb-1">📅 Datum *</label>
-                                    <input type="date" id="add-fin-date" class="form-control form-control-sm" value="${new Date().toISOString().slice(0,10)}" required style="font-size: 15px;" />
-                                </div>
-                                <div class="col-12 col-sm-8 col-md-9">
-                                    <label class="form-label small font-bold text-muted mb-1">📝 Verwendungszweck / Titel *</label>
-                                    <input type="text" id="add-fin-title" class="form-control form-control-sm" placeholder="z. B. Getränkeeinkauf Brauerei" required style="font-size: 15px;" />
-                                </div>
-                            </div>
-
-                            <div class="row g-2 mb-2">
-                                <div class="col-6 col-md-3">
-                                    <label class="form-label small font-bold text-muted mb-1">📊 Typ *</label>
-                                    <select id="add-fin-type" class="form-select form-select-sm" style="font-size: 15px;">
-                                        <option value="ausgabe" selected>📉 Ausgabe (-)</option>
-                                        <option value="einnahme">📈 Einnahme (+)</option>
-                                    </select>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <label class="form-label small font-bold text-muted mb-1">💶 Betrag (€) *</label>
-                                    <input type="number" step="0.01" id="add-fin-amount" class="form-control form-control-sm" placeholder="0.00" required style="font-size: 15px;" />
-                                </div>
-                                <div class="col-12 col-md-6">
-                                    <label class="form-label small font-bold text-muted mb-1">🏷️ Kategorie</label>
-                                    <input type="text" id="add-fin-category" class="form-control form-control-sm" placeholder="z. B. Feste, Equipment..." style="font-size: 15px;" />
-                                </div>
-                            </div>
-
-                            <div class="row g-2 align-items-end">
-                                <div class="col-12 col-md-4">
-                                    <label class="form-label small font-bold text-muted mb-1">🧾 Beleg-Nr. / Quittung</label>
-                                    <input type="text" id="add-fin-receipt" class="form-control form-control-sm" placeholder="BELEG-2026-..." style="font-size: 15px;" />
-                                </div>
-                                <div class="col-12 col-md-5">
-                                    <label class="form-label small font-bold text-muted mb-1">💬 Notizen / Details</label>
-                                    <input type="text" id="add-fin-notes" class="form-control form-control-sm" placeholder="Anmerkungen..." style="font-size: 15px;" />
-                                </div>
-                                <div class="col-12 col-md-3 text-end">
-                                    <button type="submit" class="btn btn-emerald w-100 mt-2 mt-md-0" style="padding: 0.55rem; font-weight: 700; font-size: 0.9rem;">
-                                        ➕ Buchung Speichern
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-
-                    <!-- DESKTOP TABLE VIEW (Hidden on Mobile screens <= 768px) -->
-                    <div class="table-responsive finance-desktop-table d-none d-md-block">
-                        <table class="finance-table">
+                    <!-- DESKTOP TABLE VIEW -->
+                    <div class="table-responsive finance-desktop-table">
+                        <table class="clean-tasks-table w-100">
                             <thead>
                                 <tr>
                                     <th style="width: 110px;">Datum</th>
@@ -117,21 +67,21 @@ export class FinanceModule {
                                     <th style="width: 130px;">Beleg-Nr.</th>
                                     <th style="width: 110px;">Typ</th>
                                     <th style="width: 120px;">Betrag</th>
-                                    <th style="width: 120px;">Aktionen</th>
+                                    <th style="width: 120px; text-align: right;">Aktionen</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${finances.length === 0 ? `
-                                    <tr><td colspan="7" class="text-center p-4">Keine Buchungen vorhanden. Nutzen Sie das Formular oben, um eine hinzuzufügen.</td></tr>
+                                    <tr><td colspan="7" class="text-center p-4 text-muted">Keine Buchungen vorhanden. Klicken Sie oben auf "+ Neue Buchung".</td></tr>
                                 ` : finances.map(f => `
                                     <tr class="finance-row">
-                                        <td>${f.date}</td>
+                                        <td style="color: var(--text-muted); font-weight: 600;">${f.date}</td>
                                         <td>
-                                            <strong>${escapeHTML(f.title)}</strong>
-                                            ${f.notes ? `<br><small class="text-muted">${escapeHTML(f.notes)}</small>` : ''}
+                                            <strong style="color: var(--text-primary); font-size: 0.92rem;">${escapeHTML(f.title)}</strong>
+                                            ${f.notes ? `<br><small style="color: var(--text-muted);">${escapeHTML(f.notes)}</small>` : ''}
                                         </td>
                                         <td><span class="badge badge-neutral">${escapeHTML(f.category || 'Allgemein')}</span></td>
-                                        <td><code>${escapeHTML(f.receipt || '-')}</code></td>
+                                        <td><code style="background: var(--bg-canvas); padding: 0.15rem 0.4rem; border-radius: 6px; border: 1px solid var(--border-subtle);">${escapeHTML(f.receipt || '-')}</code></td>
                                         <td>
                                             <span class="badge ${f.type === 'einnahme' ? 'badge-success' : 'badge-danger'}">
                                                 ${f.type === 'einnahme' ? 'Einnahme' : 'Ausgabe'}
@@ -140,68 +90,16 @@ export class FinanceModule {
                                         <td class="${f.type === 'einnahme' ? 'text-success font-bold' : 'text-danger font-bold'}">
                                             ${f.type === 'einnahme' ? '+' : '-'}${Math.abs(f.amount).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
                                         </td>
-                                        <td>
-                                            <div class="table-action-btns">
-                                                <button class="btn btn-sm btn-ghost toggle-fin-edit-btn" data-id="${f.id}" title="Direkt bearbeiten">✏️ Edit</button>
+                                        <td style="text-align: right;">
+                                            <div class="table-action-btns d-flex align-items-center justify-content-end gap-1">
+                                                <button class="btn btn-sm btn-ghost edit-finance-modal-btn" data-id="${f.id}" title="Bearbeiten">✏️ Edit</button>
                                                 <button class="btn btn-sm btn-ghost danger-text delete-finance-btn" data-id="${f.id}" title="Löschen">🗑️</button>
                                             </div>
-                                        </td>
-                                    </tr>
-
-                                    <!-- INLINE EDITABLE ROW (DESKTOP) -->
-                                    <tr class="inline-edit-finance-row hidden" id="inline-fin-edit-desktop-${f.id}">
-                                        <td colspan="7" style="background: rgba(0,0,0,0.4); padding: 0.8rem; border-top: 1px dashed var(--border-color);">
-                                            ${this.renderEditFormHtml(f, 'desktop')}
                                         </td>
                                     </tr>
                                 `).join('')}
                             </tbody>
                         </table>
-                    </div>
-
-                    <!-- MOBILE CARD BOXES VIEW (Shown on Mobile screens <= 768px) -->
-                    <div class="finance-mobile-cards d-block d-md-none">
-                        ${finances.length === 0 ? `
-                            <div class="text-center p-4 text-muted">Keine Buchungen vorhanden.</div>
-                        ` : finances.map(f => `
-                            <div class="finance-mobile-card mb-3 p-3 card-glow" id="fin-card-${f.id}"
-                                 style="${f.type === 'einnahme' 
-                                     ? 'background: rgba(16, 185, 129, 0.08); border-left: 5px solid #10b981; border-color: rgba(16, 185, 129, 0.3);' 
-                                     : 'background: rgba(239, 68, 68, 0.08); border-left: 5px solid #ef4444; border-color: rgba(239, 68, 68, 0.3);'} border-radius: 10px;">
-                                
-                                <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <span class="badge ${f.type === 'einnahme' ? 'badge-success' : 'badge-danger'}" style="font-size: 0.8rem;">
-                                        ${f.type === 'einnahme' ? '📈 Einnahme (+)' : '📉 Ausgabe (-)'}
-                                    </span>
-                                    <span class="font-bold ${f.type === 'einnahme' ? 'text-success' : 'text-danger'}" style="font-size: 1.15rem;">
-                                        ${f.type === 'einnahme' ? '+' : '-'}${Math.abs(f.amount).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
-                                    </span>
-                                </div>
-
-                                <h4 style="font-size: 1.05rem; color: #fff; margin-bottom: 0.35rem; font-weight: 700;">
-                                    ${escapeHTML(f.title)}
-                                </h4>
-
-                                <div class="d-flex flex-wrap align-items-center gap-2 mb-2" style="font-size: 0.8rem; color: var(--text-muted);">
-                                    <span>📅 ${f.date}</span>
-                                    <span>•</span>
-                                    <span class="badge badge-neutral">${escapeHTML(f.category || 'Allgemein')}</span>
-                                    ${f.receipt ? `<span>•</span> <code>${escapeHTML(f.receipt)}</code>` : ''}
-                                </div>
-
-                                ${f.notes ? `<div class="p-2 mb-2 rounded" style="background: rgba(0,0,0,0.3); font-size: 0.82rem; color: #cbd5e1;">📝 ${escapeHTML(f.notes)}</div>` : ''}
-
-                                <div class="d-flex align-items-center justify-content-end gap-2 mt-2 pt-2" style="border-top: 1px solid rgba(255,255,255,0.08);">
-                                    <button class="btn btn-sm btn-ghost toggle-fin-edit-btn" data-id="${f.id}" style="font-size: 0.85rem;">✏️ Bearbeiten</button>
-                                    <button class="btn btn-sm btn-ghost danger-text delete-finance-btn" data-id="${f.id}" style="font-size: 0.85rem;">🗑️ Löschen</button>
-                                </div>
-
-                                <!-- INLINE EDITABLE BOX (MOBILE) -->
-                                <div class="inline-edit-finance-row hidden mt-3 p-2 rounded" id="inline-fin-edit-mobile-${f.id}" style="background: rgba(0,0,0,0.5); border: 1px dashed var(--border-color);">
-                                    ${this.renderEditFormHtml(f, 'mobile')}
-                                </div>
-                            </div>
-                        `).join('')}
                     </div>
                 </div>
             </div>
@@ -210,99 +108,269 @@ export class FinanceModule {
         this.bindEvents(containerEl, finances);
     }
 
-    static renderEditFormHtml(f, mode) {
-        return `
-            <form class="inline-fin-edit-form" data-id="${f.id}">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <strong style="color: #34d399; font-size: 0.9rem;">✏️ Buchung bearbeiten</strong>
-                    <button type="button" class="btn btn-sm btn-ghost cancel-fin-edit-btn" data-id="${f.id}">✖️ Schließen</button>
-                </div>
-
-                <div class="row g-2 mb-2">
-                    <div class="col-12 col-md-2">
-                        <label class="form-label small mb-1">Datum</label>
-                        <input type="date" class="form-control form-control-sm fin-edit-date" value="${f.date}" required />
-                    </div>
-                    <div class="col-12 col-md-3">
-                        <label class="form-label small mb-1">Titel / Verwendungszweck *</label>
-                        <input type="text" class="form-control form-control-sm fin-edit-title" value="${escapeHTML(f.title)}" required />
-                    </div>
-                    <div class="col-6 col-md-2">
-                        <label class="form-label small mb-1">Typ</label>
-                        <select class="form-select form-select-sm fin-edit-type">
-                            <option value="ausgabe" ${f.type === 'ausgabe' ? 'selected' : ''}>📉 Ausgabe (-)</option>
-                            <option value="einnahme" ${f.type === 'einnahme' ? 'selected' : ''}>📈 Einnahme (+)</option>
-                        </select>
-                    </div>
-                    <div class="col-6 col-md-2">
-                        <label class="form-label small mb-1">Betrag (€)</label>
-                        <input type="number" step="0.01" class="form-control form-control-sm fin-edit-amount" value="${Math.abs(f.amount)}" required />
-                    </div>
-                    <div class="col-12 col-md-3">
-                        <label class="form-label small mb-1">Kategorie</label>
-                        <input type="text" class="form-control form-control-sm fin-edit-category" value="${escapeHTML(f.category || '')}" />
-                    </div>
-                </div>
-
-                <div class="row g-2 align-items-end">
-                    <div class="col-12 col-md-4">
-                        <label class="form-label small mb-1">Beleg-Nr.</label>
-                        <input type="text" class="form-control form-control-sm fin-edit-receipt" value="${escapeHTML(f.receipt || '')}" />
-                    </div>
-                    <div class="col-12 col-md-5">
-                        <label class="form-label small mb-1">Notizen</label>
-                        <input type="text" class="form-control form-control-sm fin-edit-notes" value="${escapeHTML(f.notes || '')}" />
-                    </div>
-                    <div class="col-12 col-md-3 text-end">
-                        <button type="submit" class="btn btn-sm btn-emerald w-100 mt-2 mt-md-0">💾 Speichern</button>
-                    </div>
-                </div>
-            </form>
-        `;
-    }
-
-    static openMetricModal(metricType, finances) {
-        // Prevent background body scroll
+    /**
+     * Clean Modal Dialog for Creating or Editing Transactions
+     */
+    static openTransactionModal(containerEl, finances, editItem = null) {
         document.body.style.overflow = 'hidden';
 
         const modal = document.createElement('div');
         modal.className = 'modal-backdrop active';
 
-        const totalEinnahmen = finances.filter(f => f.type === 'einnahme').reduce((sum, f) => sum + f.amount, 0);
-        const totalAusgaben = finances.filter(f => f.type === 'ausgabe').reduce((sum, f) => sum + Math.abs(f.amount), 0);
-        const kassenstand = totalEinnahmen - totalAusgaben;
+        const isEdit = !!editItem;
+        const title = isEdit ? '✏️ Buchung bearbeiten' : '➕ Neue Buchung erfassen';
+        const defaultDate = editItem ? editItem.date : new Date().toISOString().slice(0, 10);
 
-        let title = '';
-        let icon = '';
-        let badgeColor = '';
-        let mainValue = '';
-        let filteredItems = [];
+        const availableCategories = StorageEngine.getCategories();
+        const selectedType = editItem ? editItem.type : 'ausgabe';
+        const initialCatName = editItem ? (editItem.category || 'Allgemein') : (availableCategories[0]?.name || 'Sonstiges');
+        const selectedCatObj = availableCategories.find(c => c.name === initialCatName || c.id === initialCatName) || availableCategories[0] || { name: 'Sonstiges', icon: '📋' };
 
-        if (metricType === 'kassenstand') {
-            title = '💰 Aktueller Kassenstand & Gesamtsaldo';
-            icon = '📈';
-            badgeColor = '#34d399';
-            mainValue = kassenstand.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
-            filteredItems = [...finances];
-        } else if (metricType === 'einnahmen') {
-            title = '📈 Gesamte Einnahmen - Detailansicht';
-            icon = '➕';
-            badgeColor = '#10b981';
-            mainValue = `+${totalEinnahmen.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}`;
-            filteredItems = finances.filter(f => f.type === 'einnahme');
-        } else if (metricType === 'ausgaben') {
-            title = '📉 Gesamte Ausgaben - Detailansicht';
-            icon = '➖';
-            badgeColor = '#ef4444';
-            mainValue = `-${totalAusgaben.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}`;
-            filteredItems = finances.filter(f => f.type === 'ausgabe');
+        modal.innerHTML = `
+            <div class="modal-card" style="max-width: 580px; width: 92vw; border-radius: 16px; overflow: visible; background: #ffffff; box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
+                <div class="modal-header d-flex align-items-center justify-content-between p-3.5" style="border-bottom: 1px solid var(--border-subtle);">
+                    <div class="d-flex align-items-center gap-2">
+                        <span style="font-size: 1.25rem;">💰</span>
+                        <h3 style="font-size: 1.15rem; margin: 0; color: var(--text-primary); font-weight: 800;">${title}</h3>
+                    </div>
+                    <button class="btn btn-ghost modal-close-btn" style="font-size: 1.2rem; padding: 0.2rem 0.5rem; border-radius: 8px;">&times;</button>
+                </div>
+
+                <form id="finance-modal-form">
+                    <div class="modal-body p-4 d-flex flex-column gap-3">
+                        <!-- Row 1: Datum & Typ (2 gleich große Kästchen mit Typ-Buttons nebeneinander) -->
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label small mb-1" style="color: var(--text-secondary); font-weight: 700;">📅 Datum *</label>
+                                <input type="date" id="modal-fin-date" class="form-control" value="${defaultDate}" required style="height: 42px; border-radius: 10px;" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small mb-1" style="color: var(--text-secondary); font-weight: 700;">📊 Typ auswählen *</label>
+                                <div class="d-flex gap-2" id="modal-fin-type-group" style="height: 42px;">
+                                    <button type="button" class="fin-type-toggle-btn ${selectedType === 'ausgabe' ? 'active-ausgabe' : ''}" data-type="ausgabe" style="flex: 1; height: 100%; font-size: 0.88rem;">
+                                        📉 Ausgabe (-)
+                                    </button>
+                                    <button type="button" class="fin-type-toggle-btn ${selectedType === 'einnahme' ? 'active-einnahme' : ''}" data-type="einnahme" style="flex: 1; height: 100%; font-size: 0.88rem;">
+                                        📈 Einnahme (+)
+                                    </button>
+                                </div>
+                                <input type="hidden" id="modal-fin-type" value="${selectedType}" />
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Betrag & Kategorie-Auswahl (2 gleich große Kästchen mit In-App Dropdown) -->
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label small mb-1" style="color: var(--text-secondary); font-weight: 700;">💶 Betrag in Euro (€) *</label>
+                                <input type="number" step="0.01" id="modal-fin-amount" class="form-control" placeholder="0.00" value="${editItem ? Math.abs(editItem.amount) : ''}" required style="height: 42px; border-radius: 10px; font-weight: 700;" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small mb-1" style="color: var(--text-secondary); font-weight: 700;">🏷️ Kategorie auswählen *</label>
+                                <div class="custom-inapp-dropdown" id="modal-fin-cat-container">
+                                    <div class="custom-inapp-trigger" id="modal-fin-cat-trigger">
+                                        <span id="modal-fin-cat-display" style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">
+                                            <span>${selectedCatObj.icon ? selectedCatObj.icon : '📋'}</span>
+                                            <span>${escapeHTML(selectedCatObj.name)}</span>
+                                        </span>
+                                        <span class="custom-inapp-caret">▾</span>
+                                    </div>
+                                    <div class="custom-inapp-menu hidden" id="modal-fin-cat-menu">
+                                        ${availableCategories.map(c => `
+                                            <div class="custom-inapp-item ${c.name === selectedCatObj.name ? 'active' : ''}" data-cat-name="${escapeHTML(c.name)}" data-cat-icon="${escapeHTML(c.icon || '📋')}">
+                                                <span style="display: flex; align-items: center; gap: 0.45rem;">
+                                                    <span>${c.icon ? c.icon : '📋'}</span>
+                                                    <span>${escapeHTML(c.name)}</span>
+                                                </span>
+                                                ${c.name === selectedCatObj.name ? '<span style="color: #10b981; font-weight: 800;">✓</span>' : ''}
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                    <input type="hidden" id="modal-fin-category" value="${escapeHTML(selectedCatObj.name)}" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: Titel & Beleg-Nr (2 gleich große Kästchen) -->
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label small mb-1" style="color: var(--text-secondary); font-weight: 700;">📝 Verwendungszweck / Titel *</label>
+                                <input type="text" id="modal-fin-title" class="form-control" placeholder="z. B. Getränkeeinkauf Brauerei" value="${editItem ? escapeHTML(editItem.title) : ''}" required style="height: 42px; border-radius: 10px;" />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small mb-1" style="color: var(--text-secondary); font-weight: 700;">🧾 Beleg-Nr. / Quittung</label>
+                                <input type="text" id="modal-fin-receipt" class="form-control" placeholder="z. B. BELEG-2026-001" value="${editItem ? escapeHTML(editItem.receipt || '') : ''}" style="height: 42px; border-radius: 10px;" />
+                            </div>
+                        </div>
+
+                        <!-- Row 4: Notizen & Anmerkungen (Vollbreite, sauber bündig) -->
+                        <div>
+                            <label class="form-label small mb-1" style="color: var(--text-secondary); font-weight: 700;">💬 Notizen / Anmerkungen</label>
+                            <textarea id="modal-fin-notes" class="form-control" rows="3" placeholder="Zusätzliche Infos oder Details zur Buchung..." style="border-radius: 10px; width: 100%;">${editItem ? escapeHTML(editItem.notes || '') : ''}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer p-3.5 d-flex justify-content-end gap-2" style="border-top: 1px solid var(--border-subtle); background: #f8fafc; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
+                        <button type="button" class="btn btn-sm btn-ghost modal-close-btn" style="padding: 0.5rem 1.15rem; font-weight: 600;">Abbrechen</button>
+                        <button type="submit" class="btn btn-sm btn-donezo-primary font-bold" style="padding: 0.5rem 1.35rem; border-radius: 10px;">
+                            ${isEdit ? '💾 Speichern' : '➕ Buchung anlegen'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        const closeModal = () => {
+            document.body.style.overflow = '';
+            modal.remove();
+        };
+
+        modal.querySelectorAll('.modal-close-btn').forEach(b => b.addEventListener('click', closeModal));
+
+        // Segmented Type Buttons logic
+        const typeHiddenInput = modal.querySelector('#modal-fin-type');
+        const typeButtons = modal.querySelectorAll('.fin-type-toggle-btn');
+        typeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type = btn.dataset.type;
+                typeHiddenInput.value = type;
+                typeButtons.forEach(b => {
+                    b.classList.remove('active-ausgabe', 'active-einnahme');
+                });
+                if (type === 'ausgabe') {
+                    btn.classList.add('active-ausgabe');
+                } else {
+                    btn.classList.add('active-einnahme');
+                }
+            });
+        });
+
+        // In-App Custom Category Dropdown logic
+        const catTrigger = modal.querySelector('#modal-fin-cat-trigger');
+        const catMenu = modal.querySelector('#modal-fin-cat-menu');
+        const catHiddenInput = modal.querySelector('#modal-fin-category');
+        const catDisplay = modal.querySelector('#modal-fin-cat-display');
+
+        if (catTrigger && catMenu) {
+            catTrigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isHidden = catMenu.classList.contains('hidden');
+                catMenu.classList.toggle('hidden', !isHidden);
+                catTrigger.classList.toggle('active', isHidden);
+            });
+
+            catMenu.querySelectorAll('.custom-inapp-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const catName = item.dataset.catName;
+                    const catIcon = item.dataset.catIcon;
+                    catHiddenInput.value = catName;
+                    catDisplay.innerHTML = `<span>${catIcon}</span><span>${escapeHTML(catName)}</span>`;
+                    catMenu.querySelectorAll('.custom-inapp-item').forEach(i => {
+                        i.classList.remove('active');
+                        const chk = i.querySelector('span:last-child');
+                        if (chk && chk.textContent === '✓') chk.remove();
+                    });
+                    item.classList.add('active');
+                    item.insertAdjacentHTML('beforeend', '<span style="color: #10b981; font-weight: 800;">✓</span>');
+                    catMenu.classList.add('hidden');
+                    catTrigger.classList.remove('active');
+                });
+            });
+
+            modal.addEventListener('click', (e) => {
+                if (!e.target.closest('#modal-fin-cat-container')) {
+                    catMenu.classList.add('hidden');
+                    catTrigger.classList.remove('active');
+                }
+            });
         }
 
-        // Category breakdown calculation
+        modal.querySelector('#finance-modal-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const date = document.getElementById('modal-fin-date').value;
+            const type = document.getElementById('modal-fin-type').value;
+            const titleVal = document.getElementById('modal-fin-title').value.trim();
+            const amountVal = parseFloat(document.getElementById('modal-fin-amount').value);
+            const categoryVal = document.getElementById('modal-fin-category').value.trim();
+            const receiptVal = document.getElementById('modal-fin-receipt').value.trim();
+            const notesVal = document.getElementById('modal-fin-notes').value.trim();
+
+            if (!titleVal || isNaN(amountVal)) return;
+
+            const currentFinances = StorageEngine.getFinances();
+
+            if (isEdit) {
+                const idx = currentFinances.findIndex(f => f.id === editItem.id);
+                if (idx !== -1) {
+                    currentFinances[idx] = {
+                        ...currentFinances[idx],
+                        date,
+                        type,
+                        title: titleVal,
+                        amount: amountVal,
+                        category: categoryVal,
+                        receipt: receiptVal,
+                        notes: notesVal
+                    };
+                }
+            } else {
+                currentFinances.unshift({
+                    id: 'f_' + Date.now(),
+                    date,
+                    type,
+                    title: titleVal,
+                    amount: amountVal,
+                    category: categoryVal,
+                    receipt: receiptVal,
+                    notes: notesVal
+                });
+            }
+
+            StorageEngine.saveFinances(currentFinances);
+            closeModal();
+            this.render(containerEl);
+        });
+    }
+
+    static openMetricModal(metricType, finances) {
+        document.body.style.overflow = 'hidden';
+
+        const modal = document.createElement('div');
+        modal.className = 'modal-backdrop active';
+
+        let title = 'Kassenstand';
+        let icon = '📈';
+        let badgeColor = '#10b981';
+        let filteredItems = finances;
+        let totalVal = 0;
+
+        if (metricType === 'einnahmen') {
+            title = 'Gesamte Einnahmen';
+            icon = '➕';
+            badgeColor = '#10b981';
+            filteredItems = finances.filter(f => f.type === 'einnahme');
+            totalVal = filteredItems.reduce((sum, f) => sum + f.amount, 0);
+        } else if (metricType === 'ausgaben') {
+            title = 'Gesamte Ausgaben';
+            icon = '➖';
+            badgeColor = '#ef4444';
+            filteredItems = finances.filter(f => f.type === 'ausgabe');
+            totalVal = filteredItems.reduce((sum, f) => sum + Math.abs(f.amount), 0);
+        } else {
+            const einnahmen = finances.filter(f => f.type === 'einnahme').reduce((sum, f) => sum + f.amount, 0);
+            const ausgaben = finances.filter(f => f.type === 'ausgabe').reduce((sum, f) => sum + Math.abs(f.amount), 0);
+            totalVal = einnahmen - ausgaben;
+            badgeColor = totalVal >= 0 ? '#10b981' : '#ef4444';
+        }
+
+        const mainValue = (totalVal >= 0 ? '+' : '') + totalVal.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+
         const categoryMap = {};
-        filteredItems.forEach(item => {
-            const cat = item.category || 'Allgemein';
-            const amt = Math.abs(item.amount);
+        filteredItems.forEach(f => {
+            const cat = f.category || 'Allgemein';
+            const amt = Math.abs(f.amount);
             categoryMap[cat] = (categoryMap[cat] || 0) + amt;
         });
 
@@ -312,29 +380,27 @@ export class FinanceModule {
         };
 
         modal.innerHTML = `
-            <div class="modal-card" style="max-width: 680px; width: 95vw; position: relative; box-shadow: 0 25px 60px rgba(0,0,0,0.85); border: 1px solid rgba(255,255,255,0.15);">
-                <div class="modal-header d-flex align-items-center justify-content-between p-3" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                    <h3 style="font-size: 1.25rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+            <div class="modal-card" style="max-width: 680px; width: 95vw; position: relative;">
+                <div class="modal-header d-flex align-items-center justify-content-between p-3" style="border-bottom: 1px solid var(--border-subtle);">
+                    <h3 style="font-size: 1.15rem; margin: 0; color: var(--text-primary); font-weight: 800;">
                         <span>${icon}</span> ${title}
                     </h3>
-                    <button class="btn btn-ghost modal-close modal-close-x" style="font-size: 1.5rem; line-height: 1; padding: 0.2rem 0.6rem;">&times;</button>
+                    <button class="btn btn-ghost modal-close-btn" style="font-size: 1.2rem; padding: 0.2rem 0.5rem;">&times;</button>
                 </div>
 
-                <div class="modal-body p-3" style="max-height: 75vh; overflow-y: auto;">
-                    <!-- Key Figure Banner -->
-                    <div class="p-3 mb-3 text-center rounded" style="background: rgba(0,0,0,0.4); border: 1px solid ${badgeColor}66;">
+                <div class="modal-body p-3" style="max-height: 70vh; overflow-y: auto;">
+                    <div class="p-3 mb-3 text-center rounded" style="background: var(--bg-canvas); border: 1px solid var(--border-subtle); border-radius: 12px;">
                         <span style="font-size: 0.85rem; color: var(--text-muted); display: block;">Gesamtsumme dieser Kategorie</span>
-                        <span style="font-size: 2rem; font-weight: 900; color: ${badgeColor}; font-family: 'Montserrat', sans-serif;">${mainValue}</span>
-                        <span style="font-size: 0.8rem; color: var(--text-dim); display: block; margin-top: 4px;">Enthält ${filteredItems.length} Buchungen</span>
+                        <span style="font-size: 1.8rem; font-weight: 900; color: ${badgeColor};">${mainValue}</span>
+                        <span style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-top: 2px;">Enthält ${filteredItems.length} Buchungen</span>
                     </div>
 
-                    <!-- Category Breakdown Chips -->
                     ${Object.keys(categoryMap).length > 0 ? `
                         <div class="mb-3">
-                            <h5 style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">🏷️ Aufschlüsselung nach Kategorien:</h5>
+                            <h5 style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; font-weight: 800;">🏷️ Aufschlüsselung nach Kategorien:</h5>
                             <div class="d-flex flex-wrap gap-2">
                                 ${Object.entries(categoryMap).map(([cat, sum]) => `
-                                    <div class="badge p-2" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); font-size: 0.82rem; color: #fff;">
+                                    <div class="badge badge-neutral p-2" style="font-size: 0.82rem;">
                                         <strong>${escapeHTML(cat)}:</strong> ${sum.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
                                     </div>
                                 `).join('')}
@@ -342,27 +408,25 @@ export class FinanceModule {
                         </div>
                     ` : ''}
 
-                    <!-- Detailed Items List -->
-                    <h5 style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">📜 Einzelpositionen (${filteredItems.length}):</h5>
-                    <div class="finance-modal-list d-flex flex-column gap-2">
+                    <h5 style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; font-weight: 800;">📜 Einzelpositionen (${filteredItems.length}):</h5>
+                    <div class="d-flex flex-column gap-2">
                         ${filteredItems.length === 0 ? `
                             <div class="p-3 text-center text-muted">Keine Positionen für diesen Filter vorhanden.</div>
                         ` : filteredItems.map(f => `
                             <div class="p-2.5 rounded d-flex align-items-center justify-content-between gap-2" 
                                  style="${f.type === 'einnahme' 
                                      ? 'background: rgba(16, 185, 129, 0.08); border-left: 4px solid #10b981;' 
-                                     : 'background: rgba(239, 68, 68, 0.08); border-left: 4px solid #ef4444;'} border-top: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                     : 'background: rgba(239, 68, 68, 0.08); border-left: 4px solid #ef4444;'} border-radius: 8px; border-top: 1px solid var(--border-subtle);">
                                 
                                 <div>
-                                    <div class="font-bold" style="color: #fff; font-size: 0.95rem;">${escapeHTML(f.title)}</div>
+                                    <div class="font-bold" style="color: var(--text-primary); font-size: 0.92rem;">${escapeHTML(f.title)}</div>
                                     <div style="font-size: 0.78rem; color: var(--text-muted);">
                                         📅 ${f.date} • <span class="badge badge-neutral" style="font-size: 0.7rem;">${escapeHTML(f.category || 'Allgemein')}</span>
                                         ${f.receipt ? ` • <code>${escapeHTML(f.receipt)}</code>` : ''}
                                     </div>
-                                    ${f.notes ? `<div style="font-size: 0.76rem; color: #cbd5e1; font-style: italic;" class="mt-1">📝 ${escapeHTML(f.notes)}</div>` : ''}
                                 </div>
 
-                                <div class="text-end font-bold" style="font-size: 1.05rem; white-space: nowrap; color: ${f.type === 'einnahme' ? '#34d399' : '#f87171'};">
+                                <div class="text-end font-bold" style="font-size: 1rem; white-space: nowrap; color: ${f.type === 'einnahme' ? '#10b981' : '#ef4444'};">
                                     ${f.type === 'einnahme' ? '+' : '-'}${Math.abs(f.amount).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
                                 </div>
                             </div>
@@ -370,113 +434,38 @@ export class FinanceModule {
                     </div>
                 </div>
 
-                <div class="modal-footer p-3 text-end" style="border-top: 1px solid rgba(255,255,255,0.1);">
-                    <button class="btn btn-sm btn-ghost modal-close">Schließen</button>
+                <div class="modal-footer p-3 text-end" style="border-top: 1px solid var(--border-subtle);">
+                    <button class="btn btn-sm btn-ghost modal-close-btn">Schließen</button>
                 </div>
             </div>
         `;
 
         document.body.appendChild(modal);
-
-        modal.querySelectorAll('.modal-close').forEach(b => b.addEventListener('click', closeModal));
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
-        });
+        modal.querySelectorAll('.modal-close-btn').forEach(b => b.addEventListener('click', closeModal));
     }
 
     static bindEvents(containerEl, finances) {
-        // Metric Cards Popup Click Handlers
+        // Open Add Modal
+        containerEl.querySelector('#open-add-finance-modal')?.addEventListener('click', () => {
+            this.openTransactionModal(containerEl, finances, null);
+        });
+
+        // Open Edit Modal
+        containerEl.querySelectorAll('.edit-finance-modal-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.currentTarget.dataset.id;
+                const item = finances.find(f => f.id === id);
+                if (item) {
+                    this.openTransactionModal(containerEl, finances, item);
+                }
+            });
+        });
+
+        // Click metric cards for popup
         containerEl.querySelectorAll('[data-finance-metric]').forEach(card => {
             card.addEventListener('click', (e) => {
                 const metricType = e.currentTarget.dataset.financeMetric;
                 this.openMetricModal(metricType, StorageEngine.getFinances());
-            });
-        });
-
-        // Direct Inline Quick-Add Submission
-        document.getElementById('inline-finance-add-form')?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const date = document.getElementById('add-fin-date').value;
-            const title = document.getElementById('add-fin-title').value.trim();
-            const type = document.getElementById('add-fin-type').value;
-            const amount = parseFloat(document.getElementById('add-fin-amount').value);
-            const category = document.getElementById('add-fin-category').value.trim();
-            const receipt = document.getElementById('add-fin-receipt').value.trim();
-            const notes = document.getElementById('add-fin-notes').value.trim();
-
-            if (!title || isNaN(amount)) return;
-
-            const currentFinances = StorageEngine.getFinances();
-            currentFinances.unshift({
-                id: 'f_' + Date.now(),
-                date,
-                title,
-                type,
-                amount,
-                category,
-                receipt,
-                notes
-            });
-
-            StorageEngine.saveFinances(currentFinances);
-            this.render(containerEl);
-        });
-
-        // Toggle Edit Row (Handles both desktop table and mobile cards)
-        containerEl.querySelectorAll('.toggle-fin-edit-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = e.currentTarget.dataset.id;
-                const editDesktop = containerEl.querySelector(`#inline-fin-edit-desktop-${id}`);
-                const editMobile = containerEl.querySelector(`#inline-fin-edit-mobile-${id}`);
-                if (editDesktop) editDesktop.classList.toggle('hidden');
-                if (editMobile) editMobile.classList.toggle('hidden');
-            });
-        });
-
-        // Cancel Edit Row
-        containerEl.querySelectorAll('.cancel-fin-edit-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = e.currentTarget.dataset.id;
-                const editDesktop = containerEl.querySelector(`#inline-fin-edit-desktop-${id}`);
-                const editMobile = containerEl.querySelector(`#inline-fin-edit-mobile-${id}`);
-                if (editDesktop) editDesktop.classList.add('hidden');
-                if (editMobile) editMobile.classList.add('hidden');
-            });
-        });
-
-        // Save Edit Row (Handles forms in both views)
-        containerEl.querySelectorAll('.inline-fin-edit-form').forEach(form => {
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const id = form.dataset.id;
-                const currentFinances = StorageEngine.getFinances();
-                const idx = currentFinances.findIndex(f => f.id === id);
-
-                if (idx !== -1) {
-                    const date = form.querySelector('.fin-edit-date').value;
-                    const title = form.querySelector('.fin-edit-title').value.trim();
-                    const type = form.querySelector('.fin-edit-type').value;
-                    const amount = parseFloat(form.querySelector('.fin-edit-amount').value);
-                    const category = form.querySelector('.fin-edit-category').value.trim();
-                    const receipt = form.querySelector('.fin-edit-receipt').value.trim();
-                    const notes = form.querySelector('.fin-edit-notes').value.trim();
-
-                    if (!title || isNaN(amount)) return;
-
-                    currentFinances[idx] = {
-                        ...currentFinances[idx],
-                        date,
-                        title,
-                        type,
-                        amount,
-                        category,
-                        receipt,
-                        notes
-                    };
-
-                    StorageEngine.saveFinances(currentFinances);
-                    this.render(containerEl);
-                }
             });
         });
 
