@@ -12,16 +12,25 @@ import { SettingsModule } from './modules/settings.js';
 import { PdfReportModule } from './modules/pdf_report.js';
 import { AutoSaveEngine } from './modules/autosave.js';
 import { CloudStorageEngine } from './cloud-storage.js';
+import { AppAuth } from './modules/auth.js';
 
 let activeTab = 'dashboard';
 let pendingProtectedTab = null;
 
 class App {
     static init() {
-        this.showMainApp();
+        if (!AppAuth.isCentralUnlocked()) {
+            AppAuth.renderCentralLockScreen(document.body, () => {
+                this.showMainApp();
+            });
+        } else {
+            this.showMainApp();
+        }
     }
 
     static showMainApp() {
+        const appLayout = document.querySelector('.app-layout');
+        if (appLayout) appLayout.style.display = 'flex';
         this.renderNavbar();
         this.bindGlobalEvents();
         AutoSaveEngine.init();
@@ -159,6 +168,13 @@ class App {
             link.addEventListener('click', (e) => {
                 const targetTab = e.currentTarget.dataset.tab;
                 this.handleTabClick(targetTab);
+            });
+        });
+
+        // Lock / Logout Central App Button
+        document.getElementById('lock-app-btn')?.addEventListener('click', () => {
+            AppAuth.lockCentral(document.body, () => {
+                this.showMainApp();
             });
         });
 

@@ -34,7 +34,7 @@ export class SettingsModule {
                                     🏷️ Kategorien (${categories.length})
                                 </button>
                                 <button type="button" class="sub-tab-btn ${activeSubTab === 'security' ? 'active' : ''}" data-subtab="security">
-                                    🔒 Admin-PIN
+                                    🔒 Sicherheit & Passwörter
                                 </button>
                             </div>
                         </div>
@@ -153,20 +153,62 @@ export class SettingsModule {
             `;
         } else if (subTab === 'security') {
             return `
-                <div class="card-glow p-4" style="max-width: 600px;">
-                    <h3 class="m-0 mb-2 font-size-md" style="font-weight: 800; font-size: 1.2rem;">🔒 Admin-PIN & Bereichs-Sicherheit</h3>
-                    <p class="text-muted mb-3 font-size-sm" style="line-height: 1.5;">
-                        Der Admin-PIN schützt vertrauliche Finanzen, Verträge und Sitzungsprotokolle. 
-                        Sobald Sie eine neue PIN festlegen, werden alle alten benutzerdefinierten PINs ungültig. 
-                        Die Standard-Master-PIN <strong>2026</strong> bleibt als Notfallzugang stets erhalten.
-                    </p>
-                    
-                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
-                        <label style="font-weight: 700; white-space: nowrap;">Neuer Vorstand-PIN:</label>
-                        <input type="password" id="backend-pin-input" class="form-control form-control-sm" maxlength="8" placeholder="Neuer PIN..." style="max-width: 160px; font-weight: bold; text-align: center; font-size: 1rem; letter-spacing: 0.2rem;" />
-                        <button class="btn btn-donezo-primary btn-sm" id="save-pin-backend-btn">💾 PIN Speichern</button>
+                <div class="d-flex flex-column gap-4" style="max-width: 680px;">
+                    <!-- 1. Zentraler Vorstand-Zugangscode (Generelle Zentrale) -->
+                    <div class="card-glow p-4" style="border-left: 5px solid #10b981; background: #ffffff; border-radius: 16px; border: 1px solid var(--border-subtle); box-shadow: var(--shadow-donezo);">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span style="font-size: 1.35rem;">🔑</span>
+                            <h3 class="m-0" style="font-weight: 800; font-size: 1.15rem; color: var(--text-primary);">
+                                Zentraler Vorstand-Zugangscode (Generelle Zentrale)
+                            </h3>
+                        </div>
+                        <p class="text-muted mb-3" style="line-height: 1.5; font-size: 0.88rem;">
+                            Dieser Code schützt den <strong>generellen Zugang zur gesamten Vorstands-Zentrale</strong> beim Aufrufen der Website. 
+                            Alle Vorstandsmitglieder nutzen diesen gemeinsamen Code zur Freischaltung beim Betreten der Seite.
+                        </p>
+
+                        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                            <div style="position: relative; width: 230px;">
+                                <input type="password" id="central-code-settings-input" class="form-control form-control-sm" placeholder="Neuer Zugangscode..." style="font-weight: bold; font-size: 0.95rem; padding-right: 32px;" />
+                                <button type="button" id="toggle-settings-central-code-btn" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 0.95rem; cursor: pointer; color: var(--text-muted);">👁️</button>
+                            </div>
+                            <button class="btn btn-donezo-primary btn-sm font-bold" id="save-central-code-btn" style="padding: 0.45rem 1.15rem; border-radius: 10px;">
+                                💾 Zentralen Code speichern
+                            </button>
+                        </div>
+                        <div id="central-code-feedback-msg" style="font-size: 0.85rem; font-weight: 700; margin-top: 0.5rem;"></div>
+                        <small style="font-size: 0.76rem; color: #94a3b8; display: block; margin-top: 0.35rem;">
+                            Standard-Notfallcode: <strong>2026</strong>
+                        </small>
                     </div>
-                    <div id="pin-feedback-msg" style="font-size: 0.85rem; font-weight: 600; margin-top: 0.5rem;"></div>
+
+                    <!-- 2. Master-Passwort / PIN für den geschützten Bereich (Kasse, Verträge, Protokolle) -->
+                    <div class="card-glow p-4" style="border-left: 5px solid #f59e0b; background: #ffffff; border-radius: 16px; border: 1px solid var(--border-subtle); box-shadow: var(--shadow-donezo);">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span style="font-size: 1.35rem;">🛡️</span>
+                            <h3 class="m-0" style="font-weight: 800; font-size: 1.15rem; color: var(--text-primary);">
+                                Master-Passwort / PIN (Geschützter Bereich)
+                            </h3>
+                        </div>
+                        <p class="text-muted mb-3" style="line-height: 1.5; font-size: 0.88rem;">
+                            Dieser PIN schützt die <strong>vertraulichen Vereinsinterna</strong> (Kassenbuch, Finanzen, Verträge und Sitzungsprotokolle). 
+                            Sobald Sie eine neue PIN festlegen, wird diese sofort für den geschützten Bereich aktiv.
+                        </p>
+
+                        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                            <div style="position: relative; width: 230px;">
+                                <input type="password" id="backend-pin-input" class="form-control form-control-sm" maxlength="12" placeholder="Neuer Tresor-PIN..." style="font-weight: bold; font-size: 0.95rem; padding-right: 32px;" />
+                                <button type="button" id="toggle-settings-vault-pin-btn" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 0.95rem; cursor: pointer; color: var(--text-muted);">👁️</button>
+                            </div>
+                            <button class="btn btn-sm font-bold" id="save-pin-backend-btn" style="padding: 0.45rem 1.15rem; border-radius: 10px; background: #f59e0b; color: #ffffff; border: none; cursor: pointer;">
+                                💾 Tresor-PIN speichern
+                            </button>
+                        </div>
+                        <div id="pin-feedback-msg" style="font-size: 0.85rem; font-weight: 700; margin-top: 0.5rem;"></div>
+                        <small style="font-size: 0.76rem; color: #94a3b8; display: block; margin-top: 0.35rem;">
+                            Standard-Master-PIN: <strong>2026</strong>
+                        </small>
+                    </div>
                 </div>
             `;
         }
@@ -288,7 +330,48 @@ export class SettingsModule {
             });
         });
 
-        // Save PIN Backend & Synchronize All Protected Areas
+        // Toggle visibility helpers
+        const wireToggle = (btnId, inputId) => {
+            const btn = document.getElementById(btnId);
+            const input = document.getElementById(inputId);
+            btn?.addEventListener('click', () => {
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    btn.textContent = '🙈';
+                } else {
+                    input.type = 'password';
+                    btn.textContent = '👁️';
+                }
+            });
+        };
+        wireToggle('toggle-settings-central-code-btn', 'central-code-settings-input');
+        wireToggle('toggle-settings-vault-pin-btn', 'backend-pin-input');
+
+        // 1. Save Central Access Code (Generelle Zentrale)
+        document.getElementById('save-central-code-btn')?.addEventListener('click', async () => {
+            const codeInput = document.getElementById('central-code-settings-input');
+            const feedbackMsg = document.getElementById('central-code-feedback-msg');
+            const newCode = (codeInput?.value || '').trim();
+
+            if (newCode.length >= 4) {
+                if (feedbackMsg) feedbackMsg.innerHTML = '⏳ <i>Speichere neuen Zugangscode...</i>';
+                await StorageEngine.setCentralAccessCode(newCode);
+
+                if (feedbackMsg) {
+                    feedbackMsg.innerHTML = '<span style="color: #10b981;">✅ Neuer zentraler Vorstand-Zugangscode erfolgreich gespeichert & aktiv!</span>';
+                }
+                if (codeInput) codeInput.value = '';
+                setTimeout(() => {
+                    if (feedbackMsg) feedbackMsg.innerHTML = '';
+                }, 4000);
+            } else {
+                if (feedbackMsg) {
+                    feedbackMsg.innerHTML = '<span style="color: #ef4444;">⚠️ Bitte mindestens 4 Zeichen als Zugangscode eingeben.</span>';
+                }
+            }
+        });
+
+        // 2. Save PIN Backend & Synchronize Protected Areas (Tresor)
         document.getElementById('save-pin-backend-btn')?.addEventListener('click', async () => {
             const pinInput = document.getElementById('backend-pin-input');
             const feedbackMsg = document.getElementById('pin-feedback-msg');
@@ -317,7 +400,7 @@ export class SettingsModule {
                     console.log('Backend sync offline, local PIN updated.');
                 }
                 if (feedbackMsg) {
-                    feedbackMsg.innerHTML = '<span style="color: #10b981;">✅ Neuer Admin-PIN aktiv! Der alte PIN wurde ungültig.</span>';
+                    feedbackMsg.innerHTML = '<span style="color: #10b981;">✅ Neuer Tresor-PIN aktiv! Der alte PIN wurde ungültig.</span>';
                 }
                 if (pinInput) pinInput.value = '';
                 setTimeout(() => {

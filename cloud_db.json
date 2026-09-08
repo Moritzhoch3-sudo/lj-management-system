@@ -1,6 +1,14 @@
 {
-  "_updatedAt": 1788905683085,
+  "_updatedAt": 1788906356826,
   "members": [
+    {
+      "id": "m0",
+      "name": "Allgemein",
+      "role": "Beisitzer",
+      "avatar": "👤",
+      "color": "#64748b",
+      "bgLight": "#64748b22"
+    },
     {
       "id": "m1",
       "name": "Valentin Müllner",
@@ -101,7 +109,7 @@
   "categories": [
     {
       "id": "fest",
-      "name": "Landjugendfest & Party",
+      "name": "Summerbreak",
       "icon": "🎪",
       "color": "#8b5cf6"
     },
@@ -131,8 +139,8 @@
     },
     {
       "id": "sponsoren",
-      "name": "Sponsoring & Verträge",
-      "icon": "🤝",
+      "name": "Ausflüge",
+      "icon": "🚌",
       "color": "#3b82f6"
     },
     {

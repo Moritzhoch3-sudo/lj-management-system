@@ -157,9 +157,17 @@ export class CloudStorageEngine {
             }
         }
 
+        // Synchronize central access code & vault pin if present
+        if (cloudData.centralAccessCode) {
+            localStorage.setItem('lj_app_central_code_v1', String(cloudData.centralAccessCode).trim());
+        }
+        if (cloudData.pin) {
+            localStorage.setItem('lj_active_pin_raw', String(cloudData.pin).trim());
+        }
+
         if (dataUpdated || remoteTimestamp > this.lastSyncTimestamp) {
             this.lastSyncTimestamp = remoteTimestamp;
-            this.updateStatus('online', '🟢 Live mit allen Geräten synchronisiert (10s)');
+            this.updateStatus('online', '🟢 Live synchronisiert (Auto-Save 5m)');
             if (dataUpdated) {
                 this.notifyListeners(cloudData);
             }
@@ -171,7 +179,9 @@ export class CloudStorageEngine {
 
         const payload = {
             _updatedAt: Date.now(),
-            members: JSON.parse(localStorage.getItem('lj_members_v10_final') || 'null') || StorageEngine.getMembers(),
+            centralAccessCode: StorageEngine.getCentralAccessCode(),
+            pin: StorageEngine.getPIN(),
+            members: JSON.parse(localStorage.getItem('lj_members_v12_varied_palette') || 'null') || StorageEngine.getMembers(),
             categories: JSON.parse(localStorage.getItem('lj_categories_v1') || 'null') || StorageEngine.getCategories(),
             tasks: JSON.parse(localStorage.getItem('lj_tasks_v3_12') || 'null') || StorageEngine.getTasks(),
             finances: JSON.parse(localStorage.getItem('lj_finances_v1') || 'null') || StorageEngine.getFinances(),

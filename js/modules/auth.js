@@ -1,339 +1,181 @@
 /**
- * Level-1 App Entry Lock & User Re-Authentication Guard (Strict Firstname + Lastname Concatenated Username Matching)
+ * Central Access Code Guard for Landjugend Scheuring Vorstands-Zentrale
+ * Protects the entire application behind a shared board-member access code.
  */
 import { StorageEngine, escapeHTML } from '../storage.js';
 
-const AUTH_KEY = 'lj_app_authenticated';
-const INITIAL_USER_KEY = 'lj_initial_login_user';
+const CENTRAL_AUTH_KEY = 'lj_central_unlocked';
+const CENTRAL_REMEMBER_KEY = 'lj_central_remember';
 
 export class AppAuth {
-    static isAuthenticated() {
-        return sessionStorage.getItem(AUTH_KEY) === 'true';
+    static isCentralUnlocked() {
+        return sessionStorage.getItem(CENTRAL_AUTH_KEY) === 'true' || 
+               localStorage.getItem(CENTRAL_REMEMBER_KEY) === 'true';
     }
 
-    static getInitialLoginUserId() {
-        return sessionStorage.getItem(INITIAL_USER_KEY) || StorageEngine.getCurrentUserId();
+    static lockCentral(containerEl, onUnlockedCallback) {
+        sessionStorage.removeItem(CENTRAL_AUTH_KEY);
+        localStorage.removeItem(CENTRAL_REMEMBER_KEY);
+
+        const appLayout = document.querySelector('.app-layout');
+        if (appLayout) appLayout.style.display = 'none';
+
+        this.renderCentralLockScreen(containerEl || document.body, onUnlockedCallback);
     }
 
-    static setInitialLoginUserId(memberId) {
-        sessionStorage.setItem(INITIAL_USER_KEY, memberId);
-    }
+    static renderCentralLockScreen(containerEl, onUnlockedCallback) {
+        // Remove existing lock screens if any
+        const existing = document.getElementById('central-lock-screen-root');
+        if (existing) existing.remove();
 
-    /**
-     * Format member name as concatenated firstname + lastname in lowercase (e.g. "Moritz Kubik" -> "moritzkubik")
-     */
-    static sanitizeUsername(nameStr) {
-        return (nameStr || '')
-            .toLowerCase()
-            .replace(/ä/g, 'ae')
-            .replace(/ö/g, 'oe')
-            .replace(/ü/g, 'ue')
-            .replace(/ß/g, 'ss')
-            .replace(/[^a-z0-9]/g, '');
-    }
+        const appLayout = document.querySelector('.app-layout');
+        if (appLayout) appLayout.style.display = 'none';
 
-    /**
-     * Bulletproof Username Matcher with complete 13-member mapping
-     */
-    static findMemberByUsername(usernameInput, members) {
-        if (!usernameInput) return null;
-        const cleanInput = this.sanitizeUsername(usernameInput);
-        const rawInput = usernameInput.trim().toLowerCase();
-        if (!cleanInput && !rawInput) return null;
+        const lockRoot = document.createElement('div');
+        lockRoot.id = 'central-lock-screen-root';
+        lockRoot.style.cssText = `
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 100000;
+            background: radial-gradient(circle at 50% 30%, #143725 0%, #0c2016 60%, #06110b 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            box-sizing: border-box;
+            overflow-y: auto;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        `;
 
-        const activeMembers = (members && members.length > 0) ? members : StorageEngine.getMembers();
+        lockRoot.innerHTML = `
+            <div class="central-lock-card" style="max-width: 440px; width: 100%; background: #ffffff; border-radius: 24px; padding: 2.75rem 2.25rem; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45); text-align: center; border: 1px solid rgba(255,255,255,0.2); animation: fadeInScale 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+                <!-- Official Scheuring Coat of Arms -->
+                <div style="margin-bottom: 1.25rem;">
+                    <img src="assets/wappen_scheuring.png" alt="Wappen Scheuring" style="width: 76px; height: 90px; object-fit: contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.15));" />
+                </div>
 
-        // 1. Exact sanitized username match (e.g. "valentinmuellner", "lindaschweiger")
-        let found = activeMembers.find(m => this.sanitizeUsername(m.name) === cleanInput);
-        if (found) return found;
+                <h1 style="font-size: 1.55rem; font-weight: 900; color: #0f172a; margin: 0 0 0.4rem; letter-spacing: -0.02em;">Landjugend Scheuring e.V.</h1>
+                <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-weight: 800; font-size: 0.76rem; padding: 0.25rem 0.75rem; border-radius: 9999px; margin-bottom: 1.15rem;">
+                    <span>🔒</span> <span>Vorstands-Zentrale geschützt</span>
+                </div>
 
-        // 2. Raw display name match (e.g. "Valentin Müllner", "Linda Schweiger")
-        found = activeMembers.find(m => (m.name || '').trim().toLowerCase() === rawInput);
-        if (found) return found;
+                <p style="font-size: 0.9rem; color: #64748b; line-height: 1.5; margin: 0 0 1.75rem;">
+                    Dieser Bereich ist verschlüsselt. Bitte gib den Vorstand-Zugangscode ein, um Zugriff auf die Zentrale zu erhalten.
+                </p>
 
-        return null;
-    }
-
-    /**
-     * Authenticate user with password verification
-     */
-    static async authenticate(usernameInput, passwordInput) {
-        const members = StorageEngine.getMembers();
-        const matchedMember = this.findMemberByUsername(usernameInput, members);
-
-        if (!matchedMember) {
-            return { success: false, reason: 'user' };
-        }
-
-        let activeMemberPass = StorageEngine.getMemberPassword(matchedMember.id);
-        const inputClean = (passwordInput || '').trim();
-
-        if (!activeMemberPass) {
-            await StorageEngine.setMemberPassword(matchedMember.id, inputClean);
-            activeMemberPass = StorageEngine.getMemberPassword(matchedMember.id);
-        }
-
-        const hashedInput = await StorageEngine.hashPassword(inputClean);
-        const isPassValid = (hashedInput === activeMemberPass);
-
-        if (!isPassValid) {
-            return { success: false, reason: 'pass' };
-        }
-
-        sessionStorage.setItem(AUTH_KEY, 'true');
-        this.setInitialLoginUserId(matchedMember.id);
-        StorageEngine.setCurrentUserId(matchedMember.id);
-        return { success: true, member: matchedMember };
-    }
-
-    static renderEntryLockPage(containerEl, onAuthenticatedCallback) {
-        const members = StorageEngine.getMembers();
-        const headerEl = document.querySelector('.app-header');
-        if (headerEl) headerEl.style.display = 'none';
-
-        containerEl.innerHTML = `
-            <div class="app-entry-lock-viewport d-flex align-items-center justify-content-center">
-                <div class="card-glow entry-lock-card text-center">
-                    
-                    <!-- Logo Badge -->
-                    <div class="brand-logo-wrapper mb-2 text-center">
-                        <img src="assets/logo_white.png" alt="Landjugend Scheuring Logo" class="entry-lock-logo" />
+                <form id="central-unlock-form" autocomplete="off">
+                    <div style="margin-bottom: 1.25rem; text-align: left;">
+                        <label for="central-code-input" style="display: block; font-size: 0.8rem; font-weight: 800; color: #334155; margin-bottom: 0.4rem;">
+                            Zentraler Vorstand-Zugangscode:
+                        </label>
+                        <div style="position: relative; display: flex; align-items: center;">
+                            <input 
+                                type="password" 
+                                id="central-code-input" 
+                                class="form-control" 
+                                required 
+                                autofocus 
+                                placeholder="Zugangscode eingeben..." 
+                                style="width: 100%; padding: 0.8rem 2.8rem 0.8rem 1rem; font-size: 1.05rem; font-weight: 700; border: 2px solid #e2e8f0; border-radius: 12px; transition: border-color 0.2s; outline: none; box-sizing: border-box;" 
+                            />
+                            <button 
+                                type="button" 
+                                id="toggle-code-visibility-btn" 
+                                style="position: absolute; right: 10px; background: none; border: none; font-size: 1.15rem; cursor: pointer; color: #94a3b8; padding: 4px;"
+                                title="Code einblenden / ausblenden"
+                            >
+                                👁️
+                            </button>
+                        </div>
                     </div>
 
-                    <h2 class="entry-lock-title">Vorstands-Zentrale</h2>
-                    <span class="entry-lock-sub">Landjugend Scheuring</span>
+                    <div style="display: flex; align-items: center; justify-content: flex-start; gap: 0.5rem; margin-bottom: 1.5rem; text-align: left;">
+                        <input type="checkbox" id="central-remember-me" style="width: 17px; height: 17px; cursor: pointer; accent-color: #10b981;" />
+                        <label for="central-remember-me" style="font-size: 0.82rem; font-weight: 600; color: #64748b; cursor: pointer; user-select: none;">
+                            Auf diesem Gerät angemeldet bleiben
+                        </label>
+                    </div>
 
-                    <form id="app-entry-pass-form" autocomplete="off" class="mt-3">
-                        <div class="form-group mb-3 text-start">
-                            <label class="form-label small font-bold text-muted mb-1">Benutzername</label>
-                            <input type="text" id="entry-username-input" class="form-control" placeholder="z. B. Moritz Kubik" required autofocus autocomplete="off" />
-                        </div>
+                    <div id="central-code-error" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 0.6rem 0.85rem; border-radius: 10px; font-size: 0.82rem; font-weight: 700; margin-bottom: 1.25rem;">
+                        ⚠️ Falscher Zugangscode! Nur für die Vorstandschaft.
+                    </div>
 
-                        <div class="form-group mb-3 text-start">
-                            <label class="form-label small font-bold text-muted mb-1">Passwort</label>
-                            <input type="password" id="entry-password-input" class="form-control" placeholder="Passwort eingeben..." required autocomplete="off" />
-                        </div>
+                    <button 
+                        type="submit" 
+                        id="central-unlock-submit-btn" 
+                        style="width: 100%; padding: 0.85rem; font-size: 1rem; font-weight: 800; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4); transition: transform 0.15s ease, box-shadow 0.15s ease;"
+                    >
+                        🔓 Zentrale freischalten
+                    </button>
+                </form>
 
-                        <div id="entry-pass-error" class="mb-3 hidden" style="color: #ef4444; font-size: 0.85rem; font-weight: 600;"></div>
-
-                        <button type="submit" class="btn btn-emerald btn-glow w-100 entry-lock-btn">
-                            🔒 Anmelden
-                        </button>
-                    </form>
-
-                    <small class="text-muted d-block mt-3" style="font-size: 0.75rem;">
-                        🛡️ Geschützte Vereinsinstanz der Landjugend Scheuring
-                    </small>
+                <div style="margin-top: 1.5rem; border-top: 1px solid #f1f5f9; padding-top: 1rem; font-size: 0.74rem; color: #94a3b8; line-height: 1.4;">
+                    🛡️ Verschlüsselte Vereinsinstanz der Landjugend Scheuring e.V.<br/>
+                    Standard-Mastercode: <strong>2026</strong> (änderbar in den Einstellungen)
                 </div>
             </div>
         `;
 
-        const form = containerEl.querySelector('#app-entry-pass-form');
-        const userInput = containerEl.querySelector('#entry-username-input');
-        const passInput = containerEl.querySelector('#entry-password-input');
-        const errorMsg = containerEl.querySelector('#entry-pass-error');
+        containerEl.appendChild(lockRoot);
 
-        // Immediate Autofocus on page load
-        setTimeout(() => userInput?.focus(), 50);
+        const form = lockRoot.querySelector('#central-unlock-form');
+        const codeInput = lockRoot.querySelector('#central-code-input');
+        const errorEl = lockRoot.querySelector('#central-code-error');
+        const rememberCheckbox = lockRoot.querySelector('#central-remember-me');
+        const toggleBtn = lockRoot.querySelector('#toggle-code-visibility-btn');
+        const submitBtn = lockRoot.querySelector('#central-unlock-submit-btn');
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const uVal = userInput.value;
-            const pVal = passInput.value;
-            const res = await this.authenticate(uVal, pVal);
+        // Immediate autofocus
+        setTimeout(() => codeInput?.focus(), 80);
 
-            if (res.success) {
-                if (onAuthenticatedCallback) onAuthenticatedCallback(res.member);
+        // Toggle code visibility
+        toggleBtn?.addEventListener('click', () => {
+            if (codeInput.type === 'password') {
+                codeInput.type = 'text';
+                toggleBtn.textContent = '🙈';
             } else {
-                errorMsg.classList.remove('hidden');
-                if (res.reason === 'user') {
-                    errorMsg.textContent = '⚠️ Ungültiger Benutzername! Es wird ausschließlich der Vor- und Nachname zusammengeschrieben akzeptiert (z. B. moritzkubik).';
-                } else {
-                    errorMsg.textContent = '⚠️ Falsches Passwort! Bitte wende dich an den Admin.';
-                }
-                passInput.classList.add('shake');
-                setTimeout(() => passInput.classList.remove('shake'), 500);
+                codeInput.type = 'password';
+                toggleBtn.textContent = '👁️';
             }
         });
-    }
 
-    /**
-     * Floating Re-Authentication Modal when switching user in dropdown
-     */
-    static promptUserSwitchAuth(targetMember, onSuccessCallback, onCancelCallback) {
-        const targetUsername = this.sanitizeUsername(targetMember.name);
-        document.body.style.overflow = 'hidden';
-        const modal = document.createElement('div');
-        modal.className = 'modal-backdrop active';
-
-        const closeModal = () => {
-            document.body.style.overflow = '';
-            modal.remove();
-        };
-
-        modal.innerHTML = `
-            <div class="modal-card" style="max-width: 440px; width: 100%; border: 1px solid rgba(0,135,61,0.4);">
-                <div class="modal-header">
-                    <h3 style="font-size: 1.1rem; color: #fff;">🔒 Anmelde-Abfrage für Nutzerwechsel</h3>
-                    <button class="btn btn-ghost modal-close modal-close-x">&times;</button>
-                </div>
-
-                <div class="modal-body p-3">
-                    <div class="d-flex align-items-center gap-2 mb-3 p-2" style="background: rgba(255,255,255,0.04); border-radius: 8px; border-left: 4px solid ${targetMember.color}">
-                        <span style="font-size: 1.4rem;">${targetMember.avatar}</span>
-                        <div>
-                            <strong style="color: #fff;">Wechsel zu: ${escapeHTML(targetMember.name)}</strong>
-                            <small class="d-block text-muted">${escapeHTML(targetMember.role)}</small>
-                        </div>
-                    </div>
-
-                    <p class="text-muted small mb-3">
-                        Bitte gib das Passwort für <strong>${escapeHTML(targetMember.name)}</strong> ein:
-                    </p>
-
-                    <form id="reauth-switch-form" autocomplete="off">
-                        <div class="form-group mb-2">
-                            <label class="form-label small font-bold text-muted mb-1">Benutzername:</label>
-                            <input type="text" id="reauth-user-input" class="form-control form-control-sm text-emerald font-bold" value="${escapeHTML(targetUsername)}" readonly required style="font-size: 0.95rem; background: rgba(0,0,0,0.4);" />
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label class="form-label small font-bold text-muted mb-1">Passwort:</label>
-                            <input type="password" id="reauth-pass-input" class="form-control form-control-sm" placeholder="Passwort eingeben..." required autofocus autocomplete="off" style="font-size: 0.95rem;" />
-                        </div>
-
-                        <div id="reauth-error" class="mb-2 hidden" style="color: #ef4444; font-size: 0.8rem; font-weight: bold;"></div>
-
-                        <div class="d-flex justify-content-end gap-2">
-                            <button type="button" class="btn btn-sm btn-ghost cancel-reauth-btn">Abbrechen</button>
-                            <button type="submit" class="btn btn-sm btn-emerald">🔓 Bestätigen</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-
-        const form = modal.querySelector('#reauth-switch-form');
-        const userInput = modal.querySelector('#reauth-user-input');
-        const passInput = modal.querySelector('#reauth-pass-input');
-        const errEl = modal.querySelector('#reauth-error');
-
-        // Immediate Autofocus on password field
-        setTimeout(() => passInput?.focus(), 50);
-
-        modal.querySelectorAll('.modal-close, .cancel-reauth-btn').forEach(b => {
-            b.addEventListener('click', () => {
-                closeModal();
-                if (onCancelCallback) onCancelCallback();
-            });
-        });
-
+        // Submit Handler
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const uVal = userInput.value;
-            const pVal = passInput.value;
+            const inputVal = (codeInput.value || '').trim();
+            if (!inputVal) return;
 
-            const res = await this.authenticate(uVal, pVal);
-            if (res.success && res.member.id === targetMember.id) {
-                closeModal();
-                if (onSuccessCallback) onSuccessCallback(res.member);
-            } else {
-                errEl.classList.remove('hidden');
-                if (res.success && res.member.id !== targetMember.id) {
-                    errEl.textContent = `⚠️ Benutzername gehört zu ${res.member.name}, nicht zu ${targetMember.name}!`;
-                } else if (res.reason === 'user') {
-                    errEl.textContent = `⚠️ Benutzername stimmt nicht mit ${targetMember.name} überein!`;
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Prüfe Code...';
+            errorEl.style.display = 'none';
+
+            const isValid = await StorageEngine.verifyCentralAccessCode(inputVal);
+
+            if (isValid) {
+                sessionStorage.setItem(CENTRAL_AUTH_KEY, 'true');
+                if (rememberCheckbox && rememberCheckbox.checked) {
+                    localStorage.setItem(CENTRAL_REMEMBER_KEY, 'true');
                 } else {
-                    errEl.textContent = '⚠️ Falsches Passwort!';
+                    localStorage.removeItem(CENTRAL_REMEMBER_KEY);
                 }
-            }
-        });
-    }
 
-    /**
-     * Floating Re-Authentication Modal when clicking Settings tab
-     */
-    static promptSettingsAuth(onSuccessCallback, onCancelCallback) {
-        document.body.style.overflow = 'hidden';
-        const modal = document.createElement('div');
-        modal.className = 'modal-backdrop active';
+                submitBtn.textContent = '✅ Freigeschaltet!';
+                submitBtn.style.background = '#059669';
 
-        const closeModal = () => {
-            document.body.style.overflow = '';
-            modal.remove();
-        };
-
-        modal.innerHTML = `
-            <div class="modal-card" style="max-width: 440px; width: 100%; border: 1px solid rgba(0,135,61,0.5);">
-                <div class="modal-header">
-                    <h3 style="font-size: 1.1rem; color: #fff;">🔒 Authentifizierung für Einstellungen</h3>
-                    <button class="btn btn-ghost modal-close modal-close-x">&times;</button>
-                </div>
-
-                <div class="modal-body p-3">
-                    <div class="text-center mb-3">
-                        <div style="font-size: 2rem;">⚙️</div>
-                        <strong style="color: #fff;" class="d-block mt-1">Admin-Freischaltung (Moritz Kubik)</strong>
-                        <small class="text-muted">Bitte melde dich erneut mit deinen Admin-Zugangsdaten an:</small>
-                    </div>
-
-                    <form id="settings-auth-form" autocomplete="off">
-                        <div class="form-group mb-2">
-                            <label class="form-label small font-bold text-muted mb-1">Benutzername:</label>
-                            <input type="text" id="settings-user-input" class="form-control form-control-sm" placeholder="moritzkubik" required autofocus autocomplete="off" style="font-size: 0.95rem;" />
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label class="form-label small font-bold text-muted mb-1">Passwort:</label>
-                            <input type="password" id="settings-pass-input" class="form-control form-control-sm" placeholder="Passwort eingeben..." required autocomplete="off" style="font-size: 0.95rem;" />
-                        </div>
-
-                        <div id="settings-auth-error" class="mb-2 hidden text-danger small font-bold"></div>
-
-                        <div class="d-flex justify-content-end gap-2">
-                            <button type="button" class="btn btn-sm btn-ghost cancel-settings-btn">Abbrechen</button>
-                            <button type="submit" class="btn btn-sm btn-emerald">🔓 Einstellungen Öffnen</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-
-        const form = modal.querySelector('#settings-auth-form');
-        const userInput = modal.querySelector('#settings-user-input');
-        const passInput = modal.querySelector('#settings-pass-input');
-        const errEl = modal.querySelector('#settings-auth-error');
-
-        // Immediate Autofocus on modal launch
-        setTimeout(() => userInput?.focus(), 50);
-
-        modal.querySelectorAll('.modal-close, .cancel-settings-btn').forEach(b => {
-            b.addEventListener('click', () => {
-                closeModal();
-                if (onCancelCallback) onCancelCallback();
-            });
-        });
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const uVal = userInput.value;
-            const pVal = passInput.value;
-
-            const res = await this.authenticate(uVal, pVal);
-            if (res.success && StorageEngine.isSuperAdmin(res.member.id)) {
-                closeModal();
-                if (onSuccessCallback) onSuccessCallback();
+                setTimeout(() => {
+                    lockRoot.remove();
+                    if (appLayout) appLayout.style.display = 'flex';
+                    if (onUnlockedCallback) onUnlockedCallback();
+                }, 300);
             } else {
-                errEl.classList.remove('hidden');
-                if (!res.success) {
-                    errEl.textContent = '⚠️ Ungültiger Benutzername oder Passwort!';
-                } else {
-                    errEl.textContent = '⚠️ Keine Admin-Berechtigung!';
-                }
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🔓 Zentrale freischalten';
+                errorEl.style.display = 'block';
+                codeInput.style.borderColor = '#ef4444';
+                codeInput.focus();
+                codeInput.select();
             }
         });
     }
