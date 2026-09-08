@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LANDJUGEND SCHEURUNG - COMPONENTS & NEXT-GEN REDESIGN
+   LANDJUGEND SCHEURUNG - COMPONENTS WITH PRECISION SPACING & MARGINS
    ========================================================================== */
 
 /* Dashboard Banner */
@@ -10,15 +10,15 @@
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
-    padding: 1.5rem 1.75rem;
-    margin-bottom: 1.75rem !important;
-    gap: 1.25rem;
+    padding: 1.65rem 2rem;
+    margin-bottom: 2rem !important;
+    gap: 1.5rem;
     flex-wrap: wrap;
     box-shadow: var(--shadow-card);
 }
 
 .dashboard-banner h2, .section-banner h2 {
-    font-size: 1.35rem;
+    font-size: 1.4rem;
     font-weight: 800;
     color: var(--text-primary);
 }
@@ -26,17 +26,17 @@
 .global-progress-card {
     display: flex;
     align-items: center;
-    gap: 1.1rem;
+    gap: 1.25rem;
     background: #090d16;
-    padding: 0.75rem 1.15rem;
+    padding: 0.85rem 1.25rem;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-subtle);
 }
 
 .progress-ring-container {
     position: relative;
-    width: 70px;
-    height: 70px;
+    width: 72px;
+    height: 72px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -58,15 +58,15 @@
 .metrics-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.1rem;
-    margin-bottom: 1.75rem !important;
+    gap: 1.5rem;
+    margin-bottom: 2rem !important;
 }
 
 .metric-card {
     display: flex;
     align-items: center;
-    gap: 1.1rem;
-    padding: 1.1rem 1.35rem;
+    gap: 1.25rem;
+    padding: 1.25rem 1.5rem;
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
@@ -81,13 +81,13 @@
 }
 
 .metric-icon {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
+    font-size: 1.3rem;
     background: #090d16;
     border: 1px solid var(--border-subtle);
 }
@@ -95,7 +95,7 @@
 .metric-value {
     display: block;
     font-family: 'Montserrat', sans-serif;
-    font-size: 1.5rem;
+    font-size: 1.55rem;
     font-weight: 800;
     line-height: 1.1;
     color: var(--text-primary);
@@ -113,15 +113,15 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 1.1rem !important;
+    margin-bottom: 1.25rem !important;
 }
 
 .members-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1.35rem;
+    gap: 1.5rem;
     margin-top: 1rem;
-    margin-bottom: 2.25rem !important;
+    margin-bottom: 2.5rem !important;
 }
 
 .member-card {
@@ -130,7 +130,7 @@
     background: var(--bg-surface) !important;
     border: 1px solid var(--border-subtle) !important;
     border-radius: var(--radius-lg);
-    padding: 1.25rem 1.4rem;
+    padding: 1.35rem 1.5rem;
     box-shadow: var(--shadow-card);
     transition: var(--transition-smooth);
 }
@@ -144,25 +144,25 @@
 .member-card-header {
     display: flex;
     align-items: center;
-    gap: 0.85rem;
-    margin-bottom: 0.85rem;
+    gap: 0.9rem;
+    margin-bottom: 0.9rem;
 }
 
 .member-avatar {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     border-radius: var(--radius-sm);
     background: #090d16;
     border: 1px solid var(--border-subtle);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
+    font-size: 1.3rem;
 }
 
 .member-name {
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.95rem;
+    font-size: 0.98rem;
     font-weight: 800;
     color: var(--text-primary);
 }
@@ -176,9 +176,9 @@
 .member-percent-badge {
     margin-left: auto;
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     font-weight: 800;
-    padding: 0.2rem 0.55rem;
+    padding: 0.25rem 0.6rem;
     border-radius: var(--radius-sm);
     background: rgba(16, 185, 129, 0.15);
     border: 1px solid rgba(16, 185, 129, 0.3);
@@ -186,12 +186,12 @@
 }
 
 .member-progress-container {
-    margin-bottom: 0.85rem;
+    margin-bottom: 0.9rem;
 }
 
 .progress-bar-bg {
     width: 100%;
-    height: 6px;
+    height: 7px;
     background: #090d16;
     border-radius: var(--radius-full);
     overflow: hidden;
@@ -206,11 +206,11 @@
 .member-stats-row {
     display: flex;
     justify-content: space-between;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     font-weight: 600;
-    padding-bottom: 0.55rem;
+    padding-bottom: 0.6rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    margin-bottom: 0.65rem;
+    margin-bottom: 0.7rem;
     color: var(--text-secondary);
 }
 
@@ -218,15 +218,15 @@
     list-style: none;
     max-height: 140px;
     overflow-y: auto;
-    margin-bottom: 0.85rem;
+    margin-bottom: 0.9rem;
 }
 
 .mini-task-item {
     display: flex;
     align-items: center;
-    gap: 0.45rem;
+    gap: 0.5rem;
     font-size: 0.82rem;
-    padding: 0.25rem 0;
+    padding: 0.3rem 0;
     color: var(--text-secondary);
 }
 
@@ -237,7 +237,7 @@
 }
 
 .mini-task-item.status-offen .status-indicator { background: var(--status-warning); }
-.mini-task-item.status-in_bearbeitung .status-indicator { background: var(--accent-blue); }
+.mini-task-item.status-in_bearbeitung .status-indicator { background: #3b82f6; }
 .mini-task-item.status-erledigt .status-indicator { background: var(--status-success); }
 .mini-task-item.status-erledigt .mini-task-title { text-decoration: line-through; opacity: 0.6; }
 
@@ -245,16 +245,16 @@
 .person-tasks-container {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem !important;
-    margin-top: 1.25rem !important;
-    margin-bottom: 2.5rem !important;
+    gap: 1.75rem !important;
+    margin-top: 1.5rem !important;
+    margin-bottom: 3rem !important;
 }
 
 .person-tasks-section {
     background: var(--bg-surface) !important;
     border-radius: var(--radius-lg) !important;
-    padding: 1.35rem 1.5rem !important;
-    margin-bottom: 1.5rem !important;
+    padding: 1.65rem 2rem !important;
+    margin-bottom: 1.75rem !important;
     transition: var(--transition-smooth);
     box-shadow: var(--shadow-card) !important;
     border: 1px solid var(--border-subtle) !important;
@@ -268,36 +268,36 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    gap: 1.25rem;
     flex-wrap: wrap;
-    padding-bottom: 0.75rem;
-    margin-bottom: 0.75rem;
+    padding-bottom: 0.85rem;
+    margin-bottom: 0.85rem;
     border-bottom: 1px solid var(--border-subtle);
 }
 
 .person-title-block {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.85rem;
 }
 
 .person-name {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     font-weight: 800;
     color: var(--text-primary);
 }
 
 .person-role {
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     font-weight: 700;
     color: var(--lj-green-bright);
 }
 
 .person-stats-badge {
-    padding: 0.3rem 0.65rem;
+    padding: 0.35rem 0.75rem;
     border-radius: var(--radius-sm);
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     font-weight: 700;
     background: #090d16;
     border: 1px solid var(--border-subtle);
@@ -312,17 +312,17 @@
 
 .clean-tasks-table th {
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--text-muted);
     border-bottom: 1px solid var(--border-subtle);
-    padding: 0.75rem 0.85rem;
+    padding: 0.85rem 1rem;
 }
 
 .clean-tasks-table td {
-    padding: 0.75rem 0.85rem;
+    padding: 0.85rem 1rem;
     vertical-align: middle;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     color: var(--text-primary);
@@ -351,16 +351,16 @@
 .sub-tabs-bar {
     display: flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.4rem;
     background: #090d16;
-    padding: 0.3rem;
+    padding: 0.35rem;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-subtle);
     overflow-x: auto;
 }
 
 .sub-tab-btn {
-    padding: 0.5rem 1rem;
+    padding: 0.55rem 1.1rem;
     border-radius: var(--radius-sm);
     background: transparent;
     border: none;
@@ -380,12 +380,12 @@
     border: 1px solid var(--border-medium);
 }
 
-/* Urgency Pill Badges (Subtle Tint + Bright Text) */
+/* Urgency Pill Badges */
 .due-date-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    padding: 0.25rem 0.6rem;
+    padding: 0.25rem 0.65rem;
     border-radius: var(--radius-full);
     font-family: 'Montserrat', sans-serif;
     font-size: 0.72rem;

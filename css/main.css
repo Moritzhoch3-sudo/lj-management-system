@@ -1,16 +1,16 @@
 /* ==========================================================================
-   LANDJUGEND SCHEURUNG - NEXT-GEN INTUITIVE DESIGN & CLASSIC COMPATIBILITY
+   LANDJUGEND SCHEURUNG - EXECUTIVE ENTERPRISE PORTAL (PERFEKTE RANDABSTÄNDE)
    ========================================================================== */
 
 :root {
-    /* Edler Obsidian- & Dark Slate Farbraum (Next-Gen Edition) */
+    /* Edler Obsidian- & Dark Slate Farbraum */
     --bg-dark: #090d16;
     --bg-sidebar: #0d131f;
     --bg-surface: #131b2b;
     --bg-surface-hover: #1c273c;
     --bg-input: #0d131f;
 
-    /* Micro Borders & Crisp Contrast */
+    /* Micro Borders & Precision Contrast */
     --border-subtle: rgba(255, 255, 255, 0.08);
     --border-medium: rgba(255, 255, 255, 0.16);
 
@@ -67,15 +67,15 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .view-title {
     color: var(--text-primary);
 }
 
-/* Layout Modes */
+/* Layout Architecture */
 .app-layout {
     display: flex;
     min-height: 100vh;
 }
 
-/* NEXT-GEN MODE: LEFT SIDEBAR */
-body.theme-nextgen .app-sidebar {
-    width: 270px;
+/* LEFT SIDEBAR NAVIGATION */
+.app-sidebar {
+    width: 280px;
     background: var(--bg-sidebar);
     border-right: 1px solid var(--border-subtle);
     display: flex;
@@ -84,41 +84,32 @@ body.theme-nextgen .app-sidebar {
     position: sticky;
     top: 0;
     height: 100vh;
-    padding: 1.25rem 1rem;
+    padding: 1.5rem 1.25rem;
     z-index: 90;
 }
 
-body.theme-nextgen .app-main-wrapper {
+.app-main-wrapper {
     flex: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
 }
 
-/* CLASSIC MODE BACKUP TOGGLE */
-body.theme-classic .app-sidebar {
-    display: none !important;
-}
-
-body.theme-classic .app-main-wrapper {
-    width: 100%;
-}
-
-/* Sidebar Elements */
+/* Sidebar Header */
 .sidebar-header {
-    padding-bottom: 1.25rem;
+    padding-bottom: 1.35rem;
     border-bottom: 1px solid var(--border-subtle);
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.35rem;
 }
 
 .brand-logo {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.85rem;
 }
 
 .brand-logo-img {
-    height: 38px;
+    height: 40px;
     width: auto;
 }
 
@@ -151,14 +142,14 @@ body.theme-classic .app-main-wrapper {
     font-weight: 800;
     color: var(--text-muted);
     letter-spacing: 0.08em;
-    padding: 0.35rem 0.5rem;
+    padding: 0.4rem 0.6rem;
 }
 
 .sidebar-nav-link {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.65rem 0.85rem;
+    padding: 0.7rem 0.95rem;
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
     font-family: 'Montserrat', sans-serif;
@@ -189,7 +180,7 @@ body.theme-classic .app-main-wrapper {
 }
 
 .sidebar-footer {
-    padding-top: 1rem;
+    padding-top: 1.1rem;
     border-top: 1px solid var(--border-subtle);
 }
 
@@ -197,14 +188,14 @@ body.theme-classic .app-main-wrapper {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.5rem 0.75rem;
+    padding: 0.6rem 0.85rem;
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
 }
 
 .user-avatar-badge {
-    font-size: 1.25rem;
+    font-size: 1.3rem;
 }
 
 .user-info-text {
@@ -230,18 +221,18 @@ body.theme-classic .app-main-wrapper {
     overflow: hidden;
 }
 
-/* Topbar Header */
+/* TOPBAR HEADER MIT PERFEKTEN ABSTÄNDEN */
 .topbar-header {
-    height: 64px;
+    height: 68px;
     background: rgba(13, 19, 31, 0.85);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border-subtle);
-    padding: 0 1.5rem;
+    padding: 0 2.25rem; /* Perfekter Seitenabstand */
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    gap: 1.5rem;
     position: sticky;
     top: 0;
     z-index: 80;
@@ -260,42 +251,13 @@ body.theme-classic .app-main-wrapper {
     flex-wrap: wrap;
 }
 
-/* Design Theme Switcher Toggle */
-.design-theme-toggle {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    background: #090d16;
-    border: 1px solid var(--border-subtle);
-    padding: 0.25rem 0.5rem;
-    border-radius: var(--radius-sm);
-}
-
-.design-theme-toggle .toggle-label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--text-muted);
-}
-
-.design-theme-toggle button {
-    padding: 0.25rem 0.55rem;
-    font-size: 0.72rem;
-    border-radius: var(--radius-sm);
-}
-
-.design-theme-toggle button.active {
-    background: var(--bg-surface-hover);
-    color: #ffffff;
-    border: 1px solid var(--border-medium);
-}
-
 .user-simulator-box {
     display: flex;
     align-items: center;
-    gap: 0.45rem;
+    gap: 0.5rem;
     background: #090d16;
     border: 1px solid var(--border-subtle);
-    padding: 0.3rem 0.65rem;
+    padding: 0.35rem 0.75rem;
     border-radius: var(--radius-sm);
 }
 
@@ -305,11 +267,11 @@ body.theme-classic .app-main-wrapper {
     font-weight: 600;
 }
 
-/* Main Container Viewport */
+/* MAIN VIEWPORT CONTAINER MIT GROSSZÜGIGEM RANDABSTAND */
 .main-container {
     max-width: 1400px;
-    margin: 1.75rem auto;
-    padding: 0 1.5rem;
+    margin: 2rem auto;
+    padding: 0 2.25rem; /* PERFEKTER RANDABSTAND ZUM SEITENRAND */
 }
 
 /* Base Card */
@@ -317,7 +279,7 @@ body.theme-classic .app-main-wrapper {
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
-    padding: 1.5rem;
+    padding: 1.75rem 2rem;
     box-shadow: var(--shadow-card);
     transition: var(--transition-smooth);
 }
@@ -330,7 +292,7 @@ body.theme-classic .app-main-wrapper {
 /* Form Controls */
 .form-control, .form-select {
     width: 100%;
-    padding: 0.55rem 0.85rem;
+    padding: 0.6rem 0.9rem;
     background: var(--bg-input);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
@@ -351,8 +313,8 @@ body.theme-classic .app-main-wrapper {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.4rem;
-    padding: 0.5rem 1rem;
+    gap: 0.45rem;
+    padding: 0.55rem 1.1rem;
     font-family: 'Montserrat', sans-serif;
     font-size: 0.78rem;
     font-weight: 700;
@@ -394,6 +356,6 @@ body.theme-classic .app-main-wrapper {
 }
 
 .btn-sm {
-    padding: 0.35rem 0.7rem;
+    padding: 0.4rem 0.75rem;
     font-size: 0.72rem;
 }

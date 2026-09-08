@@ -1,5 +1,5 @@
 /**
- * Main Application Orchestrator with Next-Gen Intuitive Sidebar & Instant Design Switcher
+ * Main Application Orchestrator (Next-Gen Executive Standard)
  */
 import { StorageEngine } from './storage.js';
 import { TasksModule } from './modules/tasks.js';
@@ -14,35 +14,7 @@ let activeTab = 'dashboard';
 
 class App {
     static init() {
-        this.applyDesignThemePreference();
         this.showMainApp();
-    }
-
-    static applyDesignThemePreference() {
-        const theme = localStorage.getItem('lj_design_theme') || 'nextgen';
-        if (theme === 'classic') {
-            document.body.classList.remove('theme-nextgen');
-            document.body.classList.add('theme-classic');
-        } else {
-            document.body.classList.remove('theme-classic');
-            document.body.classList.add('theme-nextgen');
-        }
-        this.updateThemeToggleButtons(theme);
-    }
-
-    static updateThemeToggleButtons(theme) {
-        const nextgenBtn = document.getElementById('toggle-design-nextgen');
-        const classicBtn = document.getElementById('toggle-design-classic');
-
-        if (nextgenBtn && classicBtn) {
-            if (theme === 'classic') {
-                classicBtn.classList.add('active');
-                nextgenBtn.classList.remove('active');
-            } else {
-                nextgenBtn.classList.add('active');
-                classicBtn.classList.remove('active');
-            }
-        }
     }
 
     static showMainApp() {
@@ -86,23 +58,12 @@ class App {
     }
 
     static bindGlobalEvents() {
-        // Sidebar & Header Navigation Links
-        document.querySelectorAll('.sidebar-nav-link[data-tab], .nav-link[data-tab]').forEach(link => {
+        // Sidebar Navigation Links
+        document.querySelectorAll('.sidebar-nav-link[data-tab]').forEach(link => {
             link.addEventListener('click', (e) => {
                 const targetTab = e.currentTarget.dataset.tab;
                 this.handleTabClick(targetTab);
             });
-        });
-
-        // Instant Design Theme Toggle
-        document.getElementById('toggle-design-nextgen')?.addEventListener('click', () => {
-            localStorage.setItem('lj_design_theme', 'nextgen');
-            this.applyDesignThemePreference();
-        });
-
-        document.getElementById('toggle-design-classic')?.addEventListener('click', () => {
-            localStorage.setItem('lj_design_theme', 'classic');
-            this.applyDesignThemePreference();
         });
 
         // Backup & Reset Buttons
@@ -144,7 +105,7 @@ class App {
         activeTab = tabName;
 
         // Update Nav Active State
-        document.querySelectorAll('.sidebar-nav-link, .nav-link').forEach(link => {
+        document.querySelectorAll('.sidebar-nav-link').forEach(link => {
             if (link.dataset.tab === tabName) {
                 link.classList.add('active');
             } else {
