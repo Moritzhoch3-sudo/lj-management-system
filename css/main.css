@@ -490,24 +490,42 @@ html, body {
         min-width: 100%;
         height: auto;
         position: relative;
-        padding: 1rem 1.25rem;
+        padding: 0.85rem 1rem;
         border-right: none;
         border-bottom: 1px solid var(--border-subtle);
     }
 
     .sidebar-header {
-        margin-bottom: 1rem;
+        margin-bottom: 0.75rem;
     }
 
     .sidebar-nav {
+        display: flex;
         flex-direction: row;
-        flex-wrap: wrap;
-        gap: 0.5rem;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        gap: 0.45rem;
+        padding-bottom: 2px;
+    }
+
+    .sidebar-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    #sidebar-protected-nav {
+        display: flex;
+        gap: 0.45rem;
+        flex-shrink: 0;
     }
 
     .sidebar-nav-link {
-        padding: 0.5rem 0.85rem;
-        font-size: 0.82rem;
+        padding: 0.45rem 0.85rem;
+        font-size: 0.84rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+        border-radius: 10px;
     }
 
     .nav-section-label {
@@ -524,10 +542,107 @@ html, body {
     }
 
     .topbar-header {
-        padding: 0 1rem;
+        height: auto;
+        min-height: 58px;
+        padding: 0.6rem 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .topbar-left {
+        min-width: 0;
+    }
+
+    .topbar-left .view-title {
+        font-size: 1.05rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .topbar-right {
+        gap: 0.5rem;
+        flex-wrap: wrap;
     }
 
     .main-container {
-        padding: 1rem;
+        padding: 1rem 0.85rem;
+    }
+}
+
+/* Specific Smartphone Sizing (<= 640px and <= 480px) */
+@media (max-width: 640px) {
+    .app-sidebar {
+        padding: 0.65rem 0.75rem;
+    }
+
+    .sidebar-header {
+        margin-bottom: 0.5rem;
+    }
+
+    .donezo-brand-badge {
+        width: 34px;
+        height: 34px;
+        font-size: 1.15rem;
+    }
+
+    .brand-text .brand-main-title {
+        font-size: 0.95rem;
+    }
+
+    .sidebar-nav-link {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .topbar-header {
+        padding: 0.5rem 0.75rem;
+        gap: 0.4rem;
+    }
+
+    .topbar-left .view-title {
+        font-size: 0.95rem;
+    }
+
+    /* Hide redundant label on small mobile screens to save crucial horizontal width */
+    .user-selector-trigger span:first-child {
+        display: none;
+    }
+
+    .user-selector-trigger {
+        padding: 0.25rem 0.55rem;
+        gap: 0.4rem;
+        border-radius: 10px;
+    }
+
+    .user-selector-menu {
+        max-width: calc(100vw - 1.25rem);
+        min-width: 250px;
+        right: 0;
+    }
+
+    .topbar-right .btn-sm {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.78rem;
+        border-radius: 8px;
+    }
+
+    .main-container {
+        padding: 0.75rem 0.5rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .topbar-header {
+        padding: 0.4rem 0.5rem;
+    }
+
+    .topbar-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .topbar-left {
+        width: 100%;
     }
 }

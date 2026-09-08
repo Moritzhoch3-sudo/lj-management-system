@@ -1799,3 +1799,372 @@ tr:hover td {
     }
 }
 
+/* ==========================================================================
+   SMARTPHONE & MOBILE RESPONSIVE ENHANCEMENTS
+   (Desktop layout min-width: 769px remains 100% untouched)
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* 1. Dashboard & Page Header */
+    .donezo-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+    }
+    .donezo-header-text h1 {
+        font-size: 1.45rem;
+    }
+    .donezo-header-text p {
+        font-size: 0.85rem;
+    }
+    .donezo-header-actions {
+        width: 100%;
+        display: flex;
+        gap: 0.5rem;
+    }
+    .donezo-header-actions .btn {
+        flex: 1;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.82rem;
+        justify-content: center;
+    }
+
+    /* 2. Donezo Stats 2x2 Grid */
+    .donezo-stats-row {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.65rem !important;
+        margin-bottom: 1.25rem !important;
+    }
+    .donezo-stat-hero, .donezo-stat-card {
+        padding: 0.95rem 1rem !important;
+        min-height: 115px !important;
+        border-radius: 14px !important;
+    }
+    .donezo-stat-hero .stat-label, .donezo-stat-card .stat-label {
+        font-size: 0.82rem !important;
+    }
+    .donezo-stat-hero .stat-number, .donezo-stat-card .stat-number {
+        font-size: 1.4rem !important;
+    }
+    .donezo-arrow-badge {
+        width: 26px !important;
+        height: 26px !important;
+        font-size: 0.82rem !important;
+    }
+    .donezo-stat-hero .stat-pill, .donezo-stat-card .stat-pill {
+        font-size: 0.7rem !important;
+        margin-top: 0.35rem !important;
+    }
+
+    /* 3. Dashboard Middle & Bottom Rows */
+    .donezo-grid-row, .donezo-grid-row-2 {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+    .donezo-card {
+        padding: 1.15rem !important;
+        border-radius: 14px !important;
+    }
+    .donezo-dark-widget {
+        padding: 1.15rem !important;
+        border-radius: 14px !important;
+    }
+    .dark-widget-controls {
+        display: flex;
+        gap: 0.5rem;
+        width: 100%;
+    }
+    .widget-control-btn {
+        flex: 1;
+        padding: 0.5rem !important;
+        font-size: 0.82rem !important;
+        justify-content: center;
+    }
+
+    /* 4. Tasks Toolbar & Dropdown Filters */
+    .tasks-action-bar {
+        flex-direction: column;
+        align-items: stretch !important;
+        padding: 0.85rem 1rem !important;
+        gap: 0.75rem !important;
+    }
+    .tasks-action-bar .search-box {
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+    .filter-controls {
+        width: 100% !important;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem !important;
+        justify-content: space-between;
+    }
+    .custom-inapp-dropdown {
+        flex: 1 1 calc(50% - 0.25rem) !important;
+        min-width: 135px !important;
+    }
+    .custom-inapp-trigger {
+        height: 36px !important;
+        padding: 0 0.65rem !important;
+        font-size: 0.82rem !important;
+    }
+    .custom-inapp-menu {
+        max-width: calc(100vw - 2rem);
+        min-width: 220px !important;
+    }
+    .view-toggle-btns {
+        margin-left: 0;
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+    .delete-completed-btn {
+        width: 100% !important;
+        text-align: center;
+        justify-content: center;
+        padding: 0.45rem 0.75rem !important;
+        font-size: 0.8rem !important;
+        border-radius: 8px !important;
+    }
+
+    /* 5. Person Task Cards & Header */
+    .person-tasks-section {
+        margin-bottom: 0.75rem !important;
+        border-radius: 14px !important;
+    }
+    .person-tasks-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 0.65rem !important;
+        padding: 0.75rem !important;
+    }
+    .person-title-block {
+        width: 100%;
+        gap: 0.65rem !important;
+    }
+    .person-name {
+        font-size: 1.05rem !important;
+    }
+    .person-header-actions {
+        width: 100% !important;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem !important;
+    }
+    .person-stats-badge {
+        font-size: 0.78rem !important;
+        padding: 0.35rem 0.75rem !important;
+    }
+    .toggle-member-collapse-btn {
+        font-size: 0.78rem !important;
+        padding: 0.35rem 0.75rem !important;
+    }
+
+    /* 6. Inline Quick Add Form */
+    .card-inline-add-bar {
+        padding: 0.75rem !important;
+    }
+    .inline-quick-add-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .quick-task-title-input {
+        width: 100% !important;
+        min-width: 100% !important;
+        font-size: 0.85rem !important;
+    }
+    .inline-quick-add-form .quick-task-cat-select,
+    .inline-quick-add-form .quick-task-prio-select {
+        max-width: 100% !important;
+        flex: 1;
+        font-size: 0.82rem !important;
+    }
+    .inline-quick-add-form .quick-task-date-input {
+        max-width: 100% !important;
+        flex: 1;
+        font-size: 0.82rem !important;
+    }
+    .inline-quick-add-form button[type="submit"] {
+        width: 100% !important;
+        padding: 0.5rem !important;
+        justify-content: center;
+    }
+
+    /* 7. Kanban Board Mobile Swipe */
+    .kanban-board {
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+    .kanban-column {
+        min-width: 82vw !important;
+        max-width: 88vw !important;
+        scroll-snap-align: center;
+        padding: 0.85rem !important;
+    }
+
+    /* 8. Finances Mobile Layout */
+    .finance-wrapper .donezo-stats-row {
+        grid-template-columns: 1fr !important;
+        gap: 0.65rem !important;
+    }
+
+    /* 9. Contracts Grid */
+    .contracts-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.85rem !important;
+    }
+
+    /* 10. Audio Recorder Widget */
+    .recorder-widget {
+        flex-direction: column;
+        align-items: stretch !important;
+        padding: 1.25rem !important;
+        gap: 1.15rem !important;
+    }
+    .recorder-left {
+        min-width: 100% !important;
+        text-align: center;
+        align-items: center;
+    }
+    .recorder-center {
+        width: 100%;
+        justify-content: center;
+        margin: 0.25rem 0;
+    }
+    .recorder-right {
+        width: 100%;
+    }
+    .recorder-right .btn {
+        width: 100% !important;
+        justify-content: center;
+        padding: 0.65rem 1rem !important;
+    }
+    .transcript-actions .btn {
+        width: 100% !important;
+        justify-content: center;
+    }
+
+    /* 11. Settings Sub-Tab Pill Bar */
+    .settings-nav-pill-group {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        flex-wrap: nowrap !important;
+        gap: 0.35rem !important;
+    }
+    .settings-nav-pill-group::-webkit-scrollbar {
+        display: none;
+    }
+    .sub-tab-btn {
+        white-space: nowrap;
+        flex-shrink: 0;
+        font-size: 0.8rem !important;
+        padding: 0.4rem 0.75rem !important;
+    }
+
+    /* 12. Modals Mobile Optimization */
+    .modal-card {
+        width: 95vw !important;
+        max-width: 95vw !important;
+        margin: 0.5rem auto;
+    }
+    .modal-body {
+        padding: 1rem !important;
+    }
+    .modal-header, .modal-footer {
+        padding: 0.75rem 1rem !important;
+    }
+}
+
+/* Extra Small Smartphones (<= 480px) */
+@media (max-width: 480px) {
+    /* Central Lock Screen */
+    .central-lock-card {
+        padding: 1.75rem 1.15rem !important;
+        border-radius: 20px !important;
+    }
+    .central-lock-card h1 {
+        font-size: 1.35rem !important;
+    }
+
+    /* User Selection Modal ("Wer bist du?") */
+    .user-selection-card {
+        padding: 1.5rem 1rem !important;
+        border-radius: 20px !important;
+    }
+    .user-selection-card h2 {
+        font-size: 1.35rem !important;
+    }
+    #user-selection-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.45rem !important;
+        max-height: 58vh !important;
+    }
+    .user-select-tile {
+        padding: 0.5rem 0.6rem !important;
+        gap: 0.45rem !important;
+        border-radius: 12px !important;
+    }
+    .user-select-tile div:last-child div:first-child {
+        font-size: 0.8rem !important;
+    }
+    .user-select-tile div:last-child div:last-child {
+        font-size: 0.68rem !important;
+    }
+
+    /* Protected Keypad */
+    .protected-login-card {
+        padding: 1.5rem 1.15rem !important;
+        max-width: 94vw !important;
+        border-radius: 20px !important;
+    }
+    .protected-keypad .pin-btn {
+        padding: 0.75rem 0.5rem !important;
+        font-size: 1.15rem !important;
+    }
+    .pin-card {
+        max-width: 94vw !important;
+        padding: 1.25rem !important;
+    }
+
+    /* PDF Overview Modal */
+    #pdf-export-modal-root .modal-card {
+        width: 98vw !important;
+        height: 94vh !important;
+        max-height: 94vh !important;
+        border-radius: 14px !important;
+    }
+    #pdf-export-modal-root .modal-header {
+        padding: 0.55rem 0.75rem !important;
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 0.5rem !important;
+    }
+    #pdf-export-modal-root .modal-header > div:last-child {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+    }
+    #pdf-export-modal-root .modal-header .btn {
+        padding: 0.35rem 0.6rem !important;
+        font-size: 0.76rem !important;
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+    .pdf-printable-page {
+        padding: 0.85rem !important;
+        border-radius: 10px !important;
+    }
+
+    /* Filter dropdowns 1 per row on narrow screens */
+    .custom-inapp-dropdown {
+        flex: 1 1 100% !important;
+    }
+}
+
