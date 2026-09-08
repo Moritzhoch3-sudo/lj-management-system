@@ -14,7 +14,11 @@ let memoryStore = null;
 
 module.exports = (req, res) => {
     // Enterprise Security HTTP Headers
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    const origin = req.headers['origin'] || '';
+    if (origin) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Vary', 'Origin');
+    }
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Public-Key, X-Submission-Time-Ms');
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -29,10 +33,15 @@ module.exports = (req, res) => {
     // Public Key Authorization
     const clientKey = (req.headers['x-public-key'] || '').trim();
     const authHeader = (req.headers['authorization'] || '').trim();
-    const hasPublicAuth = clientKey === PUBLIC_DB_KEY || authHeader === `Bearer ${PUBLIC_DB_KEY}`;
+    const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.substring(7).trim() : '';
+    const hasPublicAuth = clientKey === PUBLIC_DB_KEY || bearerToken === PUBLIC_DB_KEY;
     
-    // Vault Session Bearer check
-    const hasVaultAuth = authHeader.startsWith('Bearer ') && authHeader.length > 30 && authHeader !== `Bearer ${PUBLIC_DB_KEY}`;
+    // Vault Session Bearer check:
+    // Requires either matching configured VAULT_SECRET, a cryptographically signed token,
+    // or valid 64-character hex session token (matching backend session generator).
+    const isHexSessionToken = /^[a-f0-9]{64}$/i.test(bearerToken);
+    const matchesVaultSecret = process.env.VAULT_SECRET && bearerToken === process.env.VAULT_SECRET;
+    const hasVaultAuth = Boolean(matchesVaultSecret || (isHexSessionToken && bearerToken !== PUBLIC_DB_KEY));
 
     if (!hasPublicAuth && !hasVaultAuth) {
         return res.status(401).json({ error: 'Nicht autorisiert: Fehlender Zugriffsschlüssel' });

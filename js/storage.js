@@ -11,7 +11,9 @@ export function escapeHTML(str) {
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+        .replace(/'/g, '&#039;')
+        .replace(/`/g, '&#96;')
+        .replace(/\//g, '&#x2F;');
 }
 
 
@@ -203,7 +205,8 @@ export class StorageEngine {
     }
 
     static getPIN() {
-        return localStorage.getItem('lj_active_pin_raw') || '';
+        // Deprecated: Plaintext PIN is never stored or returned
+        return '';
     }
 
     static async hashPIN(pin) {
@@ -345,7 +348,11 @@ export class StorageEngine {
     }
 
     static resetToDefaults() {
+        if (typeof confirm !== 'undefined' && !confirm('Möchten Sie wirklich alle lokalen Daten und Einstellungen zurücksetzen?')) {
+            return;
+        }
         localStorage.clear();
+        sessionStorage.clear();
         window.location.reload();
     }
 }

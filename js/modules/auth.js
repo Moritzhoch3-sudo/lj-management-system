@@ -130,6 +130,8 @@ export class AppAuth {
         const submitBtn = lockRoot.querySelector('#central-unlock-submit-btn');
         const botTrapInput = lockRoot.querySelector('#central-bot-trap');
         const renderTime = Date.now();
+        let failedAttempts = 0;
+        let lockoutUntil = 0;
 
         // Immediate autofocus
         setTimeout(() => codeInput?.focus(), 80);
@@ -149,8 +151,17 @@ export class AppAuth {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            // Rate Limit Lockout Check
+            const now = Date.now();
+            if (now < lockoutUntil) {
+                const remainingSec = Math.ceil((lockoutUntil - now) / 1000);
+                errorEl.textContent = `⚠️ Zu viele Fehlversuche. Bitte warten Sie ${remainingSec} Sekunden.`;
+                errorEl.style.display = 'block';
+                return;
+            }
+
             // Anti-Bot Protection: Honeypot & Timing Check
-            if ((botTrapInput && botTrapInput.value) || (Date.now() - renderTime < 250)) {
+            if ((botTrapInput && botTrapInput.value) || (now - renderTime < 250)) {
                 errorEl.textContent = '⚠️ Automatisierte Anfrage abgewiesen (Bot-Schutz).';
                 errorEl.style.display = 'block';
                 return;
@@ -163,9 +174,15 @@ export class AppAuth {
             submitBtn.textContent = '⏳ Prüfe Code...';
             errorEl.style.display = 'none';
 
+            // Progressive delay against brute force
+            if (failedAttempts > 0) {
+                await new Promise(r => setTimeout(r, Math.min(failedAttempts * 300, 2000)));
+            }
+
             const isValid = await StorageEngine.verifyCentralAccessCode(inputVal);
 
             if (isValid) {
+                failedAttempts = 0;
                 sessionStorage.setItem(CENTRAL_AUTH_KEY, 'true');
                 if (rememberCheckbox && rememberCheckbox.checked) {
                     localStorage.setItem(CENTRAL_REMEMBER_KEY, 'true');
@@ -181,8 +198,18 @@ export class AppAuth {
                     if (onUnlockedCallback) onUnlockedCallback();
                 }, 300);
             } else {
+                failedAttempts++;
                 submitBtn.disabled = false;
                 submitBtn.textContent = '🔓 Zentrale freischalten';
+
+                if (failedAttempts >= 5) {
+                    const lockDuration = failedAttempts >= 8 ? 60000 : 30000;
+                    lockoutUntil = Date.now() + lockDuration;
+                    errorEl.textContent = `⚠️ Zu viele Fehlversuche! Zugang für ${lockDuration / 1000} Sekunden gesperrt.`;
+                } else {
+                    errorEl.textContent = `⚠️ Falscher Zugangscode! Nur für die Vorstandschaft. (Versuch ${failedAttempts}/5)`;
+                }
+
                 errorEl.style.display = 'block';
                 codeInput.style.borderColor = '#ef4444';
                 codeInput.focus();

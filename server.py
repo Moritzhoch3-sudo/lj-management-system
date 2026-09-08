@@ -22,6 +22,7 @@ import time
 import hashlib
 import re
 import datetime
+import urllib.parse
 
 PORT = int(os.environ.get('PORT', 8080))
 PIN_FILE = 'server_pin.json'
@@ -187,7 +188,11 @@ class HardenedLJRequestHandler(http.server.SimpleHTTPRequestHandler):
         
         if self.path.startswith('/api/'):
             self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, private')
-            self.send_header('Access-Control-Allow-Origin', '*')
+            origin = self.headers.get('Origin', '')
+            host = self.headers.get('Host', '')
+            if origin and ('localhost' in origin or '127.0.0.1' in origin or (host and host in origin)):
+                self.send_header('Access-Control-Allow-Origin', origin)
+                self.send_header('Vary', 'Origin')
             self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Public-Key, X-Submission-Time-Ms')
             self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         super().end_headers()
@@ -195,6 +200,37 @@ class HardenedLJRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(200)
         self.end_headers()
+
+    def is_safe_static_request(self, req_path):
+        clean_path = urllib.parse.urlparse(req_path).path
+        # Disallow directory traversal & hidden files
+        if '..' in clean_path or '/.' in clean_path:
+            return False, "Pfadtraversierung oder versteckte Datei verboten"
+
+        # Explicitly block access to secret files & databases
+        blocked_names = {
+            'server_pin.json', 'cloud_db.json', 'audit_access.log',
+            'server.py', 'requirements.txt', 'vercel.json', '.env', '.gitignore'
+        }
+        parts = [p for p in clean_path.split('/') if p]
+        for part in parts:
+            if part.lower() in blocked_names or part.startswith('.'):
+                return False, f"Zugriff auf '{part}' verboten"
+
+        # Check file extension
+        root, ext = os.path.splitext(clean_path)
+        ext = ext.lower()
+        if ext in {'.json', '.py', '.log', '.sh', '.env', '.md', '.txt', '.yml', '.yaml', '.bak'}:
+            return False, f"Dateityp '{ext}' nicht öffentlich verfügbar"
+
+        safe_extensions = {
+            '', '.html', '.js', '.css', '.png', '.jpg', '.jpeg', '.svg',
+            '.ico', '.webp', '.woff', '.woff2', '.ttf', '.map'
+        }
+        if ext and ext not in safe_extensions:
+            return False, f"Dateityp '{ext}' nicht erlaubt"
+
+        return True, None
 
     def do_GET(self):
         client_ip = self.client_address[0]
@@ -259,6 +295,16 @@ class HardenedLJRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
             self.wfile.write(json.dumps({'logs': logs}).encode('utf-8'))
+            return
+
+        # Static File Requests - Strictly Enforce Security Boundaries
+        is_safe, reason = self.is_safe_static_request(self.path)
+        if not is_safe:
+            audit_log(client_ip, 'GET', self.path, 'BLOCKED_STATIC', reason)
+            self.send_response(403)
+            self.send_header('Content-Type', 'text/plain; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(f"403 Forbidden: {reason}".encode('utf-8'))
             return
 
         super().do_GET()

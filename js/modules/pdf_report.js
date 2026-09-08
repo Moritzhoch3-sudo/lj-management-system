@@ -4,6 +4,9 @@
  */
 
 import { StorageEngine } from '../storage.js';
+import { SecurityUtils } from '../utils/security.js';
+
+const escapeHTML = SecurityUtils.escapeHTML.bind(SecurityUtils);
 
 export class PdfReportModule {
     static openPdfOverview() {
@@ -389,10 +392,13 @@ export class PdfReportModule {
                 return;
             }
 
-            // If not available, dynamically load it from CDN
+            // If not available, dynamically load it from CDN with SRI verification
             const scriptLoaded = await new Promise((resolve) => {
                 const script = document.createElement('script');
                 script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+                script.integrity = 'sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==';
+                script.crossOrigin = 'anonymous';
+                script.referrerPolicy = 'no-referrer';
                 script.onload = () => resolve(true);
                 script.onerror = () => resolve(false);
                 document.head.appendChild(script);
@@ -450,14 +456,4 @@ export class PdfReportModule {
         a.remove();
         URL.revokeObjectURL(url);
     }
-}
-
-function escapeHTML(str) {
-    if (!str) return '';
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
 }

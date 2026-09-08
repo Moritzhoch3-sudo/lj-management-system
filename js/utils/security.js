@@ -81,14 +81,31 @@ export class SecurityUtils {
         }
 
         // 3. MIME Check
-        if (file.type && !config.allowedMimes.includes(file.type.toLowerCase())) {
-            // Some systems don't send precise audio mimes, allow if extension is confirmed valid
-            if (!file.type.startsWith('audio/') && !file.type.startsWith('image/') && file.type !== 'application/pdf') {
-                return { valid: false, error: `Ungültiger MIME-Typ: ${file.type}` };
+        if (file.type) {
+            const lowerMime = file.type.toLowerCase();
+            if (!config.allowedMimes.includes(lowerMime)) {
+                // Only allow specific category prefixes if they match the requested category
+                const isAudioMismatch = lowerMime.startsWith('audio/') && typeCategory !== 'audio';
+                const isImageMismatch = lowerMime.startsWith('image/') && typeCategory !== 'image';
+                if (isAudioMismatch || isImageMismatch || (!lowerMime.startsWith('audio/') && !lowerMime.startsWith('image/') && lowerMime !== 'application/pdf')) {
+                    return { valid: false, error: `Ungültiger MIME-Typ '${file.type}' für Kategorie '${typeCategory}'.` };
+                }
             }
         }
 
         return { valid: true, sanitizedName: safeName };
+    }
+
+    /**
+     * Sanitize color string to prevent CSS / Attribute injection
+     */
+    static sanitizeColor(color, fallback = '#10b981') {
+        if (!color || typeof color !== 'string') return fallback;
+        const trimmed = color.trim();
+        if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(trimmed)) {
+            return trimmed;
+        }
+        return fallback;
     }
 
     /**

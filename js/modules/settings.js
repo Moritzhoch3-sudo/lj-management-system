@@ -13,7 +13,7 @@ export class SettingsModule {
         try {
             const members = StorageEngine.getMembers() || [];
             const categories = StorageEngine.getCategories() || [];
-            const currentPin = StorageEngine.getPIN ? StorageEngine.getPIN() : '****';
+            const currentPin = '••••';
 
             containerEl.innerHTML = `
                 <div class="settings-wrapper w-100">

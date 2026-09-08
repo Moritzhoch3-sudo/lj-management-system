@@ -13,6 +13,7 @@ import { PdfReportModule } from './modules/pdf_report.js';
 import { AutoSaveEngine } from './modules/autosave.js';
 import { CloudStorageEngine } from './cloud-storage.js';
 import { AppAuth } from './modules/auth.js';
+import { SecurityUtils } from './utils/security.js';
 
 let activeTab = 'dashboard';
 let pendingProtectedTab = null;
@@ -71,18 +72,21 @@ class App {
         const caretEl = document.getElementById('user-selector-caret');
 
         if (listEl) {
-            listEl.innerHTML = members.map(m => `
+            listEl.innerHTML = members.map(m => {
+                const safeColor = SecurityUtils.sanitizeColor(m.color);
+                return `
                 <div class="user-selector-item ${m.id === currentUserId ? 'active' : ''}" data-user-id="${m.id}" style="cursor: pointer; padding: 0.55rem 0.75rem; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; transition: background 0.15s; background: ${m.id === currentUserId ? 'rgba(16, 185, 129, 0.08)' : 'transparent'};">
                     <div style="display: flex; align-items: center; gap: 0.6rem; overflow: hidden;">
-                        <span style="font-size: 1.2rem; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: ${m.color}18; color: ${m.color}; border-radius: 8px; border: 1.5px solid ${m.color}40; flex-shrink: 0;">${m.avatar}</span>
+                        <span style="font-size: 1.2rem; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: ${safeColor}18; color: ${safeColor}; border-radius: 8px; border: 1.5px solid ${safeColor}40; flex-shrink: 0;">${escapeHTML(m.avatar || '👤')}</span>
                         <div style="overflow: hidden;">
                             <span style="font-weight: 800; font-size: 0.88rem; color: var(--text-primary); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(m.name)}</span>
-                            <span style="font-size: 0.74rem; color: ${m.color}; font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(m.role)}</span>
+                            <span style="font-size: 0.74rem; color: ${safeColor}; font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(m.role)}</span>
                         </div>
                     </div>
                     ${m.id === currentUserId ? `<span style="color: var(--donezo-green); font-weight: 800; font-size: 1rem;">✓</span>` : ''}
                 </div>
-            `).join('');
+            `;
+            }).join('');
 
             listEl.querySelectorAll('.user-selector-item[data-user-id]').forEach(item => {
                 item.addEventListener('click', (e) => {

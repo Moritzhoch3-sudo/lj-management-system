@@ -21,11 +21,17 @@ export class CloudStorageEngine {
 
     static setCloudUrl(url) {
         if (url) {
-            localStorage.setItem(CLOUD_SYNC_KEY, url.trim().replace(/\/$/, ''));
+            const cleanUrl = url.trim().replace(/\/$/, '');
+            if (!cleanUrl.startsWith('https://') && !cleanUrl.startsWith('http://localhost') && !cleanUrl.startsWith('http://127.0.0.1')) {
+                console.warn('Insecure custom cloud URL rejected. Only HTTPS or localhost allowed.');
+                return false;
+            }
+            localStorage.setItem(CLOUD_SYNC_KEY, cleanUrl);
         } else {
             localStorage.removeItem(CLOUD_SYNC_KEY);
         }
         this.init();
+        return true;
     }
 
     static init(onUpdateCallback) {
@@ -226,14 +232,19 @@ export class CloudStorageEngine {
             }
         } catch (e) {}
 
-        // 2. Push to custom external Cloud URL if configured
+        // 2. Push to custom external Cloud URL if configured (Sanitized, credentials stripped)
         const customUrl = this.getCloudUrl();
-        if (customUrl) {
+        if (customUrl && (customUrl.startsWith('https://') || customUrl.startsWith('http://localhost') || customUrl.startsWith('http://127.0.0.1'))) {
             try {
+                // Strip secret credential hashes before sending to custom third-party endpoint
+                const safeExternalPayload = { ...payload };
+                delete safeExternalPayload.pinHash;
+                delete safeExternalPayload.centralAccessCodeHash;
+
                 const response = await fetch(`${customUrl}/lj_data.json`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(safeExternalPayload)
                 });
                 if (response.ok) {
                     pushedSuccess = true;
