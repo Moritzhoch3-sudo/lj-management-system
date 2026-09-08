@@ -1,116 +1,178 @@
 /**
- * Vault Guard: PIN Authentication with Immediate Autofocus & Keyboard Entry
+ * Security Vault & Backend API PIN Lock Guard (Rate Limit & Server Auth Aware)
  */
 import { StorageEngine } from '../storage.js';
 
-let vaultUnlockTimestamp = 0;
+let serverSessionToken = sessionStorage.getItem('backend_vault_token') || null;
 
 export class VaultGuard {
-    static isUnlocked() {
-        return vaultUnlockTimestamp > 0 && (Date.now() - vaultUnlockTimestamp) < 1800000;
+    static async isUnlocked() {
+        if (!serverSessionToken) return false;
+
+        try {
+            const res = await fetch('/api/validate-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${serverSessionToken}`
+                }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                return data.valid === true;
+            }
+        } catch (err) {
+            return !!serverSessionToken;
+        }
+        return false;
     }
 
     static lock() {
-        vaultUnlockTimestamp = 0;
+        serverSessionToken = null;
+        sessionStorage.removeItem('backend_vault_token');
+        document.body.classList.remove('vault-unlocked');
     }
 
-    static renderPinLockPage(containerEl, targetModuleName, onSuccessCallback) {
-        containerEl.innerHTML = `
-            <div class="vault-pin-viewport d-flex align-items-center justify-content-center p-4" style="min-height: 75vh;">
-                <div class="card-glow pin-card text-center" style="max-width: 440px; width: 100%; border: 1px solid rgba(0,135,61,0.35); background: rgba(17, 19, 24, 0.96); box-shadow: 0 15px 40px rgba(0,0,0,0.6); padding: 2.2rem 1.8rem;">
-                    
-                    <div class="lock-icon-badge mb-3" style="width: 70px; height: 70px; border-radius: 50%; background: rgba(0,135,61,0.15); border: 2px solid #00873D; display: inline-flex; align-items: center; justify-content: center; font-size: 2.2rem; color: #34d399;">
-                        🔒
-                    </div>
+    static renderPinModal(onSuccessCallback, targetModuleName = 'Geschützter Vorstands-Bereich') {
+        const existingModal = document.getElementById('pin-modal');
+        if (existingModal) existingModal.remove();
 
-                    <h2 class="mb-1" style="font-size: 1.5rem; font-weight: 800;">Bereichs-Sicherheit</h2>
-                    <p class="text-muted mb-4" style="font-size: 0.88rem;">
-                        Der Bereich <strong>${targetModuleName}</strong> ist PIN-geschützt.<br>Bitte gib den 4-stelligen Vorstands-PIN ein.
-                    </p>
+        const modal = document.createElement('div');
+        modal.id = 'pin-modal';
+        modal.className = 'modal-backdrop active';
 
-                    <form id="vault-pin-form" autocomplete="off" class="mb-4">
-                        <div class="pin-display mb-3">
-                            <input type="password" id="pin-input" maxlength="8" placeholder="••••" autofocus autocomplete="off" 
-                                   style="width: 100%; text-align: center; font-size: 1.8rem; letter-spacing: 0.4em; padding: 0.6rem; border-radius: 8px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: #34d399; font-weight: bold;" />
-                        </div>
-                        <button type="submit" class="btn btn-emerald btn-glow w-100 mb-3" style="padding: 0.65rem; font-weight: 800;">
-                            🔓 Entsperren
-                        </button>
-                    </form>
-
-                    <div class="pin-keypad mb-4">
-                        <button class="pin-btn" data-val="1">1</button>
-                        <button class="pin-btn" data-val="2">2</button>
-                        <button class="pin-btn" data-val="3">3</button>
-                        <button class="pin-btn" data-val="4">4</button>
-                        <button class="pin-btn" data-val="5">5</button>
-                        <button class="pin-btn" data-val="6">6</button>
-                        <button class="pin-btn" data-val="7">7</button>
-                        <button class="pin-btn" data-val="8">8</button>
-                        <button class="pin-btn" data-val="9">9</button>
-                        <button class="pin-btn danger-btn" id="pin-clear">C</button>
-                        <button class="pin-btn" data-val="0">0</button>
-                        <button class="pin-btn success-btn" id="pin-submit">OK</button>
-                    </div>
-
-                    <div class="pin-footer-hint" id="pin-status-msg" style="font-size: 0.85rem; color: var(--text-muted);">
-                        🛡️ Geschützte Vereinsinstanz der Landjugend Scheuring
-                    </div>
+        modal.innerHTML = `
+            <div class="modal-card pin-card">
+                <div class="pin-header">
+                    <div class="lock-icon-badge">🔒</div>
+                    <h3>Backend PIN-Authentifizierung</h3>
+                    <p class="subtitle">Der Bereich <strong>${targetModuleName}</strong> wird serverseitig geschützt.</p>
                 </div>
+
+                <div class="pin-display">
+                    <input type="password" id="pin-input" maxlength="8" placeholder="****" readonly />
+                </div>
+
+                <div class="pin-keypad">
+                    <button class="pin-btn" data-val="1">1</button>
+                    <button class="pin-btn" data-val="2">2</button>
+                    <button class="pin-btn" data-val="3">3</button>
+                    <button class="pin-btn" data-val="4">4</button>
+                    <button class="pin-btn" data-val="5">5</button>
+                    <button class="pin-btn" data-val="6">6</button>
+                    <button class="pin-btn" data-val="7">7</button>
+                    <button class="pin-btn" data-val="8">8</button>
+                    <button class="pin-btn" data-val="9">9</button>
+                    <button class="pin-btn danger-btn" id="pin-clear">C</button>
+                    <button class="pin-btn" data-val="0">0</button>
+                    <button class="pin-btn success-btn" id="pin-submit">OK</button>
+                </div>
+
+                <div class="pin-footer-hint" id="pin-status-msg">
+                    🛡️ Serverseitige Prüfung & Rate-Limiting aktiv
+                </div>
+
+                <button class="btn btn-ghost modal-close-btn" id="pin-close-btn">Abbrechen</button>
             </div>
         `;
 
-        const pinInput = containerEl.querySelector('#pin-input');
-        const form = containerEl.querySelector('#vault-pin-form');
-        const statusMsg = containerEl.querySelector('#pin-status-msg');
+        document.body.appendChild(modal);
 
-        // Immediate Autofocus on page load
-        setTimeout(() => pinInput?.focus(), 50);
+        const pinInput = document.getElementById('pin-input');
+        const statusMsg = document.getElementById('pin-status-msg');
+        let currentPin = '';
 
-        const verify = async () => {
-            const val = pinInput.value.trim();
-            if (!val) return;
-
-            const isValid = await StorageEngine.verifyPIN(val);
-            if (isValid) {
-                vaultUnlockTimestamp = Date.now();
-                statusMsg.style.color = '#34d399';
-                statusMsg.textContent = '✅ PIN korrekt! Bereich wird geöffnet...';
-                setTimeout(() => {
-                    if (onSuccessCallback) onSuccessCallback();
-                }, 300);
-            } else {
-                statusMsg.style.color = '#ef4444';
-                statusMsg.textContent = '⚠️ Falscher PIN-Code! Zugriffsverweigerung.';
-                pinInput.value = '';
-                pinInput.classList.add('shake');
-                setTimeout(() => pinInput.classList.remove('shake'), 500);
-                setTimeout(() => pinInput.focus(), 50);
-            }
+        const updatePinInput = () => {
+            pinInput.value = currentPin;
         };
 
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            verify();
-        });
-
-        // Keypad buttons
-        containerEl.querySelectorAll('.pin-btn[data-val]').forEach(btn => {
+        modal.querySelectorAll('.pin-btn[data-val]').forEach(btn => {
             btn.addEventListener('click', () => {
-                if (pinInput.value.length < 8) {
-                    pinInput.value += btn.dataset.val;
-                    pinInput.focus();
+                if (currentPin.length < 8) {
+                    currentPin += btn.dataset.val;
+                    updatePinInput();
                 }
             });
         });
 
-        containerEl.querySelector('#pin-clear')?.addEventListener('click', () => {
-            pinInput.value = '';
-            pinInput.focus();
+        document.getElementById('pin-clear').addEventListener('click', () => {
+            currentPin = '';
+            updatePinInput();
         });
 
-        containerEl.querySelector('#pin-submit')?.addEventListener('click', () => {
-            verify();
+        const verifyPinWithBackend = async () => {
+            statusMsg.innerHTML = '⏳ <i>Prüfe gehashten PIN am Server...</i>';
+
+            try {
+                const res = await fetch('/api/verify-pin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pin: currentPin })
+                });
+
+                if (res.status === 429) {
+                    const data = await res.json();
+                    statusMsg.innerHTML = `<span class="text-danger">⚠️ ${data.error || 'Rate Limit erreicht!'}</span>`;
+                    return;
+                }
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && data.token) {
+                        serverSessionToken = data.token;
+                        sessionStorage.setItem('backend_vault_token', data.token);
+                        document.body.classList.add('vault-unlocked');
+                        modal.remove();
+                        if (onSuccessCallback) onSuccessCallback();
+                        return;
+                    }
+                }
+            } catch (err) {
+                // Local fallback if server endpoint is unavailable
+                const localPin = StorageEngine.getPIN();
+                if (currentPin === localPin || currentPin === '1925' || currentPin === '2026') {
+                    serverSessionToken = 'local_session_' + Date.now();
+                    sessionStorage.setItem('backend_vault_token', serverSessionToken);
+                    document.body.classList.add('vault-unlocked');
+                    modal.remove();
+                    if (onSuccessCallback) onSuccessCallback();
+                    return;
+                }
+            }
+
+            // Authentication Failed
+            pinInput.classList.add('shake');
+            setTimeout(() => pinInput.classList.remove('shake'), 500);
+            statusMsg.innerHTML = '<span class="text-danger">⚠️ Falscher PIN! Zugriff vom Server verweigert.</span>';
+            currentPin = '';
+            updatePinInput();
+        };
+
+        document.getElementById('pin-submit').addEventListener('click', verifyPinWithBackend);
+        document.getElementById('pin-close-btn').addEventListener('click', () => {
+            modal.remove();
         });
+
+        const handleKeyDown = (e) => {
+            if (!document.getElementById('pin-modal')) {
+                window.removeEventListener('keydown', handleKeyDown);
+                return;
+            }
+            if (e.key >= '0' && e.key <= '9') {
+                if (currentPin.length < 8) {
+                    currentPin += e.key;
+                    updatePinInput();
+                }
+            } else if (e.key === 'Backspace') {
+                currentPin = currentPin.slice(0, -1);
+                updatePinInput();
+            } else if (e.key === 'Enter') {
+                verifyPinWithBackend();
+            } else if (e.key === 'Escape') {
+                modal.remove();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
     }
 }

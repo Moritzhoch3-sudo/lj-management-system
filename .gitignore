@@ -1,0 +1,9 @@
+# Landjugend Scheuring - Git Ignore Security Configuration
+.env
+.env.local
+server_pin.json
+*.log
+.DS_Store
+node_modules/
+__pycache__/
+*.pyc
