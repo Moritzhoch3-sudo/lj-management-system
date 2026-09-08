@@ -1,9 +1,31 @@
-# Landjugend Scheuring - Git Ignore Security Configuration
+# Landjugend Scheuring - Hardened Git Ignore Security Configuration
+
+# Environment Variables & Secrets
 .env
 .env.local
+.env.*.local
+*.secret
+*.pem
+*.key
+*.cert
+
+# Backend Credentials & Persistent State
 server_pin.json
+server_pin.backup.json
+
+# Audit Logs & Runtime Traces
 *.log
+audit_*.log
+
+# System & Editor Files
 .DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Dependencies & Build Cache
 node_modules/
 __pycache__/
 *.pyc
+*.pyo
+.pytest_cache/

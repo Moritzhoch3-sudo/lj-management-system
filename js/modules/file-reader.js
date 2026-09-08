@@ -1,3 +1,5 @@
+import { SecurityUtils } from '../utils/security.js';
+
 export class FileReaderEngine {
     static ALLOWED_EXTENSIONS = ['.txt', '.md', '.pdf', '.docx'];
     static MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -39,7 +41,7 @@ export class FileReaderEngine {
                 text = text.substring(0, this.MAX_TEXT_LENGTH);
             }
 
-            return { success: true, text, fileName: file.name };
+            return { success: true, text, fileName: SecurityUtils.sanitizeFilename(file.name) };
         } catch (error) {
             return { success: false, error: 'Fehler beim Lesen der Datei: ' + error.message };
         }

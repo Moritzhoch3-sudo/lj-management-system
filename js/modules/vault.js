@@ -48,6 +48,9 @@ export class VaultGuard {
                         Bitte gib den Vorstand-PIN zur Freischaltung ein.
                     </p>
 
+                    <!-- Anti-Bot Honeypot Field -->
+                    <input type="text" id="login-bot-trap" value="" style="display:none !important; position:absolute; left:-9999px;" tabindex="-1" autocomplete="off" />
+
                     <div class="protected-pin-display">
                         <input type="password" id="login-pin-input" maxlength="8" placeholder="****" readonly />
                     </div>
@@ -76,6 +79,8 @@ export class VaultGuard {
 
         const pinInput = containerEl.querySelector('#login-pin-input');
         const statusMsg = containerEl.querySelector('#login-status-msg');
+        const botTrapInput = containerEl.querySelector('#login-bot-trap');
+        const pageRenderTime = Date.now();
         let currentPin = '';
 
         const updateInput = () => {
@@ -98,6 +103,13 @@ export class VaultGuard {
 
         const verifyPin = async () => {
             if (!currentPin) return;
+
+            // Bot Protection
+            if ((botTrapInput && botTrapInput.value) || (Date.now() - pageRenderTime < 250)) {
+                statusMsg.innerHTML = '<span style="color: #f87171;">⚠️ Automatisierte Anfrage abgewiesen (Bot-Schutz).</span>';
+                return;
+            }
+
             statusMsg.innerHTML = '⏳ <i>Prüfe Master-PIN am Backend-Server...</i>';
 
             try {
@@ -210,6 +222,8 @@ export class VaultGuard {
                 </div>
 
                 <div class="pin-display">
+                    <!-- Anti-Bot Honeypot Field -->
+                    <input type="text" id="modal-bot-trap" value="" style="display:none !important; position:absolute; left:-9999px;" tabindex="-1" autocomplete="off" />
                     <input type="password" id="pin-input" maxlength="8" placeholder="****" readonly />
                 </div>
 
@@ -240,6 +254,8 @@ export class VaultGuard {
 
         const pinInput = document.getElementById('pin-input');
         const statusMsg = document.getElementById('pin-status-msg');
+        const botTrapInput = modal.querySelector('#modal-bot-trap');
+        const modalRenderTime = Date.now();
         let currentPin = '';
 
         const updatePinInput = () => {
@@ -261,6 +277,14 @@ export class VaultGuard {
         });
 
         const verifyPinWithBackend = async () => {
+            if (!currentPin) return;
+
+            // Anti-Bot Protection
+            if ((botTrapInput && botTrapInput.value) || (Date.now() - modalRenderTime < 250)) {
+                statusMsg.innerHTML = '<span class="text-danger">⚠️ Automatisierte Anfrage abgewiesen (Bot-Schutz).</span>';
+                return;
+            }
+
             statusMsg.innerHTML = '⏳ <i>Prüfe gehashten PIN am Server...</i>';
 
             try {

@@ -4,6 +4,7 @@
  */
 
 import { StorageEngine } from './storage.js';
+import { PUBLIC_DB_KEY, SecurityUtils } from './utils/security.js';
 
 const CLOUD_SYNC_KEY = 'lj_cloud_sync_config_v1';
 
@@ -64,13 +65,22 @@ export class CloudStorageEngine {
             // Append cache buster timestamp query string to prevent mobile browser 304 caching
             const cacheBusterUrl = url.includes('?') ? `${url}&_t=${Date.now()}` : `${url}?_t=${Date.now()}`;
             
+            const vaultToken = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('backend_vault_token') : null;
+            const authHeaders = {
+                'X-Public-Key': PUBLIC_DB_KEY,
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache'
+            };
+            if (vaultToken) {
+                authHeaders['Authorization'] = `Bearer ${vaultToken}`;
+            }
+
             const fetchOpts = {
                 ...options,
                 cache: 'no-store',
                 headers: {
-                    ...(options.headers || {}),
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache'
+                    ...authHeaders,
+                    ...(options.headers || {})
                 }
             };
 
@@ -194,9 +204,18 @@ export class CloudStorageEngine {
 
         // 1. Push to Vercel Serverless / Python Backend (/api/cloud-data)
         try {
+            const vaultToken = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('backend_vault_token') : null;
+            const headers = {
+                'Content-Type': 'application/json',
+                'X-Public-Key': PUBLIC_DB_KEY
+            };
+            if (vaultToken) {
+                headers['Authorization'] = `Bearer ${vaultToken}`;
+            }
+
             const resp = await fetch('/api/cloud-data', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify(payload)
             });
             if (resp.ok) {

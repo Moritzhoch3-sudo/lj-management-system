@@ -66,6 +66,9 @@ export class AppAuth {
                 </p>
 
                 <form id="central-unlock-form" autocomplete="off">
+                    <!-- Anti-Bot Honeypot Field (Invisible to Humans) -->
+                    <input type="text" name="website_verification_trap" id="central-bot-trap" value="" style="display:none !important; position:absolute; left:-9999px;" tabindex="-1" autocomplete="off" />
+
                     <div style="margin-bottom: 1.25rem; text-align: left;">
                         <label for="central-code-input" style="display: block; font-size: 0.8rem; font-weight: 800; color: #334155; margin-bottom: 0.4rem;">
                             Zentraler Vorstand-Zugangscode:
@@ -125,6 +128,8 @@ export class AppAuth {
         const rememberCheckbox = lockRoot.querySelector('#central-remember-me');
         const toggleBtn = lockRoot.querySelector('#toggle-code-visibility-btn');
         const submitBtn = lockRoot.querySelector('#central-unlock-submit-btn');
+        const botTrapInput = lockRoot.querySelector('#central-bot-trap');
+        const renderTime = Date.now();
 
         // Immediate autofocus
         setTimeout(() => codeInput?.focus(), 80);
@@ -143,6 +148,14 @@ export class AppAuth {
         // Submit Handler
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            // Anti-Bot Protection: Honeypot & Timing Check
+            if ((botTrapInput && botTrapInput.value) || (Date.now() - renderTime < 250)) {
+                errorEl.textContent = '⚠️ Automatisierte Anfrage abgewiesen (Bot-Schutz).';
+                errorEl.style.display = 'block';
+                return;
+            }
+
             const inputVal = (codeInput.value || '').trim();
             if (!inputVal) return;
 
