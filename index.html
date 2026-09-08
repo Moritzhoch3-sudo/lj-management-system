@@ -10,68 +10,108 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
     
-    <!-- Google Fonts: Montserrat & Inter -->
+    <!-- Google Fonts: Plus Jakarta Sans (Intuitive Body) & Montserrat (Bold Headings) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Stylesheets with Modern Linear/Vercel v12.0 Cache-Buster Query Tags -->
-    <link rel="stylesheet" href="css/main.css?v=12.0">
-    <link rel="stylesheet" href="css/components.css?v=12.0">
+    <!-- Stylesheets with Next-Gen Intuitive Redesign v13.0 Cache-Buster Query Tags -->
+    <link rel="stylesheet" href="css/main.css?v=13.0">
+    <link rel="stylesheet" href="css/components.css?v=13.0">
 </head>
-<body>
-    <!-- App Header & Navigation -->
-    <header class="app-header">
-        <div class="header-container">
-            <!-- Refined Landjugend Scheuring Logo -->
-            <div class="brand-logo">
-                <img src="assets/logo.svg" alt="Landjugend Scheuring Logo" class="brand-logo-img" />
-                <div class="brand-text">
-                    <h1 class="font-logo-heading">Vorstands-Zentrale</h1>
-                    <span class="brand-sub">Landjugend Scheuring</span>
+<body class="theme-nextgen">
+    <div class="app-layout">
+        <!-- Modern Left Sidebar Navigation -->
+        <aside class="app-sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <img src="assets/logo.svg" alt="Landjugend Scheuring Logo" class="brand-logo-img" />
+                    <div class="brand-text">
+                        <h1 class="font-logo-heading">Vorstands-Zentrale</h1>
+                        <span class="brand-sub">Landjugend Scheuring</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Navigation Tabs (Default: Dashboard) -->
-            <nav class="nav-menu">
-                <button class="nav-link active" data-tab="dashboard">
-                    <span>📊</span> Dashboard
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">HAUPTMENÜ</div>
+                <button class="sidebar-nav-link active" data-tab="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-title">Dashboard</span>
                 </button>
-                <button class="nav-link" data-tab="tasks">
-                    <span>📌</span> Aufgaben
+                <button class="sidebar-nav-link" data-tab="tasks">
+                    <span class="nav-icon">📌</span>
+                    <span class="nav-title">Aufgaben & To-Dos</span>
                 </button>
-                <button class="nav-link" data-tab="finance">
-                    <span>💰</span> Finanzen 🔒
+
+                <div class="nav-section-label mt-4">GESCHÜTZTER BEREICH</div>
+                <button class="sidebar-nav-link" data-tab="finance">
+                    <span class="nav-icon">💰</span>
+                    <span class="nav-title">Finanzen 🔒</span>
                 </button>
-                <button class="nav-link" data-tab="contracts">
-                    <span>📄</span> Verträge 🔒
+                <button class="sidebar-nav-link" data-tab="contracts">
+                    <span class="nav-icon">📄</span>
+                    <span class="nav-title">Verträge 🔒</span>
                 </button>
-                <button class="nav-link" data-tab="minutes">
-                    <span>🎙️</span> Sitzungen & Audio 🔒
+                <button class="sidebar-nav-link" data-tab="minutes">
+                    <span class="nav-icon">🎙️</span>
+                    <span class="nav-title">Sitzungen & Audio 🔒</span>
                 </button>
-                <button class="nav-link" data-tab="settings">
-                    <span>⚙️</span> Einstellungen
+
+                <div class="nav-section-label mt-4">SYSTEM</div>
+                <button class="sidebar-nav-link" data-tab="settings">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-title">Einstellungen</span>
                 </button>
             </nav>
 
-            <!-- User Simulator & Actions -->
-            <div class="header-actions">
-                <div class="user-simulator-box">
-                    <label for="user-simulator-select">Angemeldet als:</label>
-                    <select id="user-simulator-select" class="form-select form-select-sm"></select>
+            <!-- Sidebar Footer User Profile Card -->
+            <div class="sidebar-footer">
+                <div class="sidebar-user-chip">
+                    <span class="user-avatar-badge" id="sidebar-user-avatar">👤</span>
+                    <div class="user-info-text">
+                        <span class="user-name" id="sidebar-user-name">Vorstandsmitglied</span>
+                        <span class="user-role" id="sidebar-user-role">Landjugend Scheuring</span>
+                    </div>
                 </div>
-                <button class="btn btn-sm btn-ghost" id="export-backup-btn" title="Backup herunterladen">💾 Backup</button>
-                <button class="btn btn-sm btn-ghost danger-text" id="reset-data-btn" title="Auf Standarddaten zurücksetzen">🔄 Reset</button>
             </div>
-        </div>
-    </header>
+        </aside>
 
-    <!-- Main View Viewport -->
-    <main class="main-container" id="main-content-view">
-        <!-- Injected via JavaScript Modules -->
-    </main>
+        <!-- Main Content Area -->
+        <div class="app-main-wrapper">
+            <!-- Top Action Bar -->
+            <header class="topbar-header">
+                <div class="topbar-left">
+                    <h2 class="view-title" id="page-view-title">📊 Dashboard Overview</h2>
+                </div>
+
+                <div class="topbar-right">
+                    <!-- Design Style Switcher Toggle -->
+                    <div class="design-theme-toggle" title="Zwischen neuem Next-Gen Design & klassischem Design wechseln">
+                        <span class="toggle-label">🎨 Design:</span>
+                        <button class="btn btn-sm btn-ghost active" id="toggle-design-nextgen" title="Neues intuitives Design">⚡ Next-Gen Pro</button>
+                        <button class="btn btn-sm btn-ghost" id="toggle-design-classic" title="Zum bisherigen klassischen Design zurückkehren">🏛️ Klassisch</button>
+                    </div>
+
+                    <!-- User Selector -->
+                    <div class="user-simulator-box">
+                        <label for="user-simulator-select">Angemeldet als:</label>
+                        <select id="user-simulator-select" class="form-select form-select-sm"></select>
+                    </div>
+
+                    <button class="btn btn-sm btn-ghost" id="export-backup-btn" title="Backup herunterladen">💾 Backup</button>
+                    <button class="btn btn-sm btn-ghost danger-text" id="reset-data-btn" title="Auf Standarddaten zurücksetzen">🔄 Reset</button>
+                </div>
+            </header>
+
+            <!-- Main View Viewport -->
+            <main class="main-container" id="main-content-view">
+                <!-- Injected via JavaScript Modules -->
+            </main>
+        </div>
+    </div>
 
     <!-- Application Script Engine -->
-    <script type="module" src="js/app.js?v=12.0"></script>
+    <script type="module" src="js/app.js?v=13.0"></script>
 </body>
 </html>

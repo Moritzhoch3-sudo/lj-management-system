@@ -1,20 +1,20 @@
 /* ==========================================================================
-   LANDJUGEND SCHEURUNG - MODERN HIGH-END DESIGN SYSTEM (LINEAR / VERCEL STYLE)
+   LANDJUGEND SCHEURUNG - NEXT-GEN INTUITIVE DESIGN & CLASSIC COMPATIBILITY
    ========================================================================== */
 
 :root {
-    /* Edler Obsidian- & Slate-Farbraum (Inspiriert von Linear / Vercel) */
-    --bg-dark: #0b0f19;
-    --bg-surface: #111827;
-    --bg-surface-hover: #1f2937;
-    --bg-input: #1f2937;
+    /* Edler Obsidian- & Dark Slate Farbraum (Next-Gen Edition) */
+    --bg-dark: #090d16;
+    --bg-sidebar: #0d131f;
+    --bg-surface: #131b2b;
+    --bg-surface-hover: #1c273c;
+    --bg-input: #0d131f;
 
-    /* Feine, elegante Micro-Borders */
+    /* Micro Borders & Crisp Contrast */
     --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-medium: rgba(255, 255, 255, 0.14);
-    --border-focus: #10b981;
+    --border-medium: rgba(255, 255, 255, 0.16);
 
-    /* Typografie & Kontrast */
+    /* Text */
     --text-primary: #f9fafb;
     --text-secondary: #d1d5db;
     --text-muted: #9ca3af;
@@ -22,19 +22,17 @@
     /* Landjugend Scheuring Markenfarben */
     --lj-green: #059669;
     --lj-green-bright: #10b981;
-    --accent-blue: #3b82f6;
 
+    /* Status Colors */
     --status-danger: #f87171;
     --status-warning: #fbbf24;
     --status-success: #34d399;
 
-    /* Elegante Radien */
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 14px;
     --radius-full: 9999px;
 
-    /* Subtile, edle Schatten */
     --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
     --shadow-card-hover: 0 8px 30px rgba(0, 0, 0, 0.5);
 
@@ -49,11 +47,11 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     background-color: var(--bg-dark);
     background-image: 
-        radial-gradient(ellipse at 50% 0%, rgba(16, 185, 129, 0.08) 0%, transparent 60%),
-        radial-gradient(ellipse at 80% 100%, rgba(59, 130, 246, 0.05) 0%, transparent 60%);
+        radial-gradient(ellipse at 20% 0%, rgba(16, 185, 129, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 100%, rgba(59, 130, 246, 0.06) 0%, transparent 60%);
     background-attachment: fixed;
     color: var(--text-primary);
     min-height: 100vh;
@@ -62,33 +60,55 @@ body {
 }
 
 /* Typografie */
-h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1 {
+h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .view-title {
     font-family: 'Montserrat', sans-serif;
     font-weight: 800;
     letter-spacing: -0.01em;
     color: var(--text-primary);
 }
 
-/* Header & Navigation Bar */
-.app-header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(11, 15, 25, 0.85);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border-subtle);
-    padding: 0.75rem 1.5rem;
+/* Layout Modes */
+.app-layout {
+    display: flex;
+    min-height: 100vh;
 }
 
-.header-container {
-    max-width: 1400px;
-    margin: 0 auto;
+/* NEXT-GEN MODE: LEFT SIDEBAR */
+body.theme-nextgen .app-sidebar {
+    width: 270px;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border-subtle);
     display: flex;
-    align-items: center;
+    flex-direction: column;
     justify-content: space-between;
-    gap: 1.25rem;
-    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 1.25rem 1rem;
+    z-index: 90;
+}
+
+body.theme-nextgen .app-main-wrapper {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* CLASSIC MODE BACKUP TOGGLE */
+body.theme-classic .app-sidebar {
+    display: none !important;
+}
+
+body.theme-classic .app-main-wrapper {
+    width: 100%;
+}
+
+/* Sidebar Elements */
+.sidebar-header {
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 1.25rem;
 }
 
 .brand-logo {
@@ -103,7 +123,7 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1 {
 }
 
 .brand-text h1 {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 800;
     color: #ffffff;
     line-height: 1.1;
@@ -111,67 +131,169 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1 {
 
 .brand-sub {
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     font-weight: 700;
     color: var(--lj-green-bright);
     text-transform: uppercase;
     letter-spacing: 0.08em;
 }
 
-/* Navigation Tabs */
-.nav-menu {
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 1;
+}
+
+.nav-section-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    padding: 0.35rem 0.5rem;
+}
+
+.sidebar-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.85rem;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: transparent;
+    transition: var(--transition-smooth);
+    width: 100%;
+    text-align: left;
+}
+
+.sidebar-nav-link:hover {
+    color: #ffffff;
+    background: var(--bg-surface-hover);
+}
+
+.sidebar-nav-link.active {
+    color: #ffffff;
+    background: var(--bg-surface);
+    border-color: var(--border-medium);
+    box-shadow: var(--shadow-card);
+}
+
+.sidebar-nav-link.active .nav-title {
+    color: var(--lj-green-bright);
+}
+
+.sidebar-footer {
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.sidebar-user-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+}
+
+.user-avatar-badge {
+    font-size: 1.25rem;
+}
+
+.user-info-text {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.user-name {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #ffffff;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.user-role {
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+/* Topbar Header */
+.topbar-header {
+    height: 64px;
+    background: rgba(13, 19, 31, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 80;
+}
+
+.topbar-left .view-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+}
+
+/* Design Theme Switcher Toggle */
+.design-theme-toggle {
     display: flex;
     align-items: center;
     gap: 0.35rem;
-    background: rgba(17, 24, 39, 0.7);
-    padding: 0.3rem;
-    border-radius: var(--radius-md);
+    background: #090d16;
     border: 1px solid var(--border-subtle);
-}
-
-.nav-link {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    padding: 0.45rem 0.9rem;
+    padding: 0.25rem 0.5rem;
     border-radius: var(--radius-sm);
-    color: var(--text-muted);
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.78rem;
+}
+
+.design-theme-toggle .toggle-label {
+    font-size: 0.75rem;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    white-space: nowrap;
-    transition: var(--transition-smooth);
+    color: var(--text-muted);
 }
 
-.nav-link:hover {
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.05);
+.design-theme-toggle button {
+    padding: 0.25rem 0.55rem;
+    font-size: 0.72rem;
+    border-radius: var(--radius-sm);
 }
 
-.nav-link.active {
-    color: #ffffff;
+.design-theme-toggle button.active {
     background: var(--bg-surface-hover);
+    color: #ffffff;
     border: 1px solid var(--border-medium);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-/* Actions & Selects */
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
 }
 
 .user-simulator-box {
     display: flex;
     align-items: center;
     gap: 0.45rem;
-    background: rgba(17, 24, 39, 0.7);
+    background: #090d16;
     border: 1px solid var(--border-subtle);
     padding: 0.3rem 0.65rem;
     border-radius: var(--radius-sm);
@@ -183,7 +305,7 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1 {
     font-weight: 600;
 }
 
-/* Main Container */
+/* Main Container Viewport */
 .main-container {
     max-width: 1400px;
     margin: 1.75rem auto;
@@ -213,7 +335,7 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1 {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
     color: var(--text-primary);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 0.88rem;
     transition: var(--transition-smooth);
 }
