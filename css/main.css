@@ -1,43 +1,44 @@
 /* ==========================================================================
-   LANDJUGEND SCHEURUNG - APPLE iOS FROSTED GLASS & HIGH CONTRAST DESIGN
+   LANDJUGEND SCHEURUNG - EXECUTIVE ENTERPRISE PORTAL DESIGN SYSTEM
+   Professionell, Vertrauenswürdig, Präzise & Hochwertig
    ========================================================================== */
 
 :root {
-    /* Hellerer, eleganter Schiefer-Hintergrund */
-    --bg-dark: #1b1e26;
-    --bg-card: rgba(32, 37, 48, 0.75);
-    --bg-card-hover: rgba(42, 48, 62, 0.85);
-    --bg-card-glass: rgba(255, 255, 255, 0.08);
+    /* Edle Corporate Schiefer- & Anthrazit-Farbtöne */
+    --bg-dark: #0f172a;
+    --bg-surface: #1e293b;
+    --bg-surface-elevated: #334155;
+    --bg-card: rgba(30, 41, 59, 0.85);
 
-    /* Apple iOS Glassmorphism Translucency */
-    --glass-bg: rgba(30, 35, 45, 0.65);
-    --glass-border: rgba(255, 255, 255, 0.14);
-    --glass-glow: rgba(255, 255, 255, 0.25);
-    --glass-blur: blur(24px) saturate(180%);
+    /* Präzisions-Borders & Dezente Schatten */
+    --border-subtle: rgba(255, 255, 255, 0.1);
+    --border-strong: rgba(255, 255, 255, 0.18);
+    --border-focus: #10b981;
 
-    /* Maximierte Text- & Kontrastfarben */
-    --text-main: #ffffff;
-    --text-sub: #f1f5f9;
-    --text-muted: #cbd5e1;
-    --text-dim: #94a3b8;
+    /* Typografie & Text-Kontrast */
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
 
-    /* Landjugend Scheuring Akzentfarben (Extra Leuchtend für maximale Sichtbarkeit) */
-    --lj-green: #00a84d;
-    --lj-green-light: #34d399;
-    --lj-yellow: #facc15;
-    --lj-cyan: #38bdf8;
+    /* Seriöse Vereins- & Akzentfarben */
+    --lj-emerald: #059669;
+    --lj-emerald-bright: #10b981;
+    --accent-blue: #3b82f6;
 
-    --danger: #f87171;
-    --warning: #fbbf24;
-    --info: #60a5fa;
+    --status-danger: #ef4444;
+    --status-warning: #f59e0b;
+    --status-success: #10b981;
 
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 18px;
-    --radius-full: 9999px;
+    /* Präzise Radien & Transitions */
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
 
-    --shadow-glass: 0 16px 40px rgba(0, 0, 0, 0.45), 0 4px 12px rgba(0, 0, 0, 0.25);
-    --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
+
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Reset & Base */
@@ -48,38 +49,33 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background-color: var(--bg-dark);
-    background-image: 
-        radial-gradient(circle at 20% 10%, rgba(52, 211, 153, 0.07) 0%, transparent 50%),
-        radial-gradient(circle at 80% 90%, rgba(56, 189, 248, 0.06) 0%, transparent 50%);
-    background-attachment: fixed;
-    color: var(--text-main);
+    background-image: radial-gradient(circle at 50% 0%, rgba(30, 41, 59, 0.6) 0%, var(--bg-dark) 80%);
+    color: var(--text-primary);
     min-height: 100vh;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
 }
 
-/* Überschriften: Maximale Sichtbarkeit & Logo-Typografie */
-h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .dashboard-banner h2, .section-banner h2 {
+/* Seriöse Überschriften: Präzise Corporate Typografie */
+h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1 {
     font-family: 'Montserrat', sans-serif;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: #ffffff !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--text-primary);
 }
 
-/* Header & Navbar - Apple Glassmorphism */
+/* Corporate Header */
 .app-header {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(24, 28, 37, 0.82);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border-bottom: 1px solid var(--glass-border);
-    padding: 0.75rem 1.5rem;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 0.85rem 1.75rem;
 }
 
 .header-container {
@@ -88,7 +84,7 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .dashboard-banner h2
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1.25rem;
+    gap: 1.5rem;
     flex-wrap: wrap;
 }
 
@@ -99,49 +95,48 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .dashboard-banner h2
 }
 
 .brand-logo-img {
-    height: 46px;
+    height: 40px;
     width: auto;
-    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
 }
 
 .brand-text h1 {
-    font-size: 1.25rem;
-    color: #ffffff !important;
+    font-size: 1.15rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #ffffff;
 }
 
 .brand-sub {
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.72rem;
-    font-weight: 800;
-    color: var(--lj-green-light);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--lj-emerald-bright);
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
 }
 
-/* Navigation Tabs */
+/* Professionelle Navigation Tabs */
 .nav-menu {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    background: rgba(15, 18, 25, 0.65);
-    backdrop-filter: var(--glass-blur);
-    padding: 0.35rem;
+    gap: 0.25rem;
+    background: #0f172a;
+    padding: 0.25rem;
     border-radius: var(--radius-md);
-    border: 1px solid var(--glass-border);
-    overflow-x: auto;
-    max-width: 100%;
+    border: 1px solid var(--border-subtle);
 }
 
 .nav-link {
     display: flex;
     align-items: center;
-    gap: 0.45rem;
+    gap: 0.5rem;
     padding: 0.55rem 1rem;
     border-radius: var(--radius-sm);
-    color: #cbd5e1;
+    color: var(--text-muted);
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 800;
+    font-size: 0.78rem;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.03em;
     cursor: pointer;
@@ -152,64 +147,78 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .dashboard-banner h2
 }
 
 .nav-link:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .nav-link.active {
-    color: #ffffff !important;
-    background: rgba(52, 211, 153, 0.25);
-    border: 1px solid var(--lj-green-light);
-    box-shadow: 0 4px 15px rgba(52, 211, 153, 0.2);
+    color: #ffffff;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-strong);
+    box-shadow: var(--shadow-sm);
 }
 
-/* User Simulator Control */
+/* Corporate Actions & User Select */
 .header-actions {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    flex-wrap: wrap;
 }
 
 .user-simulator-box {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: rgba(15, 18, 25, 0.75);
-    border: 1px solid var(--glass-border);
+    background: #0f172a;
+    border: 1px solid var(--border-subtle);
     padding: 0.35rem 0.75rem;
     border-radius: var(--radius-sm);
 }
 
 .user-simulator-box label {
     font-size: 0.75rem;
-    color: #cbd5e1;
+    color: var(--text-muted);
     font-weight: 600;
 }
 
-/* Layout Container */
+/* Main Container */
 .main-container {
     max-width: 1400px;
     margin: 2rem auto;
-    padding: 0 1.5rem;
+    padding: 0 1.75rem;
 }
 
-/* Card Styling: Apple iOS Glassmorphism (Kein Weiß!) */
+/* Professionelle Enterprise Cards */
 .card-glow {
-    background: rgba(28, 33, 44, 0.75) !important;
-    backdrop-filter: var(--glass-blur) !important;
-    -webkit-backdrop-filter: var(--glass-blur) !important;
-    border: 1px solid var(--glass-border) !important;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
-    box-shadow: var(--shadow-glass);
+    box-shadow: var(--shadow-md);
     transition: var(--transition-fast);
-    color: #ffffff !important;
 }
 
 .card-glow:hover {
-    border-color: rgba(255, 255, 255, 0.28) !important;
-    background: rgba(36, 42, 56, 0.85) !important;
+    border-color: var(--border-strong);
+}
+
+/* Enterprise Form Controls */
+.form-control, .form-select {
+    width: 100%;
+    padding: 0.6rem 0.85rem;
+    background: #0f172a;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem;
+    transition: var(--transition-fast);
+}
+
+.form-control:focus, .form-select:focus {
+    outline: none;
+    border-color: var(--lj-emerald-bright);
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
 }
 
 /* Buttons */
@@ -217,126 +226,50 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .dashboard-banner h2
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.45rem;
-    padding: 0.65rem 1.25rem;
+    gap: 0.4rem;
+    padding: 0.55rem 1.1rem;
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 800;
+    font-size: 0.78rem;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-    border-radius: var(--radius-md);
+    letter-spacing: 0.03em;
+    border-radius: var(--radius-sm);
     border: 1px solid transparent;
     cursor: pointer;
     transition: var(--transition-fast);
 }
 
 .btn-primary {
-    background: rgba(255, 255, 255, 0.12);
-    color: #ffffff !important;
-    border: 1px solid var(--glass-border);
+    background: #334155;
+    color: #ffffff;
+    border: 1px solid var(--border-strong);
 }
 
 .btn-primary:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: #475569;
 }
 
 .btn-emerald {
-    background: var(--lj-green);
-    color: #ffffff !important;
-    box-shadow: 0 4px 14px rgba(0, 168, 77, 0.35);
+    background: var(--lj-emerald);
+    color: #ffffff;
 }
 
 .btn-emerald:hover {
-    background: #008f41;
+    background: #047857;
 }
 
 .btn-ghost {
     background: transparent;
-    color: #cbd5e1 !important;
-    border-color: var(--glass-border);
+    color: var(--text-muted);
+    border-color: var(--border-subtle);
 }
 
 .btn-ghost:hover {
-    color: #ffffff !important;
-    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .btn-sm {
-    padding: 0.4rem 0.85rem;
-    font-size: 0.78rem;
-    border-radius: var(--radius-sm);
+    padding: 0.35rem 0.75rem;
+    font-size: 0.72rem;
 }
-
-/* Form Controls: High-Contrast Dark Glass */
-.form-control, .form-select {
-    width: 100%;
-    padding: 0.65rem 0.95rem;
-    background: rgba(15, 18, 25, 0.85) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: var(--radius-md);
-    color: #ffffff !important;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
-    transition: var(--transition-fast);
-}
-
-.form-control::placeholder {
-    color: #94a3b8 !important;
-}
-
-.form-control:focus, .form-select:focus {
-    outline: none;
-    border-color: var(--lj-green-light) !important;
-    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.25) !important;
-}
-
-.form-group {
-    margin-bottom: 1.25rem;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.4rem;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.78rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: #e2e8f0 !important;
-}
-
-.form-row {
-    display: flex;
-    gap: 1rem;
-}
-
-.form-row .col {
-    flex: 1;
-}
-
-/* Badges */
-.badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.3rem 0.7rem;
-    border-radius: var(--radius-sm);
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-.badge-emerald { background: rgba(52, 211, 153, 0.25); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.4); }
-.badge-success { background: rgba(52, 211, 153, 0.25); color: #34d399; }
-.badge-warning { background: rgba(251, 191, 36, 0.25); color: #fbbf24; }
-.badge-danger { background: rgba(248, 113, 113, 0.25); color: #f87171; }
-.badge-neutral { background: rgba(255, 255, 255, 0.12); color: #cbd5e1; }
-
-.text-success { color: #34d399 !important; }
-.text-danger { color: #f87171 !important; }
-.text-warning { color: #fbbf24 !important; }
-.text-muted { color: #cbd5e1 !important; }
-.font-bold { font-weight: 700; }
-.hidden { display: none !important; }
