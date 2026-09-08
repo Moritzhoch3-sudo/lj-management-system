@@ -239,9 +239,43 @@ class App {
                 }
             }
         });
+
+        // Mobile Hamburger Menu Toggle
+        const mobileToggleBtn = document.getElementById('mobile-menu-toggle-btn');
+        const sidebarNav = document.querySelector('.sidebar-nav');
+        if (mobileToggleBtn && sidebarNav) {
+            mobileToggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = sidebarNav.classList.toggle('mobile-expanded');
+                const iconEl = mobileToggleBtn.querySelector('.hamburger-icon') || mobileToggleBtn;
+                iconEl.textContent = isOpen ? '✕' : '☰';
+                mobileToggleBtn.classList.toggle('active', isOpen);
+            });
+
+            // Close when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.app-sidebar') && sidebarNav.classList.contains('mobile-expanded')) {
+                    sidebarNav.classList.remove('mobile-expanded');
+                    const iconEl = mobileToggleBtn.querySelector('.hamburger-icon') || mobileToggleBtn;
+                    iconEl.textContent = '☰';
+                    mobileToggleBtn.classList.remove('active');
+                }
+            });
+        }
     }
 
     static handleTabClick(targetTab) {
+        // Automatically collapse mobile menu on tab switch
+        const sidebarNav = document.querySelector('.sidebar-nav');
+        const mobileToggleBtn = document.getElementById('mobile-menu-toggle-btn');
+        if (sidebarNav && sidebarNav.classList.contains('mobile-expanded')) {
+            sidebarNav.classList.remove('mobile-expanded');
+            if (mobileToggleBtn) {
+                const iconEl = mobileToggleBtn.querySelector('.hamburger-icon') || mobileToggleBtn;
+                iconEl.textContent = '☰';
+                mobileToggleBtn.classList.remove('active');
+            }
+        }
         const protectedTabs = ['finance', 'contracts', 'minutes'];
 
         if (targetTab === 'vault-login') {
