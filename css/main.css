@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LANDJUGEND SCHEURUNG - EXECUTIVE ENTERPRISE PORTAL (PERFEKTE RANDABSTÄNDE)
+   LANDJUGEND SCHEURUNG - EXECUTIVE FULL-WIDTH & COMPACT DESIGN SYSTEM
    ========================================================================== */
 
 :root {
@@ -29,12 +29,12 @@
     --status-success: #34d399;
 
     --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 14px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
     --radius-full: 9999px;
 
-    --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
-    --shadow-card-hover: 0 8px 30px rgba(0, 0, 0, 0.5);
+    --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.35);
+    --shadow-card-hover: 0 6px 24px rgba(0, 0, 0, 0.45);
 
     --transition-smooth: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -50,17 +50,17 @@ body {
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     background-color: var(--bg-dark);
     background-image: 
-        radial-gradient(ellipse at 20% 0%, rgba(16, 185, 129, 0.08) 0%, transparent 60%),
-        radial-gradient(ellipse at 80% 100%, rgba(59, 130, 246, 0.06) 0%, transparent 60%);
+        radial-gradient(ellipse at 20% 0%, rgba(16, 185, 129, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 100%, rgba(59, 130, 246, 0.05) 0%, transparent 60%);
     background-attachment: fixed;
     color: var(--text-primary);
     min-height: 100vh;
-    line-height: 1.5;
+    line-height: 1.4;
     -webkit-font-smoothing: antialiased;
 }
 
 /* Typografie */
-h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .view-title {
+h1, h2, h3, h4, h5, h6, .brand-main-title, .view-title {
     font-family: 'Montserrat', sans-serif;
     font-weight: 800;
     letter-spacing: -0.01em;
@@ -71,11 +71,13 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .view-title {
 .app-layout {
     display: flex;
     min-height: 100vh;
+    width: 100%;
 }
 
 /* LEFT SIDEBAR NAVIGATION */
 .app-sidebar {
-    width: 280px;
+    width: 260px;
+    min-width: 260px;
     background: var(--bg-sidebar);
     border-right: 1px solid var(--border-subtle);
     display: flex;
@@ -84,7 +86,7 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .view-title {
     position: sticky;
     top: 0;
     height: 100vh;
-    padding: 1.5rem 1.25rem;
+    padding: 1.25rem 1rem;
     z-index: 90;
 }
 
@@ -93,36 +95,33 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .view-title {
     min-width: 0;
     display: flex;
     flex-direction: column;
+    width: calc(100% - 260px);
 }
 
-/* Sidebar Header */
+/* Clean Sidebar Header without logo image & non-squeezed font */
 .sidebar-header {
-    padding-bottom: 1.35rem;
+    padding-bottom: 1rem;
     border-bottom: 1px solid var(--border-subtle);
-    margin-bottom: 1.35rem;
+    margin-bottom: 1rem;
 }
 
-.brand-logo {
+.brand-text {
     display: flex;
-    align-items: center;
-    gap: 0.85rem;
+    flex-direction: column;
+    gap: 0.2rem;
 }
 
-.brand-logo-img {
-    height: 40px;
-    width: auto;
-}
-
-.brand-text h1 {
+.brand-main-title {
     font-size: 1.05rem;
     font-weight: 800;
     color: #ffffff;
-    line-height: 1.1;
+    line-height: 1.25;
+    margin: 0;
 }
 
 .brand-sub {
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.65rem;
+    font-size: 0.68rem;
     font-weight: 700;
     color: var(--lj-green-bright);
     text-transform: uppercase;
@@ -132,28 +131,28 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .view-title {
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.25rem;
     flex: 1;
 }
 
 .nav-section-label {
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     font-weight: 800;
     color: var(--text-muted);
     letter-spacing: 0.08em;
-    padding: 0.4rem 0.6rem;
+    padding: 0.35rem 0.5rem;
 }
 
 .sidebar-nav-link {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.7rem 0.95rem;
+    gap: 0.65rem;
+    padding: 0.55rem 0.8rem;
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     font-weight: 700;
     cursor: pointer;
     border: 1px solid transparent;
@@ -180,22 +179,22 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .view-title {
 }
 
 .sidebar-footer {
-    padding-top: 1.1rem;
+    padding-top: 0.85rem;
     border-top: 1px solid var(--border-subtle);
 }
 
 .sidebar-user-chip {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.6rem 0.85rem;
+    gap: 0.65rem;
+    padding: 0.5rem 0.75rem;
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
 }
 
 .user-avatar-badge {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
 }
 
 .user-info-text {
@@ -205,7 +204,7 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .view-title {
 }
 
 .user-name {
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     font-weight: 700;
     color: #ffffff;
     white-space: nowrap;
@@ -214,21 +213,21 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .view-title {
 }
 
 .user-role {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 600;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
 }
 
-/* TOPBAR HEADER MIT PERFEKTEN ABSTÄNDEN */
+/* TOPBAR HEADER */
 .topbar-header {
-    height: 68px;
+    height: 60px;
     background: rgba(13, 19, 31, 0.85);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border-subtle);
-    padding: 0 2.25rem; /* Perfekter Seitenabstand */
+    padding: 0 1.75rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -236,10 +235,11 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .view-title {
     position: sticky;
     top: 0;
     z-index: 80;
+    width: 100%;
 }
 
 .topbar-left .view-title {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 800;
     margin: 0;
 }
@@ -247,17 +247,17 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .view-title {
 .topbar-right {
     display: flex;
     align-items: center;
-    gap: 0.85rem;
+    gap: 0.75rem;
     flex-wrap: wrap;
 }
 
 .user-simulator-box {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.45rem;
     background: #090d16;
     border: 1px solid var(--border-subtle);
-    padding: 0.35rem 0.75rem;
+    padding: 0.3rem 0.65rem;
     border-radius: var(--radius-sm);
 }
 
@@ -267,19 +267,20 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .view-title {
     font-weight: 600;
 }
 
-/* MAIN VIEWPORT CONTAINER MIT GROSSZÜGIGEM RANDABSTAND */
+/* FULL-WIDTH MAIN VIEWPORT CONTAINER (FÜLLT DAS GANZE BILD AUS) */
 .main-container {
-    max-width: 1400px;
-    margin: 2rem auto;
-    padding: 0 2.25rem; /* PERFEKTER RANDABSTAND ZUM SEITENRAND */
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 1.25rem 0 !important;
+    padding: 0 1.75rem !important; /* Volle Bildbreite */
 }
 
-/* Base Card */
+/* Base Card (Kompakte Höhe) */
 .card-glow {
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg);
-    padding: 1.75rem 2rem;
+    border-radius: var(--radius-md);
+    padding: 1.1rem 1.35rem; /* Kompakte Höhe */
     box-shadow: var(--shadow-card);
     transition: var(--transition-smooth);
 }
@@ -292,13 +293,13 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .view-title {
 /* Form Controls */
 .form-control, .form-select {
     width: 100%;
-    padding: 0.6rem 0.9rem;
+    padding: 0.45rem 0.75rem;
     background: var(--bg-input);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
     color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 0.88rem;
+    font-size: 0.85rem;
     transition: var(--transition-smooth);
 }
 
@@ -313,10 +314,10 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .view-title {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.45rem;
-    padding: 0.55rem 1.1rem;
+    gap: 0.4rem;
+    padding: 0.45rem 0.95rem;
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
     border-radius: var(--radius-sm);
@@ -356,6 +357,6 @@ h1, h2, h3, h4, h5, h6, .font-logo-heading, .brand-text h1, .view-title {
 }
 
 .btn-sm {
-    padding: 0.4rem 0.75rem;
+    padding: 0.35rem 0.65rem;
     font-size: 0.72rem;
 }
