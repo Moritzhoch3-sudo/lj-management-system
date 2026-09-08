@@ -474,8 +474,9 @@ html, body {
     display: none !important;
 }
 
-/* Mobile Menu Hamburger Button - HIDDEN ON DESKTOP */
-.mobile-menu-toggle-btn {
+/* Mobile Menu Hamburger Button & Menübalken - HIDDEN ON DESKTOP */
+.mobile-menu-toggle-btn,
+.mobile-menubalken {
     display: none !important;
 }
 
@@ -545,15 +546,109 @@ html, body {
         border-color: var(--donezo-green) !important;
     }
 
-    /* Mobile Collapsible Navigation Menu */
+    /* Mobile Menübalken (Executive Menu Bar with active section display) */
+    .mobile-menubalken {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        background: linear-gradient(135deg, #143725 0%, #1c4d34 100%) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 12px !important;
+        padding: 0.55rem 0.85rem !important;
+        margin-top: 0.65rem !important;
+        cursor: pointer !important;
+        user-select: none !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 3px 12px rgba(20, 55, 37, 0.16) !important;
+        box-sizing: border-box !important;
+    }
+
+    .mobile-menubalken:hover,
+    .mobile-menubalken:active,
+    .mobile-menubalken.is-open {
+        background: linear-gradient(135deg, #0d2619 0%, #153c29 100%) !important;
+        border-color: rgba(16, 185, 129, 0.5) !important;
+        box-shadow: 0 4px 16px rgba(20, 55, 37, 0.25) !important;
+    }
+
+    .menubalken-left {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.55rem !important;
+        min-width: 0 !important;
+    }
+
+    .menubalken-bars-icon {
+        font-size: 1.05rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 26px !important;
+        height: 26px !important;
+        background: rgba(255, 255, 255, 0.16) !important;
+        border-radius: 7px !important;
+        flex-shrink: 0 !important;
+        line-height: 1 !important;
+    }
+
+    .menubalken-prefix {
+        font-size: 0.74rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        color: rgba(255, 255, 255, 0.75) !important;
+    }
+
+    .menubalken-active-title {
+        font-size: 0.92rem !important;
+        font-weight: 800 !important;
+        color: #ffffff !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .menubalken-right {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.4rem !important;
+        flex-shrink: 0 !important;
+    }
+
+    .menubalken-hint {
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        color: rgba(255, 255, 255, 0.75) !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+        padding: 0.18rem 0.5rem !important;
+        border-radius: 20px !important;
+    }
+
+    .menubalken-arrow {
+        font-size: 0.85rem !important;
+        color: #ffffff !important;
+        transition: transform 0.2s ease !important;
+    }
+
+    .mobile-menubalken.is-open .menubalken-arrow {
+        transform: rotate(180deg) !important;
+    }
+
+    /* Mobile Collapsible Navigation Menu Drawer */
     .sidebar-nav {
         display: none !important; /* Hidden by default on mobile */
         flex-direction: column !important;
         gap: 0.4rem !important;
         width: 100% !important;
-        margin-top: 0.75rem !important;
-        padding-top: 0.75rem !important;
-        border-top: 1px solid var(--border-subtle) !important;
+        margin-top: 0.65rem !important;
+        padding: 0.85rem !important;
+        background: #ffffff !important;
+        border: 1px solid var(--border-medium) !important;
+        border-radius: 14px !important;
+        box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.14) !important;
+        box-sizing: border-box !important;
         overflow-x: hidden !important;
     }
 
@@ -666,6 +761,19 @@ html, body {
         width: 36px;
         height: 36px;
         font-size: 1.2rem;
+    }
+
+    .mobile-menubalken {
+        padding: 0.45rem 0.75rem !important;
+        margin-top: 0.5rem !important;
+    }
+
+    .menubalken-active-title {
+        font-size: 0.86rem !important;
+    }
+
+    .menubalken-hint {
+        display: none !important;
     }
 
     .topbar-header {

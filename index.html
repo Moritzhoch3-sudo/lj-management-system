@@ -22,9 +22,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Stylesheets with v38.0 Cache-Buster Query Tags -->
-    <link rel="stylesheet" href="css/main.css?v=38.0">
-    <link rel="stylesheet" href="css/components.css?v=38.0">
+    <!-- Stylesheets with v39.0 Cache-Buster Query Tags -->
+    <link rel="stylesheet" href="css/main.css?v=39.0">
+    <link rel="stylesheet" href="css/components.css?v=39.0">
 </head>
 <body class="theme-donezo">
     <div class="app-layout">
@@ -43,6 +43,19 @@
                 <button type="button" class="mobile-menu-toggle-btn" id="mobile-menu-toggle-btn" aria-label="Menü öffnen" title="Menü ein-/ausklappen">
                     <span class="hamburger-icon">☰</span>
                 </button>
+            </div>
+
+            <!-- Mobile Menübalken: Clean, Tappable Bar for Section Switching -->
+            <div class="mobile-menubalken" id="mobile-menubalken-trigger" role="button" tabindex="0" aria-label="Menü ein- und ausklappen" aria-expanded="false">
+                <div class="menubalken-left">
+                    <span class="menubalken-bars-icon">☰</span>
+                    <span class="menubalken-prefix">Menü:</span>
+                    <span class="menubalken-active-title" id="menubalken-active-name">📊 Dashboard</span>
+                </div>
+                <div class="menubalken-right">
+                    <span class="menubalken-hint">Abteil wählen</span>
+                    <span class="menubalken-arrow" id="menubalken-arrow">▾</span>
+                </div>
             </div>
 
             <nav class="sidebar-nav">
@@ -123,6 +136,6 @@
     <!-- External Client-side PDF Generation Engine -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <!-- Application Script Engine -->
-    <script type="module" src="js/app.js?v=38.0"></script>
+    <script type="module" src="js/app.js?v=39.0"></script>
 </body>
 </html>

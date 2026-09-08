@@ -240,42 +240,75 @@ class App {
             }
         });
 
-        // Mobile Hamburger Menu Toggle
+        // Mobile Hamburger Menu & Menübalken Trigger Listeners
         const mobileToggleBtn = document.getElementById('mobile-menu-toggle-btn');
-        const sidebarNav = document.querySelector('.sidebar-nav');
-        if (mobileToggleBtn && sidebarNav) {
+        if (mobileToggleBtn && !mobileToggleBtn._hasListener) {
+            mobileToggleBtn._hasListener = true;
             mobileToggleBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const isOpen = sidebarNav.classList.toggle('mobile-expanded');
-                const iconEl = mobileToggleBtn.querySelector('.hamburger-icon') || mobileToggleBtn;
-                iconEl.textContent = isOpen ? '✕' : '☰';
-                mobileToggleBtn.classList.toggle('active', isOpen);
+                this.toggleMobileMenu();
             });
+        }
 
-            // Close when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.app-sidebar') && sidebarNav.classList.contains('mobile-expanded')) {
-                    sidebarNav.classList.remove('mobile-expanded');
-                    const iconEl = mobileToggleBtn.querySelector('.hamburger-icon') || mobileToggleBtn;
-                    iconEl.textContent = '☰';
-                    mobileToggleBtn.classList.remove('active');
+        const menubalkenTrigger = document.getElementById('mobile-menubalken-trigger');
+        if (menubalkenTrigger && !menubalkenTrigger._hasListener) {
+            menubalkenTrigger._hasListener = true;
+            menubalkenTrigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleMobileMenu();
+            });
+            menubalkenTrigger.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.toggleMobileMenu();
                 }
             });
+        }
+
+        // Close mobile drawer on outside click
+        document.addEventListener('click', (e) => {
+            const sidebarNav = document.querySelector('.sidebar-nav');
+            if (sidebarNav && sidebarNav.classList.contains('mobile-expanded')) {
+                if (!e.target.closest('.app-sidebar')) {
+                    this.toggleMobileMenu(false);
+                }
+            }
+        });
+    }
+
+    static toggleMobileMenu(forceState = null) {
+        const sidebarNav = document.querySelector('.sidebar-nav');
+        const mobileToggleBtn = document.getElementById('mobile-menu-toggle-btn');
+        const menubalkenTrigger = document.getElementById('mobile-menubalken-trigger');
+        const menubalkenArrow = document.getElementById('menubalken-arrow');
+        if (!sidebarNav) return;
+
+        const isCurrentlyOpen = sidebarNav.classList.contains('mobile-expanded');
+        const nextState = forceState !== null ? forceState : !isCurrentlyOpen;
+
+        sidebarNav.classList.toggle('mobile-expanded', nextState);
+
+        if (mobileToggleBtn) {
+            const iconEl = mobileToggleBtn.querySelector('.hamburger-icon') || mobileToggleBtn;
+            iconEl.textContent = nextState ? '✕' : '☰';
+            mobileToggleBtn.classList.toggle('active', nextState);
+        }
+
+        if (menubalkenTrigger) {
+            menubalkenTrigger.classList.toggle('is-open', nextState);
+            menubalkenTrigger.setAttribute('aria-expanded', nextState ? 'true' : 'false');
+        }
+
+        if (menubalkenArrow) {
+            menubalkenArrow.textContent = nextState ? '▲' : '▾';
         }
     }
 
     static handleTabClick(targetTab) {
-        // Automatically collapse mobile menu on tab switch
-        const sidebarNav = document.querySelector('.sidebar-nav');
-        const mobileToggleBtn = document.getElementById('mobile-menu-toggle-btn');
-        if (sidebarNav && sidebarNav.classList.contains('mobile-expanded')) {
-            sidebarNav.classList.remove('mobile-expanded');
-            if (mobileToggleBtn) {
-                const iconEl = mobileToggleBtn.querySelector('.hamburger-icon') || mobileToggleBtn;
-                iconEl.textContent = '☰';
-                mobileToggleBtn.classList.remove('active');
-            }
-        }
+        // Automatically collapse mobile menu drawer on tab switch
+        this.toggleMobileMenu(false);
+
         const protectedTabs = ['finance', 'contracts', 'minutes'];
 
         if (targetTab === 'vault-login') {
@@ -300,6 +333,9 @@ class App {
         activeTab = tabName;
         this.renderProtectedSidebar();
 
+        // Always ensure mobile menu is closed when switching views
+        this.toggleMobileMenu(false);
+
         // Update Nav Active State
         document.querySelectorAll('.sidebar-nav-link').forEach(link => {
             if (link.dataset.tab === tabName) {
@@ -322,6 +358,21 @@ class App {
         };
         if (viewTitleEl) {
             viewTitleEl.textContent = titleMap[tabName] || 'Vorstands-Zentrale';
+        }
+
+        // Update Mobile Menübalken Active Label
+        const menubalkenNameEl = document.getElementById('menubalken-active-name');
+        const menubalkenMap = {
+            dashboard: '📊 Dashboard',
+            tasks: '📌 Aufgaben & To-Dos',
+            'vault-login': '🔒 Geschützter Bereich',
+            finance: '💰 Finanzen & Kassenbuch',
+            contracts: '📄 Verträge & Sponsoring',
+            minutes: '🎙️ Sitzungen & Protokolle',
+            settings: '⚙️ Einstellungen'
+        };
+        if (menubalkenNameEl) {
+            menubalkenNameEl.textContent = menubalkenMap[tabName] || '📊 Dashboard';
         }
 
         const mainContentEl = document.getElementById('main-content-view');
