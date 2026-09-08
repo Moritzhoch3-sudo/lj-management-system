@@ -123,9 +123,8 @@ export class VaultGuard {
                         return;
                     }
                 } else if (res.status === 401) {
-                    const localPin = StorageEngine.getPIN();
-                    if (currentPin === '2026' || currentPin === localPin) {
-                        // Master PIN 2026 or active local PIN
+                    const isPinValid = await StorageEngine.verifyPIN(currentPin);
+                    if (isPinValid) {
                         try {
                             const syncRes = await fetch('/api/update-pin', {
                                 method: 'POST',
@@ -151,8 +150,8 @@ export class VaultGuard {
                 }
             } catch (err) {
                 // Local fallback if server endpoint is offline
-                const localPin = StorageEngine.getPIN();
-                if (currentPin === '2026' || currentPin === localPin) {
+                const isPinValid = await StorageEngine.verifyPIN(currentPin);
+                if (isPinValid) {
                     serverSessionToken = 'local_session_' + Date.now();
                     sessionStorage.setItem('backend_vault_token', serverSessionToken);
                     document.body.classList.add('vault-unlocked');
@@ -288,8 +287,8 @@ export class VaultGuard {
                         return;
                     }
                 } else if (res.status === 401) {
-                    const localPin = StorageEngine.getPIN();
-                    if (currentPin === localPin) {
+                    const isPinValid = await StorageEngine.verifyPIN(currentPin);
+                    if (isPinValid) {
                         try {
                             const syncRes = await fetch('/api/update-pin', {
                                 method: 'POST',
@@ -316,8 +315,8 @@ export class VaultGuard {
                 }
             } catch (err) {
                 // Local fallback if server endpoint is unavailable
-                const localPin = StorageEngine.getPIN();
-                if (currentPin === localPin) {
+                const isPinValid = await StorageEngine.verifyPIN(currentPin);
+                if (isPinValid) {
                     serverSessionToken = 'local_session_' + Date.now();
                     sessionStorage.setItem('backend_vault_token', serverSessionToken);
                     document.body.classList.add('vault-unlocked');

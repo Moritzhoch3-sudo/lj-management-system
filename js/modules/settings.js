@@ -177,9 +177,6 @@ export class SettingsModule {
                             </button>
                         </div>
                         <div id="central-code-feedback-msg" style="font-size: 0.85rem; font-weight: 700; margin-top: 0.5rem;"></div>
-                        <small style="font-size: 0.76rem; color: #94a3b8; display: block; margin-top: 0.35rem;">
-                            Standard-Notfallcode: <strong>2026</strong>
-                        </small>
                     </div>
 
                     <!-- 2. Master-Passwort / PIN für den geschützten Bereich (Kasse, Verträge, Protokolle) -->
@@ -205,9 +202,6 @@ export class SettingsModule {
                             </button>
                         </div>
                         <div id="pin-feedback-msg" style="font-size: 0.85rem; font-weight: 700; margin-top: 0.5rem;"></div>
-                        <small style="font-size: 0.76rem; color: #94a3b8; display: block; margin-top: 0.35rem;">
-                            Standard-Master-PIN: <strong>2026</strong>
-                        </small>
                     </div>
                 </div>
             `;

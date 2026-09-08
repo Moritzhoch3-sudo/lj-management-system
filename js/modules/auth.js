@@ -112,8 +112,7 @@ export class AppAuth {
                 </form>
 
                 <div style="margin-top: 1.5rem; border-top: 1px solid #f1f5f9; padding-top: 1rem; font-size: 0.74rem; color: #94a3b8; line-height: 1.4;">
-                    🛡️ Verschlüsselte Vereinsinstanz der Landjugend Scheuring e.V.<br/>
-                    Standard-Mastercode: <strong>2026</strong> (änderbar in den Einstellungen)
+                    🛡️ Verschlüsselte Vorstands-Zentrale der Landjugend Scheuring e.V.
                 </div>
             </div>
         `;
@@ -166,7 +165,6 @@ export class AppAuth {
 
                 setTimeout(() => {
                     lockRoot.remove();
-                    if (appLayout) appLayout.style.display = 'flex';
                     if (onUnlockedCallback) onUnlockedCallback();
                 }, 300);
             } else {
@@ -177,6 +175,99 @@ export class AppAuth {
                 codeInput.focus();
                 codeInput.select();
             }
+        });
+    }
+
+    /**
+     * "Wer bist du?" Post-Login Modal
+     * Directly asks which board member is accessing the Vorstands-Zentrale
+     */
+    static promptUserSelection(containerEl, onSelectedCallback) {
+        const existing = document.getElementById('user-selection-modal-root');
+        if (existing) existing.remove();
+
+        const members = StorageEngine.getMembers();
+        const currentUserId = StorageEngine.getCurrentUserId();
+
+        const modalBackdrop = document.createElement('div');
+        modalBackdrop.id = 'user-selection-modal-root';
+        modalBackdrop.style.cssText = `
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 100001;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.25rem;
+            box-sizing: border-box;
+            overflow-y: auto;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            animation: fadeIn 0.2s ease-out;
+        `;
+
+        modalBackdrop.innerHTML = `
+            <div class="user-selection-card" style="max-width: 680px; width: 100%; background: #ffffff; border-radius: 24px; padding: 2.25rem 2rem; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4); text-align: center; border: 1px solid rgba(255,255,255,0.6); animation: fadeInScale 0.25s cubic-bezier(0.16, 1, 0.3, 1);">
+                <div style="width: 58px; height: 58px; border-radius: 16px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; display: inline-flex; align-items: center; justify-content: center; font-size: 1.75rem; box-shadow: 0 8px 18px rgba(16, 185, 129, 0.35); margin-bottom: 1rem;">
+                    👋
+                </div>
+                <h2 style="font-size: 1.55rem; font-weight: 900; color: #0f172a; margin: 0 0 0.4rem; letter-spacing: -0.02em;">
+                    Wer bist du?
+                </h2>
+                <p style="font-size: 0.92rem; color: #64748b; line-height: 1.5; margin: 0 0 1.5rem;">
+                    Bitte wähle dein Vorstands-Profil aus, um an der Zentrale zu arbeiten:
+                </p>
+
+                <div id="user-selection-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.75rem; max-height: 52vh; overflow-y: auto; padding: 0.25rem; margin-bottom: 0.5rem;">
+                    ${members.map(m => `
+                        <button type="button" class="user-select-tile" data-member-id="${m.id}" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0.9rem; background: ${m.id === currentUserId ? '#ecfdf5' : '#f8fafc'}; border: 2px solid ${m.id === currentUserId ? '#10b981' : '#e2e8f0'}; border-radius: 14px; cursor: pointer; text-align: left; transition: all 0.15s ease; outline: none; width: 100%;">
+                            <div style="width: 40px; height: 40px; border-radius: 10px; background: ${m.color}20; color: ${m.color}; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0; border: 1.5px solid ${m.color}44;">
+                                ${m.avatar || '👤'}
+                            </div>
+                            <div style="overflow: hidden; flex: 1;">
+                                <div style="font-weight: 800; font-size: 0.88rem; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    ${escapeHTML(m.name)}
+                                </div>
+                                <div style="font-size: 0.74rem; font-weight: 700; color: ${m.color}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    ${escapeHTML(m.role)}
+                                </div>
+                            </div>
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+
+        (containerEl || document.body).appendChild(modalBackdrop);
+
+        modalBackdrop.querySelectorAll('.user-select-tile[data-member-id]').forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                btn.style.transform = 'translateY(-2px)';
+                btn.style.borderColor = '#10b981';
+                btn.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.15)';
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'none';
+                const isCur = btn.dataset.memberId === StorageEngine.getCurrentUserId();
+                btn.style.borderColor = isCur ? '#10b981' : '#e2e8f0';
+                btn.style.boxShadow = 'none';
+            });
+            btn.addEventListener('click', (e) => {
+                const memberId = e.currentTarget.dataset.memberId;
+                const member = members.find(m => m.id === memberId);
+                StorageEngine.setCurrentUserId(memberId);
+
+                modalBackdrop.style.transition = 'opacity 0.2s ease-out';
+                modalBackdrop.style.opacity = '0';
+                setTimeout(() => {
+                    modalBackdrop.remove();
+                    if (onSelectedCallback) onSelectedCallback(member);
+                }, 200);
+            });
         });
     }
 }

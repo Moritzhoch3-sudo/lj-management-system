@@ -1,14 +1,6 @@
 {
-  "_updatedAt": 1788906356826,
+  "_updatedAt": 1788906687913,
   "members": [
-    {
-      "id": "m0",
-      "name": "Allgemein",
-      "role": "Beisitzer",
-      "avatar": "👤",
-      "color": "#64748b",
-      "bgLight": "#64748b22"
-    },
     {
       "id": "m1",
       "name": "Valentin Müllner",
@@ -22,8 +14,8 @@
       "name": "Linda Schweiger",
       "role": "2. Vorstand",
       "avatar": "👱‍♀️",
-      "color": "#06b6d4",
-      "bgLight": "#06b6d422"
+      "color": "#0284c7",
+      "bgLight": "#0284c722"
     },
     {
       "id": "m3",
@@ -38,8 +30,8 @@
       "name": "Moritz Kubik",
       "role": "2. Kassier",
       "avatar": "👨‍💻",
-      "color": "#00873D",
-      "bgLight": "rgba(0, 135, 61, 0.15)"
+      "color": "#16a34a",
+      "bgLight": "#16a34a22"
     },
     {
       "id": "m5",
@@ -54,56 +46,56 @@
       "name": "Rosa Krieglmeier",
       "role": "2. Schriftführer",
       "avatar": "📋",
-      "color": "#6366f1",
-      "bgLight": "#6366f122"
+      "color": "#4f46e5",
+      "bgLight": "#4f46e522"
     },
     {
       "id": "m7",
       "name": "Cassandra Wunner",
       "role": "Getränkewart",
       "avatar": "🍺",
-      "color": "#ef4444",
-      "bgLight": "#ef444422"
+      "color": "#dc2626",
+      "bgLight": "#dc262622"
     },
     {
       "id": "m8",
       "name": "Felix Premer",
       "role": "Beisitzer",
-      "avatar": "🎪",
-      "color": "#8b5cf6",
-      "bgLight": "#8b5cf622"
+      "avatar": "🛵",
+      "color": "#7c3aed",
+      "bgLight": "#7c3aed22"
     },
     {
       "id": "m9",
       "name": "Johannes Erhard",
       "role": "Beisitzer",
-      "avatar": "🌱",
-      "color": "#14b8a6",
-      "bgLight": "#14b8a622"
+      "avatar": "🎲",
+      "color": "#0d9488",
+      "bgLight": "#0d948822"
     },
     {
       "id": "m10",
       "name": "Dominique Zahn",
       "role": "Beisitzer",
       "avatar": "🔧",
-      "color": "#3b82f6",
-      "bgLight": "#3b82f622"
+      "color": "#2563eb",
+      "bgLight": "#2563eb22"
     },
     {
       "id": "m11",
       "name": "Michaela Grabmaier",
       "role": "Beisitzer",
-      "avatar": "📸",
-      "color": "#a855f7",
-      "bgLight": "#a855f722"
+      "avatar": "👩🏽‍⚕️",
+      "color": "#d97706",
+      "bgLight": "#d9770622"
     },
     {
       "id": "m12",
       "name": "Kilian Salai",
       "role": "Beisitzer",
-      "avatar": "🔊",
-      "color": "#f97316",
-      "bgLight": "#f9731622"
+      "avatar": "🚗",
+      "color": "#ea580c",
+      "bgLight": "#ea580c22"
     }
   ],
   "categories": [

@@ -19,9 +19,15 @@ let pendingProtectedTab = null;
 
 class App {
     static init() {
+        // Protected area (Finanzen, Verträge, Protokolle) is strictly locked by default
+        VaultGuard.lock();
+
         if (!AppAuth.isCentralUnlocked()) {
             AppAuth.renderCentralLockScreen(document.body, () => {
-                this.showMainApp();
+                VaultGuard.lock(); // Ensure strictly locked after master login
+                AppAuth.promptUserSelection(document.body, () => {
+                    this.showMainApp();
+                });
             });
         } else {
             this.showMainApp();
@@ -173,8 +179,12 @@ class App {
 
         // Lock / Logout Central App Button
         document.getElementById('lock-app-btn')?.addEventListener('click', () => {
+            VaultGuard.lock();
             AppAuth.lockCentral(document.body, () => {
-                this.showMainApp();
+                VaultGuard.lock();
+                AppAuth.promptUserSelection(document.body, () => {
+                    this.showMainApp();
+                });
             });
         });
 

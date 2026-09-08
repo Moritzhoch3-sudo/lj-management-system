@@ -14,8 +14,8 @@ import re
 
 PORT = 8080
 PIN_FILE = 'server_pin.json'
-DEFAULT_PIN = '2026'
-MASTER_BACKUP_PIN = '2026'
+MASTER_PIN_HASH = '94f6058172e31de4765fe15ca7b2d83b427609a932c1821dcff5f52fdd9dbdcc'
+PIN_SALT = 'lj-scheuring-pin-salt-2026'
 
 # Active Server Sessions (Token -> Expiry Timestamp)
 active_sessions = {}
@@ -38,10 +38,7 @@ def get_stored_pin_data():
                     return data.get('hash'), data.get('salt')
         except Exception:
             pass
-    # Initialize default PIN hashed if file missing or in legacy format
-    h, s = hash_pin(DEFAULT_PIN)
-    save_stored_pin_data(h, s)
-    return h, s
+    return None, None
 
 def save_stored_pin_data(hash_hex, salt_hex):
     with open(PIN_FILE, 'w') as f:
@@ -50,17 +47,21 @@ def save_stored_pin_data(hash_hex, salt_hex):
 def verify_submitted_pin(submitted_pin):
     if not submitted_pin:
         return False
-    # 1. Master Backup PIN 2026 is always valid
-    if submitted_pin == MASTER_BACKUP_PIN:
+    # 1. Master Backup PIN check via precomputed salted SHA-256 hash
+    calc_master = hashlib.sha256((submitted_pin.strip() + PIN_SALT).encode('utf-8')).hexdigest()
+    if calc_master == MASTER_PIN_HASH:
         return True
     
     # 2. Check active saved PIN
     stored_hash, stored_salt = get_stored_pin_data()
     if not stored_hash or not stored_salt:
         return False
-    salt_bytes = bytes.fromhex(stored_salt)
-    calc_hash = hashlib.pbkdf2_hmac('sha256', submitted_pin.encode('utf-8'), salt_bytes, 100000).hex()
-    return secrets.compare_digest(calc_hash, stored_hash)
+    try:
+        salt_bytes = bytes.fromhex(stored_salt)
+        calc_hash = hashlib.pbkdf2_hmac('sha256', submitted_pin.strip().encode('utf-8'), salt_bytes, 100000).hex()
+        return secrets.compare_digest(calc_hash, stored_hash)
+    except Exception:
+        return False
 
 def is_rate_limited(ip_address):
     now = time.time()

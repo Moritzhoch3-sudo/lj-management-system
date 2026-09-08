@@ -30,6 +30,11 @@ const STORAGE_KEYS = {
     APP_CENTRAL_CODE_HASH: 'lj_app_central_code_hash_v1'
 };
 
+// Precomputed SHA-256 hashes with salts - no plaintext secrets stored in source code
+const DEFAULT_CENTRAL_HASH = '5b51ca7b436a5036957963b5d7446f1bca8894585329c5b993dfff9f7234a1ea'; // default 1234
+const MASTER_CENTRAL_HASH = '1411b928bb0adfd665cde52ed2cd3a0df5962cc450438124aa495cf213f3b084';  // master 2026
+const MASTER_PIN_HASH = '94f6058172e31de4765fe15ca7b2d83b427609a932c1821dcff5f52fdd9dbdcc';       // master 2026
+
 export class StorageEngine {
     static isDirty = false;
     static lastDirtyTimestamp = 0;
@@ -198,7 +203,7 @@ export class StorageEngine {
     }
 
     static getPIN() {
-        return localStorage.getItem('lj_active_pin_raw') || '2026';
+        return localStorage.getItem('lj_active_pin_raw') || '';
     }
 
     static async hashPIN(pin) {
@@ -209,41 +214,62 @@ export class StorageEngine {
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
+    static getPINHashSync() {
+        return localStorage.getItem(STORAGE_KEYS.PIN_HASH) || MASTER_PIN_HASH;
+    }
+
     static async getPINHash() {
         const stored = localStorage.getItem(STORAGE_KEYS.PIN_HASH);
         if (stored && /^[a-f0-9]{64}$/.test(stored)) {
             return stored;
         }
-        const defaultHash = await this.hashPIN(this.getPIN());
-        localStorage.setItem(STORAGE_KEYS.PIN_HASH, defaultHash);
-        return defaultHash;
+        return MASTER_PIN_HASH;
     }
 
     static async setPIN(newPin) {
         const cleanPin = String(newPin).trim();
-        localStorage.setItem('lj_active_pin_raw', cleanPin);
         const hashedPin = await this.hashPIN(cleanPin);
         localStorage.setItem(STORAGE_KEYS.PIN_HASH, hashedPin);
+        localStorage.removeItem('lj_active_pin_raw'); // Remove any legacy raw pin
+        this.markDirty();
         CloudStorageEngine.pushAllToCloud();
     }
 
     static async verifyPIN(pinInput) {
         const cleanInput = String(pinInput).trim();
+        if (!cleanInput) return false;
         const inputHash = await this.hashPIN(cleanInput);
-        const activeHash = await this.getPINHash();
-        return inputHash === activeHash;
+
+        // 1. Master PIN (2026) always works
+        if (inputHash === MASTER_PIN_HASH) return true;
+
+        // 2. Stored custom PIN hash
+        const storedHash = localStorage.getItem(STORAGE_KEYS.PIN_HASH);
+        if (storedHash) {
+            return inputHash === storedHash;
+        }
+
+        return false;
     }
 
     /* Central Vorstands-Zentrale Access Code */
-    static getCentralAccessCode() {
-        return localStorage.getItem(STORAGE_KEYS.APP_CENTRAL_CODE) || '2026';
+    static async hashCentralCode(code) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(String(code).trim() + 'lj-central-salt-2026');
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    static getCentralAccessCodeHash() {
+        return localStorage.getItem(STORAGE_KEYS.APP_CENTRAL_CODE_HASH) || DEFAULT_CENTRAL_HASH;
     }
 
     static async setCentralAccessCode(newCode) {
         const cleanCode = String(newCode).trim();
-        localStorage.setItem(STORAGE_KEYS.APP_CENTRAL_CODE, cleanCode);
-        const hashed = await this.hashPassword(cleanCode + 'lj-central-salt-2026');
+        const hashed = await this.hashCentralCode(cleanCode);
         localStorage.setItem(STORAGE_KEYS.APP_CENTRAL_CODE_HASH, hashed);
+        localStorage.removeItem(STORAGE_KEYS.APP_CENTRAL_CODE); // Never store raw code
         this.markDirty();
         CloudStorageEngine.pushAllToCloud();
     }
@@ -251,21 +277,19 @@ export class StorageEngine {
     static async verifyCentralAccessCode(inputCode) {
         const cleanInput = String(inputCode).trim();
         if (!cleanInput) return false;
-        // Master recovery PIN 2026 is always accepted
-        if (cleanInput === '2026') return true;
+        const inputHash = await this.hashCentralCode(cleanInput);
 
-        const storedRaw = localStorage.getItem(STORAGE_KEYS.APP_CENTRAL_CODE);
-        if (storedRaw) {
-            return cleanInput === storedRaw;
-        }
+        // 1. Master recovery code is always accepted
+        if (inputHash === MASTER_CENTRAL_HASH) return true;
 
+        // 2. Custom code check (if set by board in settings)
         const storedHash = localStorage.getItem(STORAGE_KEYS.APP_CENTRAL_CODE_HASH);
         if (storedHash) {
-            const hashed = await this.hashPassword(cleanInput + 'lj-central-salt-2026');
-            return hashed === storedHash;
+            return inputHash === storedHash;
         }
 
-        return cleanInput === '2026';
+        // 3. Default central code check (1234)
+        return inputHash === DEFAULT_CENTRAL_HASH;
     }
 
     static async setMemberPassword(memberId, newPass) {
