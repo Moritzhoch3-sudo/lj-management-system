@@ -1895,49 +1895,74 @@ tr:hover td {
         justify-content: center;
     }
 
-    /* 4. Tasks Toolbar & Dropdown Filters */
+    /* 4. Tasks Toolbar & Dropdown Filters (Full Width, Perfectly Aligned) */
     .tasks-action-bar {
-        flex-direction: column;
+        flex-direction: column !important;
         align-items: stretch !important;
         padding: 0.85rem 1rem !important;
-        gap: 0.75rem !important;
+        gap: 0.65rem !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
     .tasks-action-bar .search-box {
         width: 100% !important;
-        min-width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    .tasks-action-bar .search-box input {
+        width: 100% !important;
+        min-width: 0 !important;
+        flex: 1 !important;
+        box-sizing: border-box !important;
     }
     .filter-controls {
         width: 100% !important;
-        display: flex;
-        flex-wrap: wrap;
+        display: flex !important;
+        flex-direction: column !important;
         gap: 0.5rem !important;
-        justify-content: space-between;
     }
     .custom-inapp-dropdown {
-        flex: 1 1 calc(50% - 0.25rem) !important;
-        min-width: 135px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
     }
     .custom-inapp-trigger {
-        height: 36px !important;
-        padding: 0 0.65rem !important;
-        font-size: 0.82rem !important;
+        width: 100% !important;
+        height: 38px !important;
+        padding: 0 0.85rem !important;
+        font-size: 0.84rem !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
     }
     .custom-inapp-menu {
         max-width: calc(100vw - 2rem);
         min-width: 220px !important;
     }
     .view-toggle-btns {
-        margin-left: 0;
-        flex: 1 1 auto;
-        justify-content: center;
+        width: 100% !important;
+        display: flex !important;
+        gap: 0.45rem !important;
+        margin: 0 !important;
+    }
+    .view-toggle-btns .btn {
+        flex: 1 1 0 !important;
+        justify-content: center !important;
+        text-align: center !important;
+        padding: 0.45rem 0.75rem !important;
+        font-size: 0.82rem !important;
     }
     .delete-completed-btn {
         width: 100% !important;
-        text-align: center;
-        justify-content: center;
-        padding: 0.45rem 0.75rem !important;
-        font-size: 0.8rem !important;
-        border-radius: 8px !important;
+        text-align: center !important;
+        justify-content: center !important;
+        padding: 0.48rem 0.75rem !important;
+        font-size: 0.82rem !important;
+        border-radius: 10px !important;
+        box-sizing: border-box !important;
     }
 
     /* 5. Person Task Cards & Header (Strict Boundary Constraints) */

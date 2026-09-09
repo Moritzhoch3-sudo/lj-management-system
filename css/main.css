@@ -326,6 +326,12 @@ html, body {
     gap: 0.85rem;
 }
 
+.topbar-action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
 .user-selector-container {
     position: relative;
 }
@@ -718,6 +724,11 @@ html, body {
         display: none !important;
     }
 
+    /* Hide redundant "Angemeldet als:" label on mobile so username is never clipped */
+    .user-selector-label {
+        display: none !important;
+    }
+
     .topbar-right {
         width: 100% !important;
         display: flex !important;
@@ -725,6 +736,41 @@ html, body {
         justify-content: space-between !important;
         flex-wrap: wrap !important;
         gap: 0.45rem !important;
+    }
+
+    #autosave-status-badge {
+        font-size: 0.76rem !important;
+        padding: 0.3rem 0.6rem !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+    }
+
+    .user-selector-container {
+        flex: 0 1 auto !important;
+        max-width: calc(100% - 130px) !important;
+    }
+
+    .user-selector-trigger {
+        padding: 0.3rem 0.6rem !important;
+        gap: 0.45rem !important;
+    }
+
+    .topbar-action-buttons {
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.35rem !important;
+        margin-top: 0.15rem !important;
+    }
+
+    .topbar-action-buttons .btn {
+        flex: 1 1 0 !important;
+        justify-content: center !important;
+        text-align: center !important;
+        padding: 0.38rem 0.5rem !important;
+        font-size: 0.78rem !important;
+        white-space: nowrap !important;
+        box-sizing: border-box !important;
     }
 
     .main-container {
