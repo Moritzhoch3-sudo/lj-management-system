@@ -83,7 +83,7 @@ export class StorageEngine {
         const cleaned = filterRealMembers(members);
         localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(cleaned));
         this.markDirty();
-        CloudStorageEngine.pushAllToCloud();
+        CloudStorageEngine.scheduleImmediatePush();
     }
 
     static getCategories() {
@@ -94,7 +94,7 @@ export class StorageEngine {
     static saveCategories(categories) {
         localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
         this.markDirty();
-        CloudStorageEngine.pushAllToCloud();
+        CloudStorageEngine.scheduleImmediatePush();
     }
 
     static getTasks() {
@@ -109,8 +109,8 @@ export class StorageEngine {
 
         if (!tasks) {
             const fallbackKeys = ['lj_tasks_v4_live', 'lj_tasks_v3_11', 'lj_tasks_v3'];
-            for (const k of fallbackKeys) {
-                const fallbackRaw = localStorage.getItem(k);
+            for (const fk of fallbackKeys) {
+                const fallbackRaw = localStorage.getItem(fk);
                 if (fallbackRaw) {
                     try {
                         const parsed = JSON.parse(fallbackRaw);
@@ -141,10 +141,30 @@ export class StorageEngine {
         return cleanedTasks;
     }
 
+    static getDeletedTaskIds() {
+        try {
+            const raw = localStorage.getItem('lj_deleted_task_ids_v1');
+            return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    static markTaskDeleted(taskId) {
+        if (!taskId) return;
+        try {
+            const ids = this.getDeletedTaskIds();
+            if (!ids.includes(taskId)) {
+                ids.push(taskId);
+                localStorage.setItem('lj_deleted_task_ids_v1', JSON.stringify(ids));
+            }
+        } catch (e) {}
+    }
+
     static saveTasks(tasks) {
         localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
         this.markDirty();
-        CloudStorageEngine.pushAllToCloud();
+        CloudStorageEngine.scheduleImmediatePush();
     }
 
     static getFinances() {
@@ -155,7 +175,7 @@ export class StorageEngine {
     static saveFinances(finances) {
         localStorage.setItem(STORAGE_KEYS.FINANCES, JSON.stringify(finances));
         this.markDirty();
-        CloudStorageEngine.pushAllToCloud();
+        CloudStorageEngine.scheduleImmediatePush();
     }
 
     static getContracts() {
@@ -166,7 +186,7 @@ export class StorageEngine {
     static saveContracts(contracts) {
         localStorage.setItem(STORAGE_KEYS.CONTRACTS, JSON.stringify(contracts));
         this.markDirty();
-        CloudStorageEngine.pushAllToCloud();
+        CloudStorageEngine.scheduleImmediatePush();
     }
 
     static getMinutes() {
@@ -177,7 +197,7 @@ export class StorageEngine {
     static saveMinutes(minutes) {
         localStorage.setItem(STORAGE_KEYS.MINUTES, JSON.stringify(minutes));
         this.markDirty();
-        CloudStorageEngine.pushAllToCloud();
+        CloudStorageEngine.scheduleImmediatePush();
     }
 
     static getMemberPasswords() {

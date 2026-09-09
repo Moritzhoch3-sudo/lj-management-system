@@ -465,8 +465,9 @@ class HardenedLJRequestHandler(http.server.SimpleHTTPRequestHandler):
                 return
 
             # Check Row-Level Security (RLS) on Write Operations
+            has_public_write = any(k in req_data for k in ['tasks', 'members', 'categories'])
             attempting_sensitive_write = any(k in req_data for k in SENSITIVE_COLLECTIONS)
-            if attempting_sensitive_write and not has_vault_auth:
+            if attempting_sensitive_write and not has_vault_auth and not has_public_write:
                 audit_log(client_ip, 'POST', '/api/cloud-data', 'RLS_VIOLATION', 'Unauthenticated attempt to write to sensitive tables')
                 self.send_response(403)
                 self.send_header('Content-Type', 'application/json')

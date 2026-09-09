@@ -234,7 +234,8 @@ export class AppAuth {
         modalBackdrop.style.cssText = `
             position: fixed;
             inset: 0;
-            width: 100vw;
+            width: 100%;
+            max-width: 100vw;
             height: 100vh;
             z-index: 100001;
             background: rgba(15, 23, 42, 0.75);
@@ -246,6 +247,7 @@ export class AppAuth {
             padding: 1.25rem;
             box-sizing: border-box;
             overflow-y: auto;
+            overflow-x: hidden;
             font-family: 'Plus Jakarta Sans', sans-serif;
             animation: fadeIn 0.2s ease-out;
         `;

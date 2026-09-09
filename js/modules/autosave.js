@@ -169,48 +169,55 @@ export class AutoSaveEngine {
 
         if (forceState === 'saving') {
             badge.className = 'autosave-badge autosave-saving';
-            badge.innerHTML = `<span>🔄</span> <span>Speichert...</span>`;
-            badge.title = 'Automatische 5-Minuten-Speicherung läuft...';
+            badge.innerHTML = `<span>🔄</span> <span>Synchronisiere...</span>`;
+            badge.title = 'Live-Synchronisation mit allen Geräten läuft...';
             return;
         }
 
         if (forceState === 'saved') {
             badge.className = 'autosave-badge autosave-saved';
-            badge.innerHTML = `<span>💾</span> <span>Automatisch gesichert (${timeStr})</span>`;
-            badge.title = `Erfolgreich um ${timeStr} gesichert. Nächster Prüfzyklus in ca. 5 Min.`;
+            badge.innerHTML = `<span>💾</span> <span>Synchronisiert (${timeStr})</span>`;
+            badge.title = `Erfolgreich um ${timeStr} mit allen Geräten synchronisiert. Keine Daten gehen verloren.`;
+            return;
+        }
+
+        if (forceState === 'offline') {
+            badge.className = 'autosave-badge autosave-inactive';
+            badge.innerHTML = `<span>🟡</span> <span>Lokal gesichert</span>`;
+            badge.title = 'Änderungen sind lokal sicher im Speicher. Werden synchronisiert, sobald eine Verbindung besteht.';
             return;
         }
 
         if (forceState === 'hidden') {
             badge.className = 'autosave-badge autosave-hidden';
             badge.innerHTML = `<span>⏸️</span> <span>Hintergrund (Pause)</span>`;
-            badge.title = 'Browser-Tab ist im Hintergrund. Automatische Speicherung und Abfragen pausiert.';
+            badge.title = 'Browser-Tab ist im Hintergrund. Automatische Speicherung pausiert.';
             return;
         }
 
         if (forceState === 'not_logged_in') {
             badge.className = 'autosave-badge autosave-inactive';
             badge.innerHTML = `<span>🔒</span> <span>Nicht angemeldet</span>`;
-            badge.title = 'Kein Vorstandsmitglied ausgewählt. Auto-Save pausiert.';
+            badge.title = 'Kein Vorstandsmitglied ausgewählt.';
             return;
         }
 
         if (forceState === 'inactive' || !this.isEligibleToSave()) {
             badge.className = 'autosave-badge autosave-inactive';
             badge.innerHTML = `<span>💤</span> <span>Inaktiv (Pause)</span>`;
-            badge.title = 'Keine Benutzeraktivität seit über 5 Minuten. Automatische Speicherung pausiert bis zur nächsten Interaktion.';
+            badge.title = 'Keine Benutzeraktivität seit über 5 Minuten. Reaktiviert sich sofort bei Tastendruck oder Berührung.';
             return;
         }
 
         // Active state
         if (StorageEngine.isDirty) {
             badge.className = 'autosave-badge autosave-dirty';
-            badge.innerHTML = `<span>⏳</span> <span>Änderungen erfasst (Auto-Save 5m)</span>`;
-            badge.title = 'Lokale Änderungen erfasst. Werden im 5-Minuten-Intervall bei Aktivität automatisch gesichert.';
+            badge.innerHTML = `<span>⏳</span> <span>Speichere...</span>`;
+            badge.title = 'Änderungen erfasst. Werden sofort mit allen Geräten synchronisiert.';
         } else {
             badge.className = 'autosave-badge autosave-clean';
-            badge.innerHTML = `<span>🟢</span> <span>Auto-Save aktiv (${timeStr})</span>`;
-            badge.title = `Alles synchron (${timeStr}). Nächste Speicherung bei Änderungen in ca. 5 Minuten.`;
+            badge.innerHTML = `<span>🟢</span> <span>Cloud-Sync aktiv (${timeStr})</span>`;
+            badge.title = `Alle Geräte live synchronisiert (${timeStr}). Keine Daten gehen verloren.`;
         }
     }
 }

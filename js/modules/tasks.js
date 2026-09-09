@@ -887,6 +887,7 @@ export class TasksModule {
             btn.addEventListener('click', (e) => {
                 const taskId = btn.dataset.taskId;
                 if (confirm('Aufgabe wirklich löschen?')) {
+                    StorageEngine.markTaskDeleted(taskId);
                     const updated = tasks.filter(t => t.id !== taskId);
                     StorageEngine.saveTasks(updated);
                     this.updateViewport(containerEl);
@@ -1133,6 +1134,7 @@ export class TasksModule {
         // Delete handler
         modal.querySelector('#modal-task-delete-btn').addEventListener('click', () => {
             if (confirm('Aufgabe wirklich löschen?')) {
+                StorageEngine.markTaskDeleted(taskId);
                 const currentTasks = StorageEngine.getTasks();
                 const updated = currentTasks.filter(t => t.id !== taskId);
                 StorageEngine.saveTasks(updated);
@@ -1267,6 +1269,8 @@ export class TasksModule {
 
         modal.querySelector('#confirm-delete-completed-btn')?.addEventListener('click', () => {
             const currentTasks = StorageEngine.getTasks();
+            const completed = currentTasks.filter(t => t.status === 'erledigt');
+            completed.forEach(t => StorageEngine.markTaskDeleted(t.id));
             const remaining = currentTasks.filter(t => t.status !== 'erledigt');
             StorageEngine.saveTasks(remaining);
             closeModal();
