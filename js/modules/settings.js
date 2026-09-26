@@ -29,7 +29,7 @@ export class SettingsModule {
                             </div>
                             
                             <!-- Segmented Pill Button Group matching Dashboard / Tasks controls -->
-                            <div class="settings-nav-pill-group d-flex align-items-center gap-1.5 p-1" style="background: var(--bg-canvas); border: 1px solid var(--border-medium); border-radius: 12px;">
+                            <div class="settings-nav-pill-group">
                                 <button type="button" class="sub-tab-btn ${activeSubTab === 'members' ? 'active' : ''}" data-subtab="members">
                                     👥 Mitglieder (${members.length})
                                 </button>
@@ -37,7 +37,7 @@ export class SettingsModule {
                                     🏷️ Kategorien (${categories.length})
                                 </button>
                                 <button type="button" class="sub-tab-btn ${activeSubTab === 'security' ? 'active' : ''}" data-subtab="security">
-                                    🔒 Sicherheit & Passwörter
+                                    🔒 Sicherheit<span class="d-none d-sm-inline"> & Passwörter</span>
                                 </button>
                             </div>
                         </div>
@@ -75,46 +75,46 @@ export class SettingsModule {
                         <button class="btn btn-donezo-primary btn-sm" id="add-member-inline-btn">➕ Neues Mitglied</button>
                     </div>
 
-                    <div class="table-responsive">
-                        <table class="settings-table clean-tasks-table w-100">
-                            <thead>
-                                <tr>
-                                    <th style="width: 54px;">Icon</th>
-                                    <th>Name des Mitglieds</th>
-                                    <th style="width: 240px;">Vorstandsposition / Amt</th>
-                                    <th style="width: 120px;">Kennfarbe</th>
-                                    <th style="width: 50px; text-align: center;">Aktion</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${members.map(m => `
-                                    <tr data-member-id="${m.id}" class="member-inline-row">
-                                        <td>
+                    <div class="settings-members-container">
+                        <div class="settings-members-header">
+                            <div class="sm-col-icon">Icon</div>
+                            <div class="sm-col-name">Name des Mitglieds</div>
+                            <div class="sm-col-role">Vorstandsposition / Amt</div>
+                            <div class="sm-col-color text-center">Kennfarbe</div>
+                            <div class="sm-col-action text-center">Aktion</div>
+                        </div>
+                        <div class="settings-members-list d-flex flex-column gap-2">
+                            ${members.map(m => `
+                                <div data-member-id="${m.id}" class="member-inline-row">
+                                    <div class="member-row-top">
+                                        <div class="member-col-avatar">
                                             <input type="text" class="form-control form-control-sm inline-avatar-input" value="${escapeHTML(m.avatar || '👤')}" />
-                                        </td>
-                                        <td>
+                                        </div>
+                                        <div class="member-col-name">
                                             <input type="text" class="form-control form-control-sm inline-name-input" value="${escapeHTML(m.name || '')}" placeholder="Name eingeben..." />
-                                        </td>
-                                        <td>
+                                        </div>
+                                        <div class="member-col-action text-center">
+                                            <button class="btn btn-sm btn-ghost danger-text delete-member-btn" data-id="${m.id}" title="Mitglied löschen">🗑️</button>
+                                        </div>
+                                    </div>
+                                    <div class="member-row-bottom">
+                                        <div class="member-col-role">
                                             <select class="form-select form-select-sm inline-role-select">
                                                 ${BOARD_ROLE_OPTIONS.map(r => `
                                                     <option value="${r}" ${m.role && (m.role.startsWith(r) || m.role.includes(r)) ? 'selected' : ''}>${r}</option>
                                                 `).join('')}
                                                 <option value="${escapeHTML(m.role || '')}" ${!BOARD_ROLE_OPTIONS.some(r => m.role && m.role.startsWith(r)) ? 'selected' : ''}>Sonstiges (${escapeHTML(m.role || 'Mitglied')})</option>
                                             </select>
-                                        </td>
-                                        <td>
+                                        </div>
+                                        <div class="member-col-color">
                                             <div class="color-tile-swatch" style="background-color: ${m.color || '#10b981'};" title="Klicken, um Farbe zu ändern">
                                                 <input type="color" class="inline-color-input color-picker-overlay" value="${m.color || '#10b981'}" />
                                             </div>
-                                        </td>
-                                        <td class="text-center">
-                                            <button class="btn btn-sm btn-ghost danger-text delete-member-btn" data-id="${m.id}" title="Mitglied löschen">🗑️</button>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
             `;
@@ -126,31 +126,27 @@ export class SettingsModule {
                         <button class="btn btn-donezo-primary btn-sm" id="add-category-btn">➕ Neue Kategorie</button>
                     </div>
 
-                    <div class="table-responsive">
-                        <table class="settings-table clean-tasks-table w-100">
-                            <thead>
-                                <tr>
-                                    <th style="width: 70px; text-align: center;">Icon</th>
-                                    <th>Kategorie-Name</th>
-                                    <th style="width: 60px; text-align: center;">Aktion</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${categories.map(c => `
-                                    <tr data-cat-id="${c.id}" class="category-inline-row">
-                                        <td style="text-align: center;">
-                                            <input type="text" class="form-control form-control-sm cat-icon-input" value="${escapeHTML(c.icon || '📁')}" style="text-align: center; font-size: 1.15rem; width: 48px; margin: 0 auto;" />
-                                        </td>
-                                        <td>
-                                            <input type="text" class="form-control form-control-sm cat-name-input" value="${escapeHTML(c.name || '')}" placeholder="Kategorie Name..." />
-                                        </td>
-                                        <td class="text-center">
-                                            <button class="btn btn-sm btn-ghost danger-text delete-cat-btn" data-id="${c.id}" title="Kategorie löschen">🗑️</button>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
+                    <div class="settings-categories-container">
+                        <div class="settings-categories-header">
+                            <div class="sc-col-icon text-center">Icon</div>
+                            <div class="sc-col-name">Kategorie-Name</div>
+                            <div class="sc-col-action text-center">Aktion</div>
+                        </div>
+                        <div class="settings-categories-list d-flex flex-column gap-2">
+                            ${categories.map(c => `
+                                <div data-cat-id="${c.id}" class="category-inline-row">
+                                    <div class="cat-col-icon">
+                                        <input type="text" class="form-control form-control-sm cat-icon-input" value="${escapeHTML(c.icon || '📁')}" style="text-align: center; font-size: 1.15rem; width: 44px; margin: 0 auto;" />
+                                    </div>
+                                    <div class="cat-col-name">
+                                        <input type="text" class="form-control form-control-sm cat-name-input" value="${escapeHTML(c.name || '')}" placeholder="Kategorie Name..." />
+                                    </div>
+                                    <div class="cat-col-action text-center">
+                                        <button class="btn btn-sm btn-ghost danger-text delete-cat-btn" data-id="${c.id}" title="Kategorie löschen">🗑️</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
             `;

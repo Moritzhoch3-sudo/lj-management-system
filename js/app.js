@@ -57,10 +57,12 @@ class App {
         const currentUserId = StorageEngine.getCurrentUserId();
         const currentUser = members.find(m => m.id === currentUserId) || members[0];
 
-        // Update Topbar User Selector Button Display
+        // Update Topbar & Mobile User Selector Button Display
         const avatarEl = document.getElementById('current-user-avatar');
         const nameEl = document.getElementById('current-user-name');
         const roleEl = document.getElementById('current-user-role');
+        const mobAvatarEl = document.getElementById('mobile-user-avatar');
+        const mobNameEl = document.getElementById('mobile-user-name');
 
         if (currentUser) {
             if (avatarEl) avatarEl.textContent = currentUser.avatar || '👤';
@@ -68,6 +70,11 @@ class App {
             if (roleEl) {
                 roleEl.textContent = currentUser.role || 'Landjugend Scheuring';
                 roleEl.style.color = currentUser.color || '#10b981';
+            }
+            if (mobAvatarEl) mobAvatarEl.textContent = currentUser.avatar || '👤';
+            if (mobNameEl) {
+                const firstName = (currentUser.name || 'Vorstand').split(' ')[0];
+                mobNameEl.textContent = firstName;
             }
         }
 
@@ -186,8 +193,21 @@ class App {
             });
         });
 
+        // Mobile User Chip Trigger (Prompt user selection modal on mobile)
+        const mobUserChipBtn = document.getElementById('mobile-user-chip-btn');
+        if (mobUserChipBtn && !mobUserChipBtn._hasListener) {
+            mobUserChipBtn._hasListener = true;
+            mobUserChipBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                AppAuth.promptUserSelection(document.body, () => {
+                    this.renderNavbar();
+                    this.switchTab(activeTab);
+                });
+            });
+        }
+
         // Lock / Logout Central App Button
-        document.getElementById('lock-app-btn')?.addEventListener('click', () => {
+        const handleLockApp = () => {
             VaultGuard.lock();
             AppAuth.lockCentral(document.body, () => {
                 VaultGuard.lock();
@@ -195,17 +215,32 @@ class App {
                     this.showMainApp();
                 });
             });
+        };
+        document.getElementById('lock-app-btn')?.addEventListener('click', handleLockApp);
+        document.getElementById('mobile-lock-app-btn')?.addEventListener('click', () => {
+            this.toggleMobileMenu(false);
+            handleLockApp();
         });
 
         // Backup & Reset Buttons
-        document.getElementById('export-backup-btn')?.addEventListener('click', () => {
+        const handlePdfOverview = () => {
             PdfReportModule.openPdfOverview();
+        };
+        document.getElementById('export-backup-btn')?.addEventListener('click', handlePdfOverview);
+        document.getElementById('mobile-export-backup-btn')?.addEventListener('click', () => {
+            this.toggleMobileMenu(false);
+            handlePdfOverview();
         });
 
-        document.getElementById('reset-data-btn')?.addEventListener('click', () => {
+        const handleResetData = () => {
             if (confirm('Achtung: Auf Standarddaten zurücksetzen? Alle Änderungen gehen verloren.')) {
                 StorageEngine.resetToDefaults();
             }
+        };
+        document.getElementById('reset-data-btn')?.addEventListener('click', handleResetData);
+        document.getElementById('mobile-reset-data-btn')?.addEventListener('click', () => {
+            this.toggleMobileMenu(false);
+            handleResetData();
         });
 
         // Custom Navigation Event from Dashboard Cards

@@ -400,27 +400,31 @@ export class TasksModule {
 
                             <!-- DIRECT INLINE QUICK-ADD INPUT ROW -->
                             <div class="card-inline-add-bar mb-3 p-3" style="background: #ffffff; border: 1px solid var(--border-medium); border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-                                <form class="inline-quick-add-form d-flex align-items-center gap-2 flex-wrap" data-member-id="${m.id}">
-                                    <input type="text" class="form-control form-control-sm quick-task-title-input" placeholder="➕ Neue Aufgabe direkt für ${escapeHTML(m.name.split(' ')[0])} eingeben..." required style="flex: 1; min-width: 200px; font-size: 0.88rem; padding: 0.45rem 0.75rem; background: #ffffff; color: var(--text-primary);" />
+                                <form class="inline-quick-add-form" data-member-id="${m.id}">
+                                    <div class="quick-add-row-title">
+                                        <input type="text" class="form-control form-control-sm quick-task-title-input" placeholder="➕ Neue Aufgabe für ${escapeHTML(m.name.split(' ')[0])} eingeben..." required />
+                                    </div>
                                     
-                                    <select class="form-select form-select-sm quick-task-cat-select" style="max-width: 160px; font-size: 0.84rem; padding: 0.45rem 0.65rem; background: #ffffff; color: var(--text-primary);">
-                                        <option value="" ${!lastCat ? 'selected' : ''} ${!lastCat ? 'disabled' : ''}>-- Kategorie --</option>
-                                        ${categories.map(c => `
-                                            <option value="${c.id}" ${lastCat === c.id ? 'selected' : ''}>
-                                                ${c.icon} ${c.name}
-                                            </option>
-                                        `).join('')}
-                                    </select>
+                                    <div class="quick-add-row-details">
+                                        <select class="form-select form-select-sm quick-task-cat-select">
+                                            <option value="" ${!lastCat ? 'selected' : ''} ${!lastCat ? 'disabled' : ''}>-- Kategorie --</option>
+                                            ${categories.map(c => `
+                                                <option value="${c.id}" ${lastCat === c.id ? 'selected' : ''}>
+                                                    ${c.icon} ${c.name}
+                                                </option>
+                                            `).join('')}
+                                        </select>
 
-                                    <select class="form-select form-select-sm quick-task-prio-select" style="max-width: 110px; font-size: 0.84rem; padding: 0.45rem 0.65rem; background: #ffffff; color: var(--text-primary);">
-                                        <option value="hoch">🔴 Hoch</option>
-                                        <option value="mittel" selected>🟡 Mittel</option>
-                                        <option value="niedrig">🟢 Niedrig</option>
-                                    </select>
+                                        <select class="form-select form-select-sm quick-task-prio-select">
+                                            <option value="hoch">🔴 Hoch</option>
+                                            <option value="mittel" selected>🟡 Mittel</option>
+                                            <option value="niedrig">🟢 Niedrig</option>
+                                        </select>
 
-                                    <input type="date" class="form-control form-control-sm quick-task-date-input" style="max-width: 140px; font-size: 0.84rem; padding: 0.45rem 0.65rem; background: #ffffff; color: var(--text-primary);" />
+                                        <input type="date" class="form-control form-control-sm quick-task-date-input" aria-label="Fälligkeitsdatum" />
 
-                                    <button type="submit" class="btn btn-sm btn-donezo-primary text-nowrap" style="padding: 0.45rem 0.95rem; font-size: 0.85rem;">➕ Hinzufügen</button>
+                                        <button type="submit" class="btn btn-sm btn-donezo-primary quick-task-submit-btn text-nowrap">➕ Hinzufügen</button>
+                                    </div>
                                 </form>
                             </div>
 

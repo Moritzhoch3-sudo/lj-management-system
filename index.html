@@ -22,9 +22,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Stylesheets with v45.0 Cache-Buster Query Tags -->
-    <link rel="stylesheet" href="css/main.css?v=45.0">
-    <link rel="stylesheet" href="css/components.css?v=45.0">
+    <!-- Stylesheets with v46.0 Cache-Buster Query Tags -->
+    <link rel="stylesheet" href="css/main.css?v=46.0">
+    <link rel="stylesheet" href="css/components.css?v=46.0">
 </head>
 <body class="theme-donezo">
     <div class="app-layout">
@@ -40,9 +40,16 @@
                         <span class="brand-sub">Landjugend Scheuring</span>
                     </div>
                 </div>
-                <button type="button" class="mobile-menu-toggle-btn" id="mobile-menu-toggle-btn" aria-label="Menü öffnen" title="Menü ein-/ausklappen">
-                    <span class="hamburger-icon">☰</span>
-                </button>
+                <div class="sidebar-header-right d-flex align-items-center gap-1.5">
+                    <button type="button" class="mobile-user-chip" id="mobile-user-chip-btn" title="Vorstandsmitglied wechseln" aria-label="Vorstandsmitglied wechseln">
+                        <span id="mobile-user-avatar" class="mobile-user-avatar">👱‍♂️</span>
+                        <span id="mobile-user-name" class="mobile-user-name">Valentin</span>
+                        <span class="mobile-user-caret">▾</span>
+                    </button>
+                    <button type="button" class="mobile-menu-toggle-btn" id="mobile-menu-toggle-btn" aria-label="Menü öffnen" title="Menü ein-/ausklappen">
+                        <span class="hamburger-icon">☰</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Mobile Menübalken: Clean, Tappable Bar for Section Switching -->
@@ -80,6 +87,29 @@
                     <span class="nav-icon">⚙️</span>
                     <span class="nav-title">Einstellungen</span>
                 </button>
+
+                <!-- Mobile Drawer Only: System & Actions Section -->
+                <div class="mobile-drawer-system-section mt-3">
+                    <div class="nav-section-label">SYSTEM & AKTIONEN</div>
+                    <div class="mobile-drawer-sync-badge mb-2">
+                        <span class="sync-dot">🟢</span>
+                        <span class="sync-text">Cloud-Sync aktiv (Echtzeit)</span>
+                    </div>
+                    <div class="mobile-drawer-action-list d-flex flex-column gap-1.5">
+                        <button type="button" class="sidebar-nav-link" id="mobile-export-backup-btn">
+                            <span class="nav-icon">📄</span>
+                            <span class="nav-title">PDF / Backup</span>
+                        </button>
+                        <button type="button" class="sidebar-nav-link" id="mobile-lock-app-btn">
+                            <span class="nav-icon">🔒</span>
+                            <span class="nav-title">Zentrale sperren</span>
+                        </button>
+                        <button type="button" class="sidebar-nav-link danger-text" id="mobile-reset-data-btn">
+                            <span class="nav-icon">🔄</span>
+                            <span class="nav-title">Daten zurücksetzen</span>
+                        </button>
+                    </div>
+                </div>
             </nav>
         </aside>
 
@@ -138,6 +168,6 @@
     <!-- External Client-side PDF Generation Engine -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <!-- Application Script Engine -->
-    <script type="module" src="js/app.js?v=45.0"></script>
+    <script type="module" src="js/app.js?v=46.0"></script>
 </body>
 </html>
