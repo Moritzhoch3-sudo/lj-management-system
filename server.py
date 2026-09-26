@@ -36,7 +36,7 @@ SENSITIVE_COLLECTIONS = {'finances', 'contracts', 'minutes', 'pinHash', 'central
 
 # Strict Whitelist of allowed root keys in payloads (Anti-Field-Tampering)
 ALLOWED_PAYLOAD_KEYS = {
-    '_updatedAt', 'tasks', 'members', 'categories', 
+    '_updatedAt', 'tasks', 'members', 'categories', 'deletedTaskIds',
     'finances', 'contracts', 'minutes', 'pinHash', 'centralAccessCodeHash'
 }
 
@@ -486,16 +486,29 @@ class HardenedLJRequestHandler(http.server.SimpleHTTPRequestHandler):
                 except Exception:
                     existing_data = {}
 
+            # Process Tombstones (deletedTaskIds)
+            if 'deletedTaskIds' in req_data and isinstance(req_data['deletedTaskIds'], list):
+                combined = list(set(existing_data.get('deletedTaskIds', []) + req_data['deletedTaskIds']))
+                existing_data['deletedTaskIds'] = combined
+
+            deleted_set = set(existing_data.get('deletedTaskIds', []))
+
             if not has_vault_auth:
                 # Merge public fields while preserving sensitive vault fields
                 for k in ['tasks', 'members', 'categories']:
                     if k in req_data:
                         existing_data[k] = req_data[k]
-                existing_data['_updatedAt'] = int(time.time() * 1000)
-                data_to_write = existing_data
             else:
-                req_data['_updatedAt'] = int(time.time() * 1000)
-                data_to_write = req_data
+                for k in ALLOWED_PAYLOAD_KEYS:
+                    if k in req_data:
+                        existing_data[k] = req_data[k]
+
+            # Strictly prune any tasks that are marked deleted so they cannot resurrect
+            if 'tasks' in existing_data and isinstance(existing_data['tasks'], list):
+                existing_data['tasks'] = [t for t in existing_data['tasks'] if isinstance(t, dict) and t.get('id') not in deleted_set]
+
+            existing_data['_updatedAt'] = int(time.time() * 1000)
+            data_to_write = existing_data
 
             try:
                 with open('cloud_db.json', 'w', encoding='utf-8') as f:

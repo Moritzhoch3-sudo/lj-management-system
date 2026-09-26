@@ -6,7 +6,7 @@ const path = require('path');
 const PUBLIC_DB_KEY = process.env.PUBLIC_DB_KEY || 'lj_pub_2026_scheuring';
 const SENSITIVE_COLLECTIONS = ['finances', 'contracts', 'minutes', 'pinHash', 'centralAccessCodeHash'];
 const ALLOWED_PAYLOAD_KEYS = [
-    '_updatedAt', 'tasks', 'members', 'categories',
+    '_updatedAt', 'tasks', 'members', 'categories', 'deletedTaskIds',
     'finances', 'contracts', 'minutes', 'pinHash', 'centralAccessCodeHash'
 ];
 
@@ -180,6 +180,13 @@ module.exports = async (req, res) => {
             const currentDb = await getStoredData();
             payload._updatedAt = Date.now();
 
+            // 1. Process Tombstones (deletedTaskIds)
+            if (Array.isArray(payload.deletedTaskIds)) {
+                const combinedDeleted = Array.from(new Set([...(currentDb.deletedTaskIds || []), ...payload.deletedTaskIds]));
+                currentDb.deletedTaskIds = combinedDeleted;
+            }
+            const deletedSet = new Set(currentDb.deletedTaskIds || []);
+
             if (!hasVaultAuth) {
                 // Public caller (logged in with Central Access Code):
                 // Safely update public collections (tasks, members, categories) while preserving sensitive vault tables
@@ -188,8 +195,6 @@ module.exports = async (req, res) => {
                         currentDb[pubKey] = payload[pubKey];
                     }
                 }
-                currentDb._updatedAt = payload._updatedAt;
-                await persistData(currentDb);
             } else {
                 // Vault caller (authenticated with Master PIN / session):
                 // Full write access to all allowed collections
@@ -198,9 +203,15 @@ module.exports = async (req, res) => {
                         currentDb[key] = payload[key];
                     }
                 }
-                currentDb._updatedAt = payload._updatedAt;
-                await persistData(currentDb);
             }
+
+            // Purge any deleted tasks so they can NEVER resurrect
+            if (Array.isArray(currentDb.tasks)) {
+                currentDb.tasks = currentDb.tasks.filter(t => t && t.id && !deletedSet.has(t.id));
+            }
+
+            currentDb._updatedAt = payload._updatedAt;
+            await persistData(currentDb);
 
             return res.status(200).json({ success: true, _updatedAt: payload._updatedAt });
         } catch (e) {

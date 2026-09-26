@@ -1,7 +1,7 @@
 /**
  * Storage & State Persistence Engine (Supports Instant Single Active PIN Verification & Member Passwords)
  */
-import { INITIAL_MEMBERS, CATEGORIES, INITIAL_TASKS, INITIAL_FINANCES, INITIAL_CONTRACTS, INITIAL_MINUTES } from './data.js';
+import { INITIAL_MEMBERS, CATEGORIES, INITIAL_TASKS, INITIAL_DELETED_TASK_IDS, INITIAL_FINANCES, INITIAL_CONTRACTS, INITIAL_MINUTES } from './data.js';
 import { CloudStorageEngine } from './cloud-storage.js';
 
 export function escapeHTML(str) {
@@ -83,7 +83,7 @@ export class StorageEngine {
         const cleaned = filterRealMembers(members);
         localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(cleaned));
         this.markDirty();
-        CloudStorageEngine.scheduleImmediatePush();
+        CloudStorageEngine.scheduleImmediatePush({ members: cleaned });
     }
 
     static getCategories() {
@@ -94,7 +94,7 @@ export class StorageEngine {
     static saveCategories(categories) {
         localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
         this.markDirty();
-        CloudStorageEngine.scheduleImmediatePush();
+        CloudStorageEngine.scheduleImmediatePush({ categories });
     }
 
     static getTasks() {
@@ -126,6 +126,10 @@ export class StorageEngine {
 
         if (tasks === null) tasks = INITIAL_TASKS;
 
+        // Strictly filter out any task that has been marked deleted
+        const deletedIds = new Set(this.getDeletedTaskIds());
+        tasks = tasks.filter(t => t && t.id && !deletedIds.has(t.id));
+
         // Ensure no tasks point to deleted 'm0' / Allgemein
         let hasM0 = false;
         const cleanedTasks = tasks.map(t => {
@@ -144,13 +148,15 @@ export class StorageEngine {
     static getDeletedTaskIds() {
         try {
             const raw = localStorage.getItem('lj_deleted_task_ids_v1');
-            return raw ? JSON.parse(raw) : [];
+            const stored = raw ? JSON.parse(raw) : [];
+            const merged = Array.from(new Set([...(INITIAL_DELETED_TASK_IDS || []), ...(stored || [])]));
+            return merged;
         } catch (e) {
-            return [];
+            return INITIAL_DELETED_TASK_IDS || [];
         }
     }
 
-    static markTaskDeleted(taskId) {
+    static markTaskDeleted(taskId, shouldPush = true) {
         if (!taskId) return;
         try {
             const ids = this.getDeletedTaskIds();
@@ -158,13 +164,45 @@ export class StorageEngine {
                 ids.push(taskId);
                 localStorage.setItem('lj_deleted_task_ids_v1', JSON.stringify(ids));
             }
+            const currentTasks = (this.getTasks() || []).filter(t => t.id !== taskId);
+            localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(currentTasks));
+            if (shouldPush) {
+                this.markDirty();
+                CloudStorageEngine.scheduleImmediatePush({ tasks: currentTasks, deletedTaskIds: ids });
+            }
+        } catch (e) {}
+    }
+
+    static markTasksDeleted(taskIds, shouldPush = true) {
+        if (!Array.isArray(taskIds) || taskIds.length === 0) return;
+        try {
+            const ids = this.getDeletedTaskIds();
+            let changed = false;
+            for (const id of taskIds) {
+                if (id && !ids.includes(id)) {
+                    ids.push(id);
+                    changed = true;
+                }
+            }
+            if (changed) {
+                localStorage.setItem('lj_deleted_task_ids_v1', JSON.stringify(ids));
+                const delSet = new Set(ids);
+                const currentTasks = (this.getTasks() || []).filter(t => !delSet.has(t.id));
+                localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(currentTasks));
+                if (shouldPush) {
+                    this.markDirty();
+                    CloudStorageEngine.scheduleImmediatePush({ tasks: currentTasks, deletedTaskIds: ids });
+                }
+            }
         } catch (e) {}
     }
 
     static saveTasks(tasks) {
-        localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
+        const deletedIds = new Set(this.getDeletedTaskIds());
+        const cleaned = (tasks || []).filter(t => t && t.id && !deletedIds.has(t.id));
+        localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(cleaned));
         this.markDirty();
-        CloudStorageEngine.scheduleImmediatePush();
+        CloudStorageEngine.scheduleImmediatePush({ tasks: cleaned, deletedTaskIds: this.getDeletedTaskIds() });
     }
 
     static getFinances() {
@@ -175,7 +213,7 @@ export class StorageEngine {
     static saveFinances(finances) {
         localStorage.setItem(STORAGE_KEYS.FINANCES, JSON.stringify(finances));
         this.markDirty();
-        CloudStorageEngine.scheduleImmediatePush();
+        CloudStorageEngine.scheduleImmediatePush({ finances });
     }
 
     static getContracts() {
@@ -186,7 +224,7 @@ export class StorageEngine {
     static saveContracts(contracts) {
         localStorage.setItem(STORAGE_KEYS.CONTRACTS, JSON.stringify(contracts));
         this.markDirty();
-        CloudStorageEngine.scheduleImmediatePush();
+        CloudStorageEngine.scheduleImmediatePush({ contracts });
     }
 
     static getMinutes() {
@@ -197,7 +235,7 @@ export class StorageEngine {
     static saveMinutes(minutes) {
         localStorage.setItem(STORAGE_KEYS.MINUTES, JSON.stringify(minutes));
         this.markDirty();
-        CloudStorageEngine.scheduleImmediatePush();
+        CloudStorageEngine.scheduleImmediatePush({ minutes });
     }
 
     static getMemberPasswords() {
@@ -294,7 +332,7 @@ export class StorageEngine {
         localStorage.setItem(STORAGE_KEYS.APP_CENTRAL_CODE_HASH, hashed);
         localStorage.removeItem(STORAGE_KEYS.APP_CENTRAL_CODE); // Never store raw code
         this.markDirty();
-        CloudStorageEngine.pushAllToCloud();
+        CloudStorageEngine.scheduleImmediatePush({ centralAccessCodeHash: hashed });
     }
 
     static async verifyCentralAccessCode(inputCode) {
@@ -319,7 +357,6 @@ export class StorageEngine {
         const map = this.getMemberPasswords();
         map[memberId] = await this.hashPassword(String(newPass).trim());
         localStorage.setItem(STORAGE_KEYS.MEMBER_PASSWORDS, JSON.stringify(map));
-        CloudStorageEngine.pushAllToCloud();
     }
 
     static async verifyMemberPassword(memberId, passInput) {

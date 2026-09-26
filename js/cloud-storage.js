@@ -142,15 +142,22 @@ export class CloudStorageEngine {
         }
     }
 
+    static pendingPushPayload = {};
+
     /**
      * Debounced immediate push to cloud whenever a change is made locally
      */
-    static scheduleImmediatePush() {
+    static scheduleImmediatePush(partialPayload = null) {
         this.lastLocalMutationTimestamp = Date.now();
+        if (partialPayload && typeof partialPayload === 'object') {
+            Object.assign(this.pendingPushPayload, partialPayload);
+        }
         if (this.pushDebounceTimer) clearTimeout(this.pushDebounceTimer);
         this.pushDebounceTimer = setTimeout(() => {
-            this.pushAllToCloud();
-        }, 200);
+            const toPush = { ...this.pendingPushPayload };
+            this.pendingPushPayload = {};
+            this.pushAllToCloud(Object.keys(toPush).length > 0 ? toPush : null);
+        }, 150);
     }
 
     /**
@@ -237,68 +244,56 @@ export class CloudStorageEngine {
         const remoteTimestamp = cloudData._updatedAt || Date.now();
         let dataUpdated = false;
 
+        // 0. ADOPT TOMBSTONES FIRST (without re-pushing)
+        if (Array.isArray(cloudData.deletedTaskIds) && cloudData.deletedTaskIds.length > 0) {
+            StorageEngine.markTasksDeleted(cloudData.deletedTaskIds, false);
+        }
+        const deletedIds = new Set(StorageEngine.getDeletedTaskIds());
+
+        // Immediately purge any deleted tasks from localStorage directly
+        try {
+            const rawLocal = localStorage.getItem('lj_tasks_v3_12');
+            if (rawLocal) {
+                const parsed = JSON.parse(rawLocal);
+                if (Array.isArray(parsed)) {
+                    const filtered = parsed.filter(t => t && t.id && !deletedIds.has(t.id));
+                    if (filtered.length !== parsed.length) {
+                        localStorage.setItem('lj_tasks_v3_12', JSON.stringify(filtered));
+                    }
+                }
+            }
+        } catch (e) {}
+
         // 1. SMART MERGE & AUTO-REFRESH FOR TASKS (Zero Data Loss & Live Cross-Device Sync)
         if (Array.isArray(cloudData.tasks)) {
-            const localTasks = StorageEngine.getTasks() || [];
-            const isLocallyModifiedRecently = (Date.now() - this.lastLocalMutationTimestamp < 8000) || StorageEngine.isDirty;
-            const deletedIds = new Set(StorageEngine.getDeletedTaskIds());
+            // Cloud tasks strictly filtered of any tombstones
+            const cleanCloudTasks = cloudData.tasks.filter(t => t && t.id && !deletedIds.has(t.id));
 
-            if (!isLocallyModifiedRecently) {
-                // If local device has no active edits, remote cloud data is authoritative:
-                if (!this.areTasksIdentical(localTasks, cloudData.tasks)) {
-                    // Update localStorage with remote authoritative tasks
-                    localStorage.setItem('lj_tasks_v3_12', JSON.stringify(cloudData.tasks));
-                    dataUpdated = true;
+            // Clean local tasks of any tombstones
+            let localTasks = (StorageEngine.getTasks() || []).filter(t => t && t.id && !deletedIds.has(t.id));
 
-                    const taskHash = this.getTaskHash(cloudData.tasks);
-                    const lastReloadHash = sessionStorage.getItem('lj_last_reloaded_task_hash');
+            if (!this.areTasksIdentical(localTasks, cleanCloudTasks)) {
+                // Remote cloud data is authoritative: save to localStorage
+                localStorage.setItem('lj_tasks_v3_12', JSON.stringify(cleanCloudTasks));
+                dataUpdated = true;
 
-                    if (lastReloadHash !== taskHash) {
-                        sessionStorage.setItem('lj_last_reloaded_task_hash', taskHash);
-                        this.lastSyncTimestamp = remoteTimestamp;
+                const taskHash = this.getTaskHash(cleanCloudTasks);
+                const lastReloadHash = sessionStorage.getItem('lj_last_reloaded_task_hash');
 
-                        // Check if user is currently typing in an input
-                        const isTyping = Boolean(document.activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName));
-                        if (isTyping) {
-                            document.activeElement.addEventListener('blur', () => {
-                                window.location.reload();
-                            }, { once: true });
-                        } else {
+                if (lastReloadHash !== taskHash) {
+                    sessionStorage.setItem('lj_last_reloaded_task_hash', taskHash);
+                    this.lastSyncTimestamp = remoteTimestamp;
+
+                    // Check if user is currently typing in an input
+                    const isTyping = Boolean(document.activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName));
+                    if (isTyping) {
+                        document.activeElement.addEventListener('blur', () => {
                             window.location.reload();
-                            return;
-                        }
+                        }, { once: true });
+                    } else {
+                        window.location.reload();
+                        return;
                     }
-                }
-            } else {
-                // Local device made edits recently: smart merge so local additions are never lost
-                const localMap = new Map(localTasks.map(t => [t.id, t]));
-                let tasksChanged = false;
-
-                for (const rTask of cloudData.tasks) {
-                    if (!rTask || !rTask.id || deletedIds.has(rTask.id)) continue;
-                    const lTask = localMap.get(rTask.id);
-                    if (!lTask) {
-                        localTasks.unshift(rTask);
-                        localMap.set(rTask.id, rTask);
-                        tasksChanged = true;
-                    } else if (remoteTimestamp > this.lastLocalMutationTimestamp) {
-                        if (JSON.stringify(lTask) !== JSON.stringify(rTask)) {
-                            Object.assign(lTask, rTask);
-                            tasksChanged = true;
-                        }
-                    }
-                }
-
-                // Check if local has tasks that cloud lacks -> push immediately
-                const cloudTaskIds = new Set(cloudData.tasks.map(t => t.id));
-                const localOnlyTasks = localTasks.filter(t => !cloudTaskIds.has(t.id) && !deletedIds.has(t.id));
-                if (localOnlyTasks.length > 0) {
-                    this.scheduleImmediatePush();
-                }
-
-                if (tasksChanged) {
-                    localStorage.setItem('lj_tasks_v3_12', JSON.stringify(localTasks));
-                    dataUpdated = true;
                 }
             }
         }
@@ -363,7 +358,7 @@ export class CloudStorageEngine {
     /**
      * Push all local changes to the cloud immediately with proper authorization filtering
      */
-    static async pushAllToCloud() {
+    static async pushAllToCloud(scopedPayload = null) {
         this.updateStatus('syncing', '🔄 Synchronisiere...');
         if (window.AutoSaveEngine && typeof window.AutoSaveEngine.updateBadge === 'function') {
             window.AutoSaveEngine.updateBadge('saving');
@@ -371,21 +366,28 @@ export class CloudStorageEngine {
 
         const vaultToken = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('backend_vault_token') : null;
 
-        // Base payload: public collections only, avoiding unauthorized RLS 403 blocks
-        const payload = {
-            _updatedAt: Date.now(),
-            members: StorageEngine.getMembers(),
-            categories: StorageEngine.getCategories(),
-            tasks: StorageEngine.getTasks()
-        };
-
-        // Only include sensitive collections when user is authorized in the Vault
-        if (vaultToken) {
-            payload.finances = StorageEngine.getFinances();
-            payload.contracts = StorageEngine.getContracts();
-            payload.minutes = StorageEngine.getMinutes();
-            payload.pinHash = StorageEngine.getPINHashSync();
-            payload.centralAccessCodeHash = StorageEngine.getCentralAccessCodeHash();
+        let payload;
+        if (scopedPayload && typeof scopedPayload === 'object' && Object.keys(scopedPayload).length > 0) {
+            payload = {
+                _updatedAt: Date.now(),
+                ...scopedPayload
+            };
+        } else {
+            // Full baseline payload
+            payload = {
+                _updatedAt: Date.now(),
+                members: StorageEngine.getMembers(),
+                categories: StorageEngine.getCategories(),
+                tasks: StorageEngine.getTasks(),
+                deletedTaskIds: StorageEngine.getDeletedTaskIds()
+            };
+            if (vaultToken) {
+                payload.finances = StorageEngine.getFinances();
+                payload.contracts = StorageEngine.getContracts();
+                payload.minutes = StorageEngine.getMinutes();
+                payload.pinHash = StorageEngine.getPINHashSync();
+                payload.centralAccessCodeHash = StorageEngine.getCentralAccessCodeHash();
+            }
         }
 
         this.lastSyncTimestamp = payload._updatedAt;

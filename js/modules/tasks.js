@@ -1270,7 +1270,8 @@ export class TasksModule {
         modal.querySelector('#confirm-delete-completed-btn')?.addEventListener('click', () => {
             const currentTasks = StorageEngine.getTasks();
             const completed = currentTasks.filter(t => t.status === 'erledigt');
-            completed.forEach(t => StorageEngine.markTaskDeleted(t.id));
+            const completedIds = completed.map(t => t.id);
+            StorageEngine.markTasksDeleted(completedIds);
             const remaining = currentTasks.filter(t => t.status !== 'erledigt');
             StorageEngine.saveTasks(remaining);
             closeModal();

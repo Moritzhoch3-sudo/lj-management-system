@@ -1,5 +1,5 @@
 {
-  "_updatedAt": 1788907126069,
+  "_updatedAt": 1790438947535,
   "centralAccessCodeHash": "5b51ca7b436a5036957963b5d7446f1bca8894585329c5b993dfff9f7234a1ea",
   "pinHash": "9a1611a2f3064e9ced84eeff559cc6f3aca5b16b34420caaea98c0a7046d798e",
   "members": [
@@ -146,50 +146,6 @@
   ],
   "tasks": [
     {
-      "id": "t_1785945370195",
-      "title": "Essensbestellung Abbau",
-      "description": "",
-      "assigneeId": "m7",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-16",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785945336784",
-      "title": "Sari kehrmaschine organisieren",
-      "description": "",
-      "assigneeId": "m7",
-      "categoryId": "getraenke",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-13",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785945260310",
-      "title": "Gewinnspiel Instagram",
-      "description": "",
-      "assigneeId": "m2",
-      "categoryId": "pr",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-13",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785945193233",
-      "title": "Summer Break Schild und Standfüße",
-      "description": "",
-      "assigneeId": "m1",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-13",
-      "subtasks": []
-    },
-    {
       "id": "t_1785945087135",
       "title": "Boxen für Schrauben kaufen",
       "description": "",
@@ -198,116 +154,6 @@
       "priority": "mittel",
       "status": "in_bearbeitung",
       "dueDate": "2026-08-14",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785945057688",
-      "title": "Stapler organisieren",
-      "description": "Bernhard, Alex und Chrisi stapler anfragen",
-      "assigneeId": "m4",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-07",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785945025755",
-      "title": "Banner aufhängen Kaufering",
-      "description": "",
-      "assigneeId": "m4",
-      "categoryId": "fest",
-      "priority": "niedrig",
-      "status": "erledigt",
-      "dueDate": "2026-08-04",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785944975201",
-      "title": "Flyer Dämmerschoppen aufhängen im Dorf",
-      "description": "",
-      "assigneeId": "m8",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-13",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785926494773",
-      "title": "Reels drehen",
-      "description": "",
-      "assigneeId": "m2",
-      "categoryId": "pr",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-13",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785926482962",
-      "title": "Jugendschutzbeauftragten für 14.8. einladen",
-      "description": "",
-      "assigneeId": "m2",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-14",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785926466896",
-      "title": "Schichten Umfrage",
-      "description": "",
-      "assigneeId": "m2",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-13",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785926454448",
-      "title": "Merch Umfrage und Bestellung",
-      "description": "",
-      "assigneeId": "m2",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-14",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785926438785",
-      "title": "Bezahlte Werbung schalten",
-      "description": "",
-      "assigneeId": "m2",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-13",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785926424991",
-      "title": "Seeger Container bestellen 2x",
-      "description": "",
-      "assigneeId": "m2",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-08",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785926409352",
-      "title": "Dämmerschoppen Plakat posten",
-      "description": "",
-      "assigneeId": "m2",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "",
       "subtasks": []
     },
     {
@@ -330,17 +176,6 @@
       "priority": "mittel",
       "status": "offen",
       "dueDate": "2026-08-12",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785926146473",
-      "title": "Zeitmess Special bestellen",
-      "description": "",
-      "assigneeId": "m9",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-14",
       "subtasks": []
     },
     {
@@ -377,39 +212,6 @@
       "subtasks": []
     },
     {
-      "id": "t_1785926020057",
-      "title": "Parkplatzeinweiser FFW organisieren",
-      "description": "",
-      "assigneeId": "m11",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-14",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785925995492",
-      "title": "Specials bestellen",
-      "description": "",
-      "assigneeId": "m7",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-14",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785925984825",
-      "title": "Getränkebestellung SB",
-      "description": "",
-      "assigneeId": "m7",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-13",
-      "subtasks": []
-    },
-    {
       "id": "t_1785925972515",
       "title": "LED Kasten und Leiste über Schrank fertig machen",
       "description": "",
@@ -429,171 +231,6 @@
       "priority": "mittel",
       "status": "offen",
       "dueDate": "2026-08-13",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785925898901",
-      "title": "Spülmaschine abholen",
-      "description": "",
-      "assigneeId": "m4",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-07",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785925873308",
-      "title": "Fritteuse abholen",
-      "description": "",
-      "assigneeId": "m4",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-12",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785925856998",
-      "title": "Grills Jiri holen",
-      "description": "",
-      "assigneeId": "m4",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-12",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785925835335",
-      "title": "SimEvents Zeitplan abklären",
-      "description": "",
-      "assigneeId": "m4",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-06",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785925816373",
-      "title": "Essen Helferparty organisieren",
-      "description": "",
-      "assigneeId": "m4",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-09-19",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785925790989",
-      "title": "Fritteuse organisieren",
-      "description": "",
-      "assigneeId": "m4",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-13",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785925774924",
-      "title": "Essen Dämmerschoppen organisieren",
-      "description": "",
-      "assigneeId": "m4",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-13",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785925743133",
-      "title": "Edeka Bestellung",
-      "description": "",
-      "assigneeId": "m5",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785925735142",
-      "title": "Lebenshilfe zum 14.8. '20':30 Uhr einladen",
-      "description": "",
-      "assigneeId": "m5",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-14",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785925682327",
-      "title": "Tablet kaufen + Kartenzahlgerät besorgen",
-      "description": "",
-      "assigneeId": "m3",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-13",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785925644618",
-      "title": "Resi-Bierzeltgarnituren Dämmerschoppen reservieren",
-      "description": "",
-      "assigneeId": "m3",
-      "categoryId": "fest",
-      "priority": "hoch",
-      "status": "erledigt",
-      "dueDate": "2026-08-13",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785925622338",
-      "title": "Einlassbänder nachkaufen",
-      "description": "",
-      "assigneeId": "m3",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-13",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785925455332",
-      "title": "Kabelbinder bestellen",
-      "description": "",
-      "assigneeId": "m1",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-08",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785925437515",
-      "title": "Decke LJ fertig machen",
-      "description": "",
-      "assigneeId": "m1",
-      "categoryId": "heim",
-      "priority": "hoch",
-      "status": "erledigt",
-      "dueDate": "2026-08-13",
-      "subtasks": []
-    },
-    {
-      "id": "t_1785925412655",
-      "title": "Bauzaunplanen Zacherl organisieren",
-      "description": "",
-      "assigneeId": "m1",
-      "categoryId": "fest",
-      "priority": "mittel",
-      "status": "erledigt",
-      "dueDate": "2026-08-08",
       "subtasks": []
     }
   ],
@@ -633,5 +270,40 @@
         "Getränkebestellung wird von Cassandra Wunner durchgeführt."
       ]
     }
+  ],
+  "deletedTaskIds": [
+    "t_1785925790989",
+    "t_1785925644618",
+    "t_1785945025755",
+    "t_1785945260310",
+    "t_1785925622338",
+    "t_1785926494773",
+    "t_1785925995492",
+    "t_1785925412655",
+    "t_1785925816373",
+    "t_1785925856998",
+    "t_1785925455332",
+    "t_1785945193233",
+    "t_1785926454448",
+    "t_1785925898901",
+    "t_1785925835335",
+    "t_1785926466896",
+    "t_1785925774924",
+    "t_1785944975201",
+    "t_1785926146473",
+    "t_1785926409352",
+    "t_1785926482962",
+    "t_1785925743133",
+    "t_1785945057688",
+    "t_1785925682327",
+    "t_1785925437515",
+    "t_1785925873308",
+    "t_1785945370195",
+    "t_1785926438785",
+    "t_1785926020057",
+    "t_1785925984825",
+    "t_1785925735142",
+    "t_1785945336784",
+    "t_1785926424991"
   ]
 }
