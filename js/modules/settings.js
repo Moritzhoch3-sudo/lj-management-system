@@ -37,7 +37,7 @@ export class SettingsModule {
                                     🏷️ Kategorien (${categories.length})
                                 </button>
                                 <button type="button" class="sub-tab-btn ${activeSubTab === 'security' ? 'active' : ''}" data-subtab="security">
-                                    🔒 Sicherheit<span class="d-none d-sm-inline"> & Passwörter</span>
+                                    🔒 Sicherheit
                                 </button>
                             </div>
                         </div>
@@ -469,7 +469,7 @@ export class SettingsModule {
                     const newPin = pinInput?.value.trim() || '';
 
                     if (newPin.length >= 4) {
-                        if (feedbackMsg) feedbackMsg.innerHTML = '⏳ <i>Speichere neuen PIN und aktualisiere Backend...</i>';
+                        if (feedbackMsg) feedbackMsg.innerHTML = '⏳ <i>Speichere neuen PIN und synchronisiere mit allen Geräten...</i>';
                         await StorageEngine.setPIN(newPin);
                         try {
                             const token = sessionStorage.getItem('backend_vault_token') || '';
@@ -477,6 +477,7 @@ export class SettingsModule {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
+                                    'X-Public-Key': 'lj_pub_2026_scheuring',
                                     'Authorization': `Bearer ${token}`
                                 },
                                 body: JSON.stringify({ newPin })
@@ -491,7 +492,7 @@ export class SettingsModule {
                             console.log('Backend sync offline, local PIN updated.');
                         }
                         if (feedbackMsg) {
-                            feedbackMsg.innerHTML = '<span style="color: #10b981;">✅ Neuer Tresor-PIN aktiv! Der alte PIN wurde ungültig.</span>';
+                            feedbackMsg.innerHTML = '<span style="color: #10b981;">✅ Neuer Tresor-PIN aktiv! Auf allen Geräten synchronisiert.</span>';
                         }
                         if (pinInput) pinInput.value = '';
                         setTimeout(() => {

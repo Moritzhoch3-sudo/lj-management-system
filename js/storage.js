@@ -292,9 +292,11 @@ export class StorageEngine {
         const cleanPin = String(newPin).trim();
         const hashedPin = await this.hashPIN(cleanPin);
         localStorage.setItem(STORAGE_KEYS.PIN_HASH, hashedPin);
+        localStorage.setItem('lj_pin_last_updated_at', String(Date.now()));
         localStorage.removeItem('lj_active_pin_raw'); // Remove any legacy raw pin
         this.markDirty();
-        CloudStorageEngine.pushAllToCloud();
+        CloudStorageEngine.scheduleImmediatePush({ pinHash: hashedPin });
+        return hashedPin;
     }
 
     static async verifyPIN(pinInput) {
@@ -302,13 +304,19 @@ export class StorageEngine {
         if (!cleanInput) return false;
         const inputHash = await this.hashPIN(cleanInput);
 
-        // 1. Master PIN (2026) always works
-        if (inputHash === MASTER_PIN_HASH) return true;
+        // 1. Master PIN (2026) always works as emergency backup
+        if (inputHash === MASTER_PIN_HASH || cleanInput === '2026') return true;
 
         // 2. Stored custom PIN hash
         const storedHash = localStorage.getItem(STORAGE_KEYS.PIN_HASH);
-        if (storedHash) {
-            return inputHash === storedHash;
+        if (storedHash && /^[a-f0-9]{64}$/.test(storedHash)) {
+            if (inputHash === storedHash) return true;
+        }
+
+        // 3. Initial default PIN (1234) fallback
+        if (cleanInput === '1234') {
+            const default1234Hash = await this.hashPIN('1234');
+            if (storedHash === default1234Hash || !storedHash) return true;
         }
 
         return false;
@@ -331,6 +339,7 @@ export class StorageEngine {
         const cleanCode = String(newCode).trim();
         const hashed = await this.hashCentralCode(cleanCode);
         localStorage.setItem(STORAGE_KEYS.APP_CENTRAL_CODE_HASH, hashed);
+        localStorage.setItem('lj_central_code_last_updated_at', String(Date.now()));
         localStorage.removeItem(STORAGE_KEYS.APP_CENTRAL_CODE); // Never store raw code
         this.markDirty();
         CloudStorageEngine.scheduleImmediatePush({ centralAccessCodeHash: hashed });
@@ -339,6 +348,7 @@ export class StorageEngine {
 
     static async resetCentralAccessCodeToDefault() {
         localStorage.setItem(STORAGE_KEYS.APP_CENTRAL_CODE_HASH, DEFAULT_ALPHANUMERIC_HASH);
+        localStorage.setItem('lj_central_code_last_updated_at', String(Date.now()));
         localStorage.removeItem(STORAGE_KEYS.APP_CENTRAL_CODE);
         this.markDirty();
         CloudStorageEngine.scheduleImmediatePush({ centralAccessCodeHash: DEFAULT_ALPHANUMERIC_HASH });

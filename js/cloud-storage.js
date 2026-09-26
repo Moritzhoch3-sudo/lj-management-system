@@ -334,12 +334,14 @@ export class CloudStorageEngine {
             }
         }
 
-        // 4. Update hashes if received from cloud
-        if (cloudData.centralAccessCodeHash) {
-            localStorage.setItem('lj_app_central_code_hash_v1', String(cloudData.centralAccessCodeHash).trim());
-        }
-        if (cloudData.pinHash) {
+        // 4. Update hashes if received from cloud (protect newer local changes from stale cloud overwrites)
+        const localPinTime = parseInt(localStorage.getItem('lj_pin_last_updated_at') || '0', 10);
+        if (cloudData.pinHash && remoteTimestamp >= localPinTime) {
             localStorage.setItem('lj_vault_pin_hash_v3', String(cloudData.pinHash).trim());
+        }
+        const localCentralTime = parseInt(localStorage.getItem('lj_central_code_last_updated_at') || '0', 10);
+        if (cloudData.centralAccessCodeHash && remoteTimestamp >= localCentralTime) {
+            localStorage.setItem('lj_app_central_code_hash_v1', String(cloudData.centralAccessCodeHash).trim());
         }
 
         if (dataUpdated || remoteTimestamp > this.lastSyncTimestamp) {
@@ -379,14 +381,14 @@ export class CloudStorageEngine {
                 members: StorageEngine.getMembers(),
                 categories: StorageEngine.getCategories(),
                 tasks: StorageEngine.getTasks(),
-                deletedTaskIds: StorageEngine.getDeletedTaskIds()
+                deletedTaskIds: StorageEngine.getDeletedTaskIds(),
+                pinHash: StorageEngine.getPINHashSync(),
+                centralAccessCodeHash: StorageEngine.getCentralAccessCodeHash()
             };
             if (vaultToken) {
                 payload.finances = StorageEngine.getFinances();
                 payload.contracts = StorageEngine.getContracts();
                 payload.minutes = StorageEngine.getMinutes();
-                payload.pinHash = StorageEngine.getPINHashSync();
-                payload.centralAccessCodeHash = StorageEngine.getCentralAccessCodeHash();
             }
         }
 

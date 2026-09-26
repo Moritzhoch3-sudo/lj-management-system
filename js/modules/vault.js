@@ -121,8 +121,12 @@ export class VaultGuard {
                 return;
             }
 
-            statusMsg.innerHTML = '⏳ <i>Prüfe Master-PIN am Backend-Server...</i>';
+            statusMsg.innerHTML = '⏳ <i>Prüfe Master-PIN...</i>';
 
+            let authenticated = false;
+            let sessionToken = null;
+
+            // 1. Try backend verification
             try {
                 const res = await fetch('/api/verify-pin', {
                     method: 'POST',
@@ -139,48 +143,44 @@ export class VaultGuard {
                 if (res.ok) {
                     const data = await res.json();
                     if (data.success && data.token) {
-                        serverSessionToken = data.token;
-                        sessionStorage.setItem('backend_vault_token', data.token);
-                        document.body.classList.add('vault-unlocked');
-                        if (onSuccessCallback) onSuccessCallback();
-                        return;
-                    }
-                } else if (res.status === 401) {
-                    const isPinValid = await StorageEngine.verifyPIN(currentPin);
-                    if (isPinValid) {
-                        try {
-                            const syncRes = await fetch('/api/update-pin', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ newPin: currentPin })
-                            });
-                            if (syncRes.ok) {
-                                const syncData = await syncRes.json();
-                                serverSessionToken = syncData.token;
-                                sessionStorage.setItem('backend_vault_token', syncData.token);
-                                document.body.classList.add('vault-unlocked');
-                                if (onSuccessCallback) onSuccessCallback();
-                                return;
-                            }
-                        } catch (e) {}
-                        
-                        serverSessionToken = 'local_session_' + Date.now();
-                        sessionStorage.setItem('backend_vault_token', serverSessionToken);
-                        document.body.classList.add('vault-unlocked');
-                        if (onSuccessCallback) onSuccessCallback();
-                        return;
+                        authenticated = true;
+                        sessionToken = data.token;
                     }
                 }
             } catch (err) {
-                // Local fallback if server endpoint is offline
+                // Backend not reachable, verify locally
+            }
+
+            // 2. If backend did not succeed (401, 404 on Vercel, offline), verify against stored/master PIN
+            if (!authenticated) {
                 const isPinValid = await StorageEngine.verifyPIN(currentPin);
                 if (isPinValid) {
-                    serverSessionToken = 'local_session_' + Date.now();
-                    sessionStorage.setItem('backend_vault_token', serverSessionToken);
-                    document.body.classList.add('vault-unlocked');
-                    if (onSuccessCallback) onSuccessCallback();
-                    return;
+                    authenticated = true;
+                    sessionToken = 'vault_session_' + Date.now();
+                    try {
+                        const syncRes = await fetch('/api/update-pin', {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'X-Public-Key': 'lj_pub_2026_scheuring',
+                                'Authorization': `Bearer ${sessionToken}` 
+                            },
+                            body: JSON.stringify({ newPin: currentPin })
+                        });
+                        if (syncRes.ok) {
+                            const syncData = await syncRes.json();
+                            if (syncData.token) sessionToken = syncData.token;
+                        }
+                    } catch (e) {}
                 }
+            }
+
+            if (authenticated && sessionToken) {
+                serverSessionToken = sessionToken;
+                sessionStorage.setItem('backend_vault_token', sessionToken);
+                document.body.classList.add('vault-unlocked');
+                if (onSuccessCallback) onSuccessCallback();
+                return;
             }
 
             // Authentication Failed
@@ -296,8 +296,12 @@ export class VaultGuard {
                 return;
             }
 
-            statusMsg.innerHTML = '⏳ <i>Prüfe gehashten PIN am Server...</i>';
+            statusMsg.innerHTML = '⏳ <i>Prüfe Master-PIN...</i>';
 
+            let authenticated = false;
+            let sessionToken = null;
+
+            // 1. Try backend verification
             try {
                 const res = await fetch('/api/verify-pin', {
                     method: 'POST',
@@ -314,57 +318,51 @@ export class VaultGuard {
                 if (res.ok) {
                     const data = await res.json();
                     if (data.success && data.token) {
-                        serverSessionToken = data.token;
-                        sessionStorage.setItem('backend_vault_token', data.token);
-                        document.body.classList.add('vault-unlocked');
-                        modal.remove();
-                        if (onSuccessCallback) onSuccessCallback();
-                        return;
-                    }
-                } else if (res.status === 401) {
-                    const isPinValid = await StorageEngine.verifyPIN(currentPin);
-                    if (isPinValid) {
-                        try {
-                            const syncRes = await fetch('/api/update-pin', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ newPin: currentPin })
-                            });
-                            if (syncRes.ok) {
-                                const syncData = await syncRes.json();
-                                serverSessionToken = syncData.token;
-                                sessionStorage.setItem('backend_vault_token', syncData.token);
-                                document.body.classList.add('vault-unlocked');
-                                modal.remove();
-                                if (onSuccessCallback) onSuccessCallback();
-                                return;
-                            }
-                        } catch (e) {}
-                        serverSessionToken = 'local_session_' + Date.now();
-                        sessionStorage.setItem('backend_vault_token', serverSessionToken);
-                        document.body.classList.add('vault-unlocked');
-                        modal.remove();
-                        if (onSuccessCallback) onSuccessCallback();
-                        return;
+                        authenticated = true;
+                        sessionToken = data.token;
                     }
                 }
             } catch (err) {
-                // Local fallback if server endpoint is unavailable
+                // Backend not reachable, verify locally
+            }
+
+            // 2. If backend did not succeed (401, 404 on Vercel, offline), verify against stored/master PIN
+            if (!authenticated) {
                 const isPinValid = await StorageEngine.verifyPIN(currentPin);
                 if (isPinValid) {
-                    serverSessionToken = 'local_session_' + Date.now();
-                    sessionStorage.setItem('backend_vault_token', serverSessionToken);
-                    document.body.classList.add('vault-unlocked');
-                    modal.remove();
-                    if (onSuccessCallback) onSuccessCallback();
-                    return;
+                    authenticated = true;
+                    sessionToken = 'vault_session_' + Date.now();
+                    try {
+                        const syncRes = await fetch('/api/update-pin', {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'X-Public-Key': 'lj_pub_2026_scheuring',
+                                'Authorization': `Bearer ${sessionToken}` 
+                            },
+                            body: JSON.stringify({ newPin: currentPin })
+                        });
+                        if (syncRes.ok) {
+                            const syncData = await syncRes.json();
+                            if (syncData.token) sessionToken = syncData.token;
+                        }
+                    } catch (e) {}
                 }
+            }
+
+            if (authenticated && sessionToken) {
+                serverSessionToken = sessionToken;
+                sessionStorage.setItem('backend_vault_token', sessionToken);
+                document.body.classList.add('vault-unlocked');
+                modal.remove();
+                if (onSuccessCallback) onSuccessCallback();
+                return;
             }
 
             // Authentication Failed
             pinInput.classList.add('shake');
             setTimeout(() => pinInput.classList.remove('shake'), 500);
-            statusMsg.innerHTML = '<span class="text-danger">⚠️ Falscher PIN! Zugriff vom Server verweigert.</span>';
+            statusMsg.innerHTML = '<span class="text-danger">⚠️ Falscher PIN! Zugriff verweigert.</span>';
             currentPin = '';
             updatePinInput();
         };

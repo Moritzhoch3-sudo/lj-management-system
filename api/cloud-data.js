@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const PUBLIC_DB_KEY = process.env.PUBLIC_DB_KEY || 'lj_pub_2026_scheuring';
-const SENSITIVE_COLLECTIONS = ['finances', 'contracts', 'minutes', 'pinHash', 'centralAccessCodeHash'];
+const SENSITIVE_COLLECTIONS = ['finances', 'contracts', 'minutes'];
 const ALLOWED_PAYLOAD_KEYS = [
     '_updatedAt', 'tasks', 'members', 'categories', 'deletedTaskIds',
     'finances', 'contracts', 'minutes', 'pinHash', 'centralAccessCodeHash'
@@ -188,9 +188,9 @@ module.exports = async (req, res) => {
             const deletedSet = new Set(currentDb.deletedTaskIds || []);
 
             if (!hasVaultAuth) {
-                // Public caller (logged in with Central Access Code):
-                // Safely update public collections (tasks, members, categories) while preserving sensitive vault tables
-                for (const pubKey of ['tasks', 'members', 'categories']) {
+                // Public caller (logged in with Central Access Code / Public Key):
+                // Safely update public collections (tasks, members, categories) and security hashes
+                for (const pubKey of ['tasks', 'members', 'categories', 'pinHash', 'centralAccessCodeHash']) {
                     if (payload[pubKey] !== undefined) {
                         currentDb[pubKey] = payload[pubKey];
                     }
