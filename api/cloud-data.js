@@ -105,15 +105,17 @@ module.exports = async (req, res) => {
         if (kvUrl && kvToken && typeof fetch === 'function') {
             try {
                 const cleanUrl = kvUrl.replace(/\/$/, '');
-                await fetch(`${cleanUrl}/set/lj_cloud_db_v1`, {
+                await fetch(cleanUrl, {
                     method: 'POST',
                     headers: { 
                         Authorization: `Bearer ${kvToken}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(JSON.stringify(data))
+                    body: JSON.stringify(['SET', 'lj_cloud_db_v1', JSON.stringify(data)])
                 });
-            } catch (e) {}
+            } catch (e) {
+                console.error('KV persist error:', e);
+            }
         }
 
         // 2. Persist to /tmp (writable on Vercel)

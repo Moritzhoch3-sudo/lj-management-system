@@ -100,14 +100,14 @@ export class StorageEngine {
     static getTasks() {
         let tasks = null;
         const raw = localStorage.getItem(STORAGE_KEYS.TASKS);
-        if (raw) {
+        if (raw !== null) {
             try {
                 const parsed = JSON.parse(raw);
-                if (Array.isArray(parsed) && parsed.length > 0) tasks = parsed;
+                if (Array.isArray(parsed)) tasks = parsed;
             } catch (e) {}
         }
 
-        if (!tasks) {
+        if (tasks === null) {
             const fallbackKeys = ['lj_tasks_v4_live', 'lj_tasks_v3_11', 'lj_tasks_v3'];
             for (const fk of fallbackKeys) {
                 const fallbackRaw = localStorage.getItem(fk);
@@ -124,7 +124,7 @@ export class StorageEngine {
             }
         }
 
-        if (!tasks) tasks = INITIAL_TASKS;
+        if (tasks === null) tasks = INITIAL_TASKS;
 
         // Ensure no tasks point to deleted 'm0' / Allgemein
         let hasM0 = false;

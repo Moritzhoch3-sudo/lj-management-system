@@ -70,10 +70,48 @@ export class CloudStorageEngine {
         }
     }
 
+    static areTasksIdentical(listA, listB) {
+        if (!Array.isArray(listA) || !Array.isArray(listB)) return false;
+        if (listA.length !== listB.length) return false;
+        const mapB = new Map(listB.map(t => [t.id, t]));
+        for (const a of listA) {
+            const b = mapB.get(a.id);
+            if (!b) return false;
+            if (a.title !== b.title || a.status !== b.status || a.priority !== b.priority || 
+                a.assigneeId !== b.assigneeId || a.categoryId !== b.categoryId || a.dueDate !== b.dueDate) {
+                return false;
+            }
+            if (JSON.stringify(a.subtasks || []) !== JSON.stringify(b.subtasks || [])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static getTaskHash(tasks) {
+        if (!Array.isArray(tasks)) return '';
+        return tasks.map(t => `${t.id}:${t.status || ''}:${t.dueDate || ''}:${t.title || ''}:${(t.subtasks || []).length}`).join('|');
+    }
+
     static initBroadcast() {
         if (this.channel) {
             this.channel.onmessage = (event) => {
                 if (event.data && event.data.type === 'SYNC_DATA') {
+                    const payload = event.data.payload;
+                    if (payload && Array.isArray(payload.tasks)) {
+                        const localTasks = StorageEngine.getTasks();
+                        const isLocallyModifiedRecently = (Date.now() - this.lastLocalMutationTimestamp < 8000) || StorageEngine.isDirty;
+                        if (!isLocallyModifiedRecently && !this.areTasksIdentical(localTasks, payload.tasks)) {
+                            localStorage.setItem('lj_tasks_v3_12', JSON.stringify(payload.tasks));
+                            const taskHash = this.getTaskHash(payload.tasks);
+                            const lastReloadHash = sessionStorage.getItem('lj_last_reloaded_task_hash');
+                            if (lastReloadHash !== taskHash) {
+                                sessionStorage.setItem('lj_last_reloaded_task_hash', taskHash);
+                                window.location.reload();
+                                return;
+                            }
+                        }
+                    }
                     this.notifyListeners(event.data.payload);
                 }
             };
@@ -199,44 +237,69 @@ export class CloudStorageEngine {
         const remoteTimestamp = cloudData._updatedAt || Date.now();
         let dataUpdated = false;
 
-        // 1. SMART MERGE FOR TASKS (Zero Data Loss Protection)
+        // 1. SMART MERGE & AUTO-REFRESH FOR TASKS (Zero Data Loss & Live Cross-Device Sync)
         if (Array.isArray(cloudData.tasks)) {
             const localTasks = StorageEngine.getTasks() || [];
-            const localMap = new Map(localTasks.map(t => [t.id, t]));
+            const isLocallyModifiedRecently = (Date.now() - this.lastLocalMutationTimestamp < 8000) || StorageEngine.isDirty;
             const deletedIds = new Set(StorageEngine.getDeletedTaskIds());
-            let tasksChanged = false;
 
-            // Merge incoming cloud tasks into local state
-            for (const rTask of cloudData.tasks) {
-                if (!rTask || !rTask.id || deletedIds.has(rTask.id)) continue;
-                const lTask = localMap.get(rTask.id);
-                if (!lTask) {
-                    // New task from another device!
-                    localTasks.unshift(rTask);
-                    localMap.set(rTask.id, rTask);
-                    tasksChanged = true;
-                } else {
-                    // Task exists locally: update properties only if cloud is newer than local edits
-                    if (remoteTimestamp > this.lastLocalMutationTimestamp) {
+            if (!isLocallyModifiedRecently) {
+                // If local device has no active edits, remote cloud data is authoritative:
+                if (!this.areTasksIdentical(localTasks, cloudData.tasks)) {
+                    // Update localStorage with remote authoritative tasks
+                    localStorage.setItem('lj_tasks_v3_12', JSON.stringify(cloudData.tasks));
+                    dataUpdated = true;
+
+                    const taskHash = this.getTaskHash(cloudData.tasks);
+                    const lastReloadHash = sessionStorage.getItem('lj_last_reloaded_task_hash');
+
+                    if (lastReloadHash !== taskHash) {
+                        sessionStorage.setItem('lj_last_reloaded_task_hash', taskHash);
+                        this.lastSyncTimestamp = remoteTimestamp;
+
+                        // Check if user is currently typing in an input
+                        const isTyping = Boolean(document.activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName));
+                        if (isTyping) {
+                            document.activeElement.addEventListener('blur', () => {
+                                window.location.reload();
+                            }, { once: true });
+                        } else {
+                            window.location.reload();
+                            return;
+                        }
+                    }
+                }
+            } else {
+                // Local device made edits recently: smart merge so local additions are never lost
+                const localMap = new Map(localTasks.map(t => [t.id, t]));
+                let tasksChanged = false;
+
+                for (const rTask of cloudData.tasks) {
+                    if (!rTask || !rTask.id || deletedIds.has(rTask.id)) continue;
+                    const lTask = localMap.get(rTask.id);
+                    if (!lTask) {
+                        localTasks.unshift(rTask);
+                        localMap.set(rTask.id, rTask);
+                        tasksChanged = true;
+                    } else if (remoteTimestamp > this.lastLocalMutationTimestamp) {
                         if (JSON.stringify(lTask) !== JSON.stringify(rTask)) {
                             Object.assign(lTask, rTask);
                             tasksChanged = true;
                         }
                     }
                 }
-            }
 
-            // Check if local has tasks that the cloud does not have yet
-            const cloudTaskIds = new Set(cloudData.tasks.map(t => t.id));
-            const localOnlyTasks = localTasks.filter(t => !cloudTaskIds.has(t.id) && !deletedIds.has(t.id));
-            if (localOnlyTasks.length > 0) {
-                // Local has tasks that cloud lacks -> push immediately so cloud gets them!
-                this.scheduleImmediatePush();
-            }
+                // Check if local has tasks that cloud lacks -> push immediately
+                const cloudTaskIds = new Set(cloudData.tasks.map(t => t.id));
+                const localOnlyTasks = localTasks.filter(t => !cloudTaskIds.has(t.id) && !deletedIds.has(t.id));
+                if (localOnlyTasks.length > 0) {
+                    this.scheduleImmediatePush();
+                }
 
-            if (tasksChanged) {
-                localStorage.setItem('lj_tasks_v3_12', JSON.stringify(localTasks));
-                dataUpdated = true;
+                if (tasksChanged) {
+                    localStorage.setItem('lj_tasks_v3_12', JSON.stringify(localTasks));
+                    dataUpdated = true;
+                }
             }
         }
 
@@ -328,6 +391,12 @@ export class CloudStorageEngine {
         this.lastSyncTimestamp = payload._updatedAt;
         let pushedSuccess = false;
 
+        // Remember local task hash so this client never redundant-reloads its own mutations
+        if (Array.isArray(payload.tasks)) {
+            const currentTaskHash = this.getTaskHash(payload.tasks);
+            sessionStorage.setItem('lj_last_reloaded_task_hash', currentTaskHash);
+        }
+
         // 1. Push to Vercel Serverless / Python Backend (/api/cloud-data)
         try {
             const headers = {
@@ -341,7 +410,8 @@ export class CloudStorageEngine {
             const resp = await fetch('/api/cloud-data', {
                 method: 'POST',
                 headers,
-                body: JSON.stringify(payload)
+                body: JSON.stringify(payload),
+                keepalive: true
             });
             if (resp.ok) {
                 const contentType = resp.headers.get('content-type') || '';
@@ -390,10 +460,10 @@ export class CloudStorageEngine {
 
     static startPolling() {
         if (this.syncInterval) clearInterval(this.syncInterval);
-        // Snappy cross-device sync every 6 seconds
+        // Snappy cross-device sync every 4 seconds
         this.syncInterval = setInterval(() => {
             this.pullAllFromCloud();
-        }, 6000);
+        }, 4000);
     }
 
     static notifyListeners(data) {

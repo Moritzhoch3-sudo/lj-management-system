@@ -15,7 +15,12 @@ import { CloudStorageEngine } from './cloud-storage.js';
 import { AppAuth } from './modules/auth.js';
 import { SecurityUtils } from './utils/security.js';
 
-let activeTab = 'dashboard';
+let savedTab = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('lj_active_tab') : null;
+const sensitiveTabsList = ['finance', 'contracts', 'minutes'];
+if (sensitiveTabsList.includes(savedTab)) {
+    savedTab = 'dashboard';
+}
+let activeTab = savedTab || 'dashboard';
 let pendingProtectedTab = null;
 
 class App {
@@ -331,6 +336,9 @@ class App {
 
     static switchTab(tabName) {
         activeTab = tabName;
+        if (typeof sessionStorage !== 'undefined' && ['dashboard', 'tasks', 'settings', 'vault-login'].includes(tabName)) {
+            sessionStorage.setItem('lj_active_tab', tabName);
+        }
         this.renderProtectedSidebar();
 
         // Always ensure mobile menu is closed when switching views
