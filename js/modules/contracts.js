@@ -12,7 +12,7 @@ export class ContractsModule {
             <div class="contracts-wrapper">
                 <!-- Main Header Toolbar -->
                 <div class="card-glow p-4 mb-4">
-                    <div class="d-flex align-items-center justify-content-between mb-3 pb-2" style="border-bottom: 1px solid var(--border-subtle);">
+                    <div class="d-flex align-items-center justify-content-between mb-3 pb-2 flex-wrap gap-2" style="border-bottom: 1px solid var(--border-subtle);">
                         <div>
                             <h3 class="m-0" style="color: var(--text-primary); font-weight: 800; font-size: 1.15rem;">
                                 📋 Verträge & Sponsoring-Archiv (${contracts.length})

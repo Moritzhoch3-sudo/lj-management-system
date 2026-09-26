@@ -1804,6 +1804,17 @@ tr:hover td {
    (Desktop layout min-width: 993px remains 100% untouched)
    ========================================================================== */
 @media (max-width: 992px) {
+    /* Absolute Zero Horizontal Overflow Guard */
+    html, body, .app-layout, .app-sidebar, .app-main-wrapper, .main-container,
+    #main-content-view, .tasks-wrapper, .finance-wrapper, .contracts-wrapper,
+    .minutes-wrapper, .donezo-dashboard-wrapper, .card-glow, .donezo-card,
+    .table-responsive, .clean-tasks-table, .kanban-board, .person-tasks-container,
+    .person-tasks-section, .settings-table {
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+    }
+
     /* 0. Headings Safety Audit: Prevent Overlaps & Ensure Proper Spacing */
     h1, h2, h3, h4, h5, h6 {
         line-height: 1.3 !important;
@@ -1939,8 +1950,12 @@ tr:hover td {
         align-items: center !important;
     }
     .custom-inapp-menu {
-        max-width: calc(100vw - 2rem);
-        min-width: 220px !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        box-sizing: border-box !important;
     }
     .view-toggle-btns {
         width: 100% !important;
@@ -2056,7 +2071,7 @@ tr:hover td {
         overflow: hidden !important;
     }
 
-    /* 6. Inline Quick Add Form */
+    /* 6. Inline Quick Add Form (Responsive 2-Column Grid on Mobile) */
     .card-inline-add-bar {
         width: 100% !important;
         max-width: 100% !important;
@@ -2067,26 +2082,44 @@ tr:hover td {
     }
 
     .inline-quick-add-form {
-        display: flex !important;
-        flex-direction: column !important;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0.45rem !important;
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
-        gap: 0.45rem !important;
         box-sizing: border-box !important;
     }
 
     .quick-task-title-input {
+        grid-column: 1 / -1 !important;
         width: 100% !important;
         min-width: 0 !important;
         max-width: 100% !important;
-        font-size: 0.85rem !important;
+        font-size: 0.86rem !important;
         box-sizing: border-box !important;
     }
 
-    .inline-quick-add-form .quick-task-cat-select,
-    .inline-quick-add-form .quick-task-prio-select,
+    .inline-quick-add-form .quick-task-cat-select {
+        grid-column: 1 / 2 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        font-size: 0.82rem !important;
+        box-sizing: border-box !important;
+    }
+
+    .inline-quick-add-form .quick-task-prio-select {
+        grid-column: 2 / 3 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        font-size: 0.82rem !important;
+        box-sizing: border-box !important;
+    }
+
     .inline-quick-add-form .quick-task-date-input {
+        grid-column: 1 / 2 !important;
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
@@ -2095,62 +2128,284 @@ tr:hover td {
     }
 
     .inline-quick-add-form button[type="submit"] {
+        grid-column: 2 / 3 !important;
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
-        padding: 0.5rem !important;
+        padding: 0.45rem 0.5rem !important;
+        font-size: 0.82rem !important;
         justify-content: center;
         box-sizing: border-box !important;
     }
 
-    /* Clean Tasks Table Container - Stays STRICTLY inside card, scrollable inside */
+    /* 6b. Clean Tasks Table Container - Stacking Cards Layout (ZERO Horizontal Scroll) */
     .table-responsive {
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
+        overflow-x: hidden !important;
         display: block !important;
         box-sizing: border-box !important;
     }
 
     .clean-tasks-table {
-        min-width: 520px !important;
+        min-width: 0 !important;
         width: 100% !important;
+        max-width: 100% !important;
+        display: block !important;
+        box-sizing: border-box !important;
     }
 
-    /* 7. Kanban Board Mobile Swipe */
+    .clean-tasks-table thead {
+        display: none !important;
+    }
+
+    .clean-tasks-table tbody {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.65rem !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Tasks table rows transformed into clean Donezo mobile cards */
+    .clean-tasks-table tr.task-table-row {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0.45rem 0.65rem !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        background: #ffffff !important;
+        border: 1px solid var(--border-medium) !important;
+        border-radius: 12px !important;
+        padding: 0.75rem 0.85rem !important;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    .clean-tasks-table tr.task-table-row td {
+        display: block !important;
+        width: 100% !important;
+        padding: 0 !important;
+        border: none !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Row 1: Task Title & Subtasks (Full Width) */
+    .clean-tasks-table tr.task-table-row td:nth-child(1) {
+        grid-column: 1 / -1 !important;
+        padding-bottom: 0.35rem !important;
+        border-bottom: 1px solid var(--border-subtle) !important;
+    }
+    .clean-tasks-table tr.task-table-row td:nth-child(1) .clickable-task-title {
+        font-size: 0.95rem !important;
+        line-height: 1.35 !important;
+        display: block !important;
+        word-break: break-word !important;
+    }
+
+    /* Row 2: Category (Left) & Priority (Right) */
+    .clean-tasks-table tr.task-table-row td:nth-child(2) {
+        grid-column: 1 / 2 !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    .clean-tasks-table tr.task-table-row td:nth-child(2) .task-cat-picker-wrapper {
+        max-width: 100% !important;
+    }
+    .clean-tasks-table tr.task-table-row td:nth-child(2) .task-inline-cat-trigger {
+        font-size: 0.78rem !important;
+        padding: 0.3rem 0.55rem !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    .clean-tasks-table tr.task-table-row td:nth-child(3) {
+        grid-column: 2 / 3 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+    }
+    .clean-tasks-table tr.task-table-row td:nth-child(3) .task-inline-prio-trigger {
+        font-size: 0.78rem !important;
+        padding: 0.3rem 0.55rem !important;
+    }
+
+    /* Right align priority picker menu on mobile so it never sticks out */
+    .task-prio-picker-wrapper .task-inline-picker-menu {
+        left: auto !important;
+        right: 0 !important;
+        max-width: calc(100vw - 2rem) !important;
+    }
+
+    /* Row 3: Due Date (Left) & Status (Right) */
+    .clean-tasks-table tr.task-table-row td:nth-child(4) {
+        grid-column: 1 / 2 !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    .clean-tasks-table tr.task-table-row td:nth-child(4) .badge {
+        font-size: 0.76rem !important;
+    }
+
+    .clean-tasks-table tr.task-table-row td:nth-child(5) {
+        grid-column: 2 / 3 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+    }
+    .clean-tasks-table tr.task-table-row td:nth-child(5) .donezo-status-pill {
+        font-size: 0.78rem !important;
+        padding: 0.28rem 0.65rem !important;
+        white-space: nowrap !important;
+    }
+
+    /* Row 4: Action Buttons (Edit & Delete) */
+    .clean-tasks-table tr.task-table-row td:nth-child(6) {
+        grid-column: 1 / -1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 0.5rem !important;
+        padding-top: 0.35rem !important;
+        border-top: 1px dashed var(--border-subtle) !important;
+        margin-top: 0.15rem !important;
+    }
+    .clean-tasks-table tr.task-table-row td:nth-child(6) .btn {
+        padding: 0.32rem 0.75rem !important;
+        font-size: 0.84rem !important;
+        background: var(--bg-canvas) !important;
+        border: 1px solid var(--border-subtle) !important;
+        border-radius: 8px !important;
+    }
+
+    /* 7. Kanban Board Mobile Vertical Stacking (ZERO Horizontal Swipe/Scroll) */
     .kanban-board {
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        gap: 0.75rem !important;
-        padding-bottom: 0.75rem !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow-x: hidden !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        gap: 0.85rem !important;
+        padding-bottom: 0.5rem !important;
+        scroll-snap-type: none !important;
     }
     .kanban-column {
-        min-width: 82vw !important;
-        max-width: 88vw !important;
-        scroll-snap-align: center;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
         padding: 0.85rem !important;
     }
 
-    /* 8. Finances Mobile Layout */
+    /* 8. Finances Mobile Layout & Responsive Transaction Cards */
     .finance-wrapper .donezo-stats-row {
         grid-template-columns: 1fr !important;
         gap: 0.65rem !important;
+    }
+
+    .finance-desktop-table {
+        overflow-x: hidden !important;
+        width: 100% !important;
+    }
+    .finance-desktop-table .clean-tasks-table {
+        min-width: 0 !important;
+        width: 100% !important;
+        display: block !important;
+    }
+    .finance-desktop-table .clean-tasks-table thead {
+        display: none !important;
+    }
+    .finance-desktop-table .clean-tasks-table tbody {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.65rem !important;
+        width: 100% !important;
+    }
+    .finance-desktop-table tr.finance-row {
+        display: grid !important;
+        grid-template-columns: 1fr auto !important;
+        gap: 0.4rem !important;
+        align-items: center !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        background: #ffffff !important;
+        border: 1px solid var(--border-medium) !important;
+        border-radius: 12px !important;
+        padding: 0.75rem 0.85rem !important;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03) !important;
+    }
+    .finance-desktop-table tr.finance-row td {
+        display: block !important;
+        width: 100% !important;
+        padding: 0 !important;
+        border: none !important;
+        box-sizing: border-box !important;
+    }
+    .finance-desktop-table tr.finance-row td:nth-child(2) {
+        grid-column: 1 / 2 !important;
+        grid-row: 1 !important;
+    }
+    .finance-desktop-table tr.finance-row td:nth-child(6) {
+        grid-column: 2 / 3 !important;
+        grid-row: 1 !important;
+        text-align: right !important;
+        font-size: 1.05rem !important;
+        white-space: nowrap !important;
+    }
+    .finance-desktop-table tr.finance-row td:nth-child(1) {
+        grid-column: 1 / 2 !important;
+        grid-row: 2 !important;
+        font-size: 0.8rem !important;
+        color: var(--text-muted) !important;
+    }
+    .finance-desktop-table tr.finance-row td:nth-child(3) {
+        grid-column: 2 / 3 !important;
+        grid-row: 2 !important;
+        text-align: right !important;
+    }
+    .finance-desktop-table tr.finance-row td:nth-child(4) {
+        grid-column: 1 / 2 !important;
+        grid-row: 3 !important;
+        font-size: 0.76rem !important;
+    }
+    .finance-desktop-table tr.finance-row td:nth-child(5) {
+        display: none !important;
+    }
+    .finance-desktop-table tr.finance-row td:nth-child(7) {
+        grid-column: 2 / 3 !important;
+        grid-row: 3 !important;
+        text-align: right !important;
+    }
+    .finance-desktop-table tr.finance-row td:nth-child(7) .table-action-btns {
+        justify-content: flex-end !important;
+        gap: 0.35rem !important;
     }
 
     /* 9. Contracts Grid */
     .contracts-grid {
         grid-template-columns: 1fr !important;
         gap: 0.85rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+    .contract-card {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     /* 10. Audio Recorder Widget */
     .recorder-widget {
         flex-direction: column;
         align-items: stretch !important;
-        padding: 1.25rem !important;
-        gap: 1.15rem !important;
+        padding: 1rem !important;
+        gap: 1rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
     .recorder-left {
         min-width: 100% !important;
@@ -2169,42 +2424,219 @@ tr:hover td {
         width: 100% !important;
         justify-content: center;
         padding: 0.65rem 1rem !important;
+        white-space: normal !important;
     }
     .transcript-actions .btn {
         width: 100% !important;
         justify-content: center;
     }
 
-    /* 11. Settings Sub-Tab Pill Bar */
+    /* 11. Settings Sub-Tab 2x2 Grid (ZERO Horizontal Scroll) */
     .settings-nav-pill-group {
-        width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        flex-wrap: nowrap !important;
-        gap: 0.35rem !important;
+        width: 100% !important;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0.45rem !important;
+        overflow-x: visible !important;
+        margin-bottom: 1rem !important;
     }
     .settings-nav-pill-group::-webkit-scrollbar {
-        display: none;
+        display: none !important;
     }
     .sub-tab-btn {
-        white-space: nowrap;
-        flex-shrink: 0;
-        font-size: 0.8rem !important;
-        padding: 0.4rem 0.75rem !important;
+        width: 100% !important;
+        text-align: center !important;
+        justify-content: center !important;
+        white-space: normal !important;
+        font-size: 0.78rem !important;
+        padding: 0.55rem 0.45rem !important;
+        border-radius: 10px !important;
+        line-height: 1.25 !important;
     }
 
-    /* 12. Modals Mobile Optimization */
+    /* 11b. Settings Tables: Members and Categories as responsive cards */
+    .settings-table {
+        min-width: 0 !important;
+        width: 100% !important;
+        display: block !important;
+    }
+    .settings-table thead {
+        display: none !important;
+    }
+    .settings-table tbody {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.65rem !important;
+        width: 100% !important;
+    }
+
+    .settings-table tr.member-inline-row {
+        display: grid !important;
+        grid-template-columns: 46px 1fr 36px !important;
+        gap: 0.45rem !important;
+        align-items: center !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        background: #ffffff !important;
+        border: 1px solid var(--border-medium) !important;
+        border-radius: 12px !important;
+        padding: 0.65rem !important;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03) !important;
+    }
+    .settings-table tr.member-inline-row td {
+        display: block !important;
+        width: 100% !important;
+        padding: 0 !important;
+        border: none !important;
+        box-sizing: border-box !important;
+    }
+    .settings-table tr.member-inline-row td:nth-child(1) {
+        grid-column: 1 / 2 !important;
+        grid-row: 1 !important;
+    }
+    .settings-table tr.member-inline-row td:nth-child(1) .inline-avatar-input {
+        width: 44px !important;
+        height: 38px !important;
+        text-align: center !important;
+        font-size: 1.15rem !important;
+        padding: 0 !important;
+    }
+    .settings-table tr.member-inline-row td:nth-child(2) {
+        grid-column: 2 / 3 !important;
+        grid-row: 1 !important;
+    }
+    .settings-table tr.member-inline-row td:nth-child(2) .inline-name-input {
+        width: 100% !important;
+        height: 38px !important;
+        font-size: 0.9rem !important;
+        font-weight: 700 !important;
+    }
+    .settings-table tr.member-inline-row td:nth-child(5) {
+        grid-column: 3 / 4 !important;
+        grid-row: 1 !important;
+        text-align: center !important;
+    }
+    .settings-table tr.member-inline-row td:nth-child(5) .btn {
+        width: 36px !important;
+        height: 38px !important;
+        padding: 0 !important;
+        font-size: 1rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .settings-table tr.member-inline-row td:nth-child(3) {
+        grid-column: 1 / 3 !important;
+        grid-row: 2 !important;
+    }
+    .settings-table tr.member-inline-row td:nth-child(3) .inline-role-select {
+        width: 100% !important;
+        height: 36px !important;
+        font-size: 0.82rem !important;
+    }
+    .settings-table tr.member-inline-row td:nth-child(4) {
+        grid-column: 3 / 4 !important;
+        grid-row: 2 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+    .settings-table tr.member-inline-row td:nth-child(4) .color-tile-swatch {
+        width: 34px !important;
+        height: 34px !important;
+        border-radius: 8px !important;
+        margin: 0 auto !important;
+    }
+
+    .settings-table tr.category-inline-row {
+        display: grid !important;
+        grid-template-columns: 46px 1fr 36px !important;
+        gap: 0.45rem !important;
+        align-items: center !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        background: #ffffff !important;
+        border: 1px solid var(--border-medium) !important;
+        border-radius: 12px !important;
+        padding: 0.65rem !important;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03) !important;
+    }
+    .settings-table tr.category-inline-row td {
+        display: block !important;
+        width: 100% !important;
+        padding: 0 !important;
+        border: none !important;
+        box-sizing: border-box !important;
+    }
+    .settings-table tr.category-inline-row td:nth-child(1) .cat-icon-input {
+        width: 44px !important;
+        height: 38px !important;
+        text-align: center !important;
+        font-size: 1.15rem !important;
+        padding: 0 !important;
+    }
+    .settings-table tr.category-inline-row td:nth-child(2) .cat-name-input {
+        width: 100% !important;
+        height: 38px !important;
+        font-size: 0.88rem !important;
+    }
+    .settings-table tr.category-inline-row td:nth-child(3) .btn {
+        width: 36px !important;
+        height: 38px !important;
+        padding: 0 !important;
+        font-size: 1rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* 11c. Settings Security & Passwords Form */
+    .settings-code-input-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    .settings-code-input-wrapper input {
+        width: 100% !important;
+    }
+    #save-central-code-btn,
+    #save-pin-backend-btn {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 0.6rem 1rem !important;
+    }
+
+    /* 12. Modals & Forms Mobile Optimization */
     .modal-card {
         width: 95vw !important;
         max-width: 95vw !important;
-        margin: 0.5rem auto;
+        margin: 0.5rem auto !important;
+        box-sizing: border-box !important;
     }
     .modal-body {
-        padding: 1rem !important;
+        padding: 0.85rem !important;
+        box-sizing: border-box !important;
     }
     .modal-header, .modal-footer {
-        padding: 0.75rem 1rem !important;
+        padding: 0.75rem 0.85rem !important;
+    }
+    .row {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 0.5rem !important;
+        margin: 0 !important;
+    }
+    .col-6, .col-4 {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+    }
+    .card-glow, .donezo-card {
+        padding: 0.85rem !important;
+        border-radius: 14px !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
 }
 

@@ -70,7 +70,7 @@ export class SettingsModule {
         if (subTab === 'members') {
             return `
                 <div class="card-glow p-4">
-                    <div class="toolbar-row d-flex justify-content-between align-items-center mb-3">
+                    <div class="toolbar-row d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                         <h3 class="m-0 font-size-md" style="font-weight: 800; font-size: 1.15rem;">👥 Vorstandsmitglieder verwalten (${members.length} Personen)</h3>
                         <button class="btn btn-donezo-primary btn-sm" id="add-member-inline-btn">➕ Neues Mitglied</button>
                     </div>
@@ -121,7 +121,7 @@ export class SettingsModule {
         } else if (subTab === 'categories') {
             return `
                 <div class="card-glow p-4">
-                    <div class="toolbar-row d-flex justify-content-between align-items-center mb-3">
+                    <div class="toolbar-row d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                         <h3 class="m-0 font-size-md" style="font-weight: 800; font-size: 1.15rem;">🏷️ Aufgaben-Kategorien verwalten (${categories.length})</h3>
                         <button class="btn btn-donezo-primary btn-sm" id="add-category-btn">➕ Neue Kategorie</button>
                     </div>
@@ -213,7 +213,7 @@ export class SettingsModule {
                         </p>
 
                         <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
-                            <div style="position: relative; width: 270px;">
+                            <div class="settings-code-input-wrapper" style="position: relative; width: 270px;">
                                 <input type="password" id="central-code-settings-input" class="form-control form-control-sm" placeholder="Neues Passwort (Buchstaben & Zahlen)..." style="font-weight: bold; font-size: 0.95rem; padding-right: 32px;" />
                                 <button type="button" id="toggle-settings-central-code-btn" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 0.95rem; cursor: pointer; color: var(--text-muted);" title="Passwort anzeigen">👁️</button>
                             </div>
@@ -238,7 +238,7 @@ export class SettingsModule {
                         </p>
 
                         <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
-                            <div style="position: relative; width: 270px;">
+                            <div class="settings-code-input-wrapper" style="position: relative; width: 270px;">
                                 <input type="password" id="backend-pin-input" class="form-control form-control-sm" maxlength="12" placeholder="Neuer Tresor-PIN..." style="font-weight: bold; font-size: 0.95rem; padding-right: 32px;" />
                                 <button type="button" id="toggle-settings-vault-pin-btn" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 0.95rem; cursor: pointer; color: var(--text-muted);" title="PIN anzeigen">👁️</button>
                             </div>

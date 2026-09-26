@@ -47,7 +47,7 @@ export class FinanceModule {
 
                 <!-- Main Transactions Journal Box -->
                 <div class="card-glow p-4">
-                    <div class="d-flex align-items-center justify-content-between mb-3 pb-2" style="border-bottom: 1px solid var(--border-subtle);">
+                    <div class="d-flex align-items-center justify-content-between mb-3 pb-2 flex-wrap gap-2" style="border-bottom: 1px solid var(--border-subtle);">
                         <h3 class="m-0" style="color: var(--text-primary); font-weight: 800; font-size: 1.15rem;">
                             📜 Transaktions-Journal (${finances.length} Einträge)
                         </h3>
