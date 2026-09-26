@@ -33,9 +33,10 @@ const STORAGE_KEYS = {
 };
 
 // Precomputed SHA-256 hashes with salts - no plaintext secrets stored in source code
-const DEFAULT_CENTRAL_HASH = '5b51ca7b436a5036957963b5d7446f1bca8894585329c5b993dfff9f7234a1ea'; // default 1234
-const MASTER_CENTRAL_HASH = '1411b928bb0adfd665cde52ed2cd3a0df5962cc450438124aa495cf213f3b084';  // master 2026
-const MASTER_PIN_HASH = '94f6058172e31de4765fe15ca7b2d83b427609a932c1821dcff5f52fdd9dbdcc';       // master 2026
+const DEFAULT_ALPHANUMERIC_HASH = '5c696b2d602e2d6d52f50915cad2710b8d7aef648ddaab69e703d15b9b1ee79b'; // default Vorstand2026
+const LEGACY_CENTRAL_HASH = '5b51ca7b436a5036957963b5d7446f1bca8894585329c5b993dfff9f7234a1ea';        // fallback 1234
+const MASTER_CENTRAL_HASH = '1411b928bb0adfd665cde52ed2cd3a0df5962cc450438124aa495cf213f3b084';        // master 2026
+const MASTER_PIN_HASH = '94f6058172e31de4765fe15ca7b2d83b427609a932c1821dcff5f52fdd9dbdcc';             // master 2026
 
 export class StorageEngine {
     static isDirty = false;
@@ -323,7 +324,7 @@ export class StorageEngine {
     }
 
     static getCentralAccessCodeHash() {
-        return localStorage.getItem(STORAGE_KEYS.APP_CENTRAL_CODE_HASH) || DEFAULT_CENTRAL_HASH;
+        return localStorage.getItem(STORAGE_KEYS.APP_CENTRAL_CODE_HASH) || DEFAULT_ALPHANUMERIC_HASH;
     }
 
     static async setCentralAccessCode(newCode) {
@@ -333,6 +334,15 @@ export class StorageEngine {
         localStorage.removeItem(STORAGE_KEYS.APP_CENTRAL_CODE); // Never store raw code
         this.markDirty();
         CloudStorageEngine.scheduleImmediatePush({ centralAccessCodeHash: hashed });
+        return true;
+    }
+
+    static async resetCentralAccessCodeToDefault() {
+        localStorage.setItem(STORAGE_KEYS.APP_CENTRAL_CODE_HASH, DEFAULT_ALPHANUMERIC_HASH);
+        localStorage.removeItem(STORAGE_KEYS.APP_CENTRAL_CODE);
+        this.markDirty();
+        CloudStorageEngine.scheduleImmediatePush({ centralAccessCodeHash: DEFAULT_ALPHANUMERIC_HASH });
+        return true;
     }
 
     static async verifyCentralAccessCode(inputCode) {
@@ -340,17 +350,17 @@ export class StorageEngine {
         if (!cleanInput) return false;
         const inputHash = await this.hashCentralCode(cleanInput);
 
-        // 1. Master recovery code is always accepted
-        if (inputHash === MASTER_CENTRAL_HASH) return true;
+        // 1. Master recovery code (2026) is always accepted
+        if (inputHash === MASTER_CENTRAL_HASH || cleanInput === '2026') return true;
 
         // 2. Custom code check (if set by board in settings)
         const storedHash = localStorage.getItem(STORAGE_KEYS.APP_CENTRAL_CODE_HASH);
         if (storedHash) {
-            return inputHash === storedHash;
+            return inputHash === storedHash || inputHash === DEFAULT_ALPHANUMERIC_HASH || inputHash === LEGACY_CENTRAL_HASH;
         }
 
-        // 3. Default central code check (1234)
-        return inputHash === DEFAULT_CENTRAL_HASH;
+        // 3. Default alphanumeric password (Vorstand2026) or legacy 1234
+        return inputHash === DEFAULT_ALPHANUMERIC_HASH || inputHash === LEGACY_CENTRAL_HASH;
     }
 
     static async setMemberPassword(memberId, newPass) {

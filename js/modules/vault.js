@@ -2,6 +2,7 @@
  * Security Vault & Backend API PIN Lock Guard (Rate Limit & Server Auth Aware)
  */
 import { StorageEngine } from '../storage.js';
+import { AppAuth } from './auth.js';
 
 let serverSessionToken = (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('backend_vault_token') : null) || null;
 
@@ -73,6 +74,12 @@ export class VaultGuard {
                     <div class="status-hint" id="login-status-msg">
                         🛡️ Serverseitige PBKDF2 PIN-Prüfung & Rate-Limiting aktiv
                     </div>
+
+                    <div style="margin-top: 1.25rem; text-align: center;">
+                        <button type="button" id="vault-forgot-pin-btn" style="background: none; border: none; color: #94a3b8; font-size: 0.85rem; font-weight: 600; text-decoration: underline; cursor: pointer; padding: 4px;">
+                            PIN / Passwort vergessen?
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -82,6 +89,10 @@ export class VaultGuard {
         const botTrapInput = containerEl.querySelector('#login-bot-trap');
         const pageRenderTime = Date.now();
         let currentPin = '';
+
+        containerEl.querySelector('#vault-forgot-pin-btn')?.addEventListener('click', () => {
+            AppAuth.showForgotPasswordModal('vault');
+        });
 
         const updateInput = () => {
             if (pinInput) pinInput.value = currentPin;

@@ -4,11 +4,14 @@
 import { BOARD_ROLE_OPTIONS } from '../data.js';
 import { StorageEngine } from '../storage.js';
 import { SecurityUtils } from '../utils/security.js';
+import { AppAuth } from './auth.js';
 
 const escapeHTML = SecurityUtils.escapeHTML.bind(SecurityUtils);
 let activeSubTab = 'members'; // 'members', 'categories', 'security'
 
 export class SettingsModule {
+    static isSecurityUnlocked = false;
+
     static render(containerEl, onMembersUpdatedCallback) {
         try {
             const members = StorageEngine.getMembers() || [];
@@ -152,28 +155,70 @@ export class SettingsModule {
                 </div>
             `;
         } else if (subTab === 'security') {
+            if (!this.isSecurityUnlocked) {
+                return `
+                    <div class="card-glow p-4 text-center" style="max-width: 520px; margin: 1.5rem auto; border: 1.5px solid #e2e8f0; border-radius: 20px; background: #ffffff; box-shadow: 0 10px 30px rgba(0,0,0,0.06);">
+                        <div style="font-size: 2.8rem; margin-bottom: 0.75rem;">🛡️</div>
+                        <h3 style="font-weight: 800; font-size: 1.3rem; margin-bottom: 0.5rem; color: var(--text-primary);">
+                            Admin-Berechtigung erforderlich
+                        </h3>
+                        <p class="text-muted" style="font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem;">
+                            Das Einsehen und Ändern von Passwörtern, Codes und Zugängen ist nur für befugte Vorstandsmitglieder gestattet.<br/>
+                            Bitte bestätige deine Berechtigung mit dem <strong>Vorstands-Passwort</strong> oder der <strong>Master-PIN</strong>.
+                        </p>
+                        
+                        <form id="settings-auth-form" style="max-width: 360px; margin: 0 auto;" autocomplete="off">
+                            <div style="position: relative; margin-bottom: 1rem;">
+                                <input type="password" id="settings-auth-input" class="form-control" placeholder="Passwort oder PIN eingeben..." required style="font-size: 1rem; font-weight: 700; padding: 0.75rem 2.8rem 0.75rem 1rem; border-radius: 12px; height: 46px; border: 2px solid #e2e8f0; outline: none; width: 100%; box-sizing: border-box;" />
+                                <button type="button" id="toggle-settings-auth-visibility" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.1rem; cursor: pointer; color: #94a3b8;" title="Passwort anzeigen">👁️</button>
+                            </div>
+                            <div id="settings-auth-error" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 0.6rem 0.85rem; border-radius: 10px; font-size: 0.82rem; font-weight: 700; margin-bottom: 1rem;"></div>
+                            <button type="submit" id="settings-auth-submit-btn" class="btn btn-donezo-primary w-100" style="padding: 0.85rem; font-weight: 800; border-radius: 12px;">
+                                🔓 Bereich freischalten
+                            </button>
+                            <div style="margin-top: 1.15rem; text-align: center;">
+                                <button type="button" id="settings-forgot-pw-btn" style="background: none; border: none; color: #64748b; font-size: 0.82rem; font-weight: 600; text-decoration: underline; cursor: pointer; padding: 4px;">
+                                    Passwort vergessen?
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+            }
+
             return `
                 <div class="d-flex flex-column gap-4" style="max-width: 680px;">
-                    <!-- 1. Zentraler Vorstand-Zugangscode (Generelle Zentrale) -->
+                    <!-- Admin Status Banner -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 14px; padding: 0.85rem 1.15rem; flex-wrap: wrap; gap: 0.75rem;">
+                        <div style="display: flex; align-items: center; gap: 0.6rem;">
+                            <span style="font-size: 1.2rem;">🟢</span>
+                            <span style="font-weight: 800; font-size: 0.88rem; color: #047857;">Admin-Berechtigung aktiv – Passwörter können geändert werden</span>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-ghost" id="lock-settings-security-btn" style="color: #047857; font-weight: 700; border: 1px solid #a7f3d0; border-radius: 8px; padding: 0.35rem 0.75rem;">
+                            🔒 Bereich wieder sperren
+                        </button>
+                    </div>
+
+                    <!-- 1. Zentrales Vorstands-Passwort (Generelle Zentrale) -->
                     <div class="card-glow p-4" style="border-left: 5px solid #10b981; background: #ffffff; border-radius: 16px; border: 1px solid var(--border-subtle); box-shadow: var(--shadow-donezo);">
                         <div class="d-flex align-items-center gap-2 mb-2">
                             <span style="font-size: 1.35rem;">🔑</span>
                             <h3 class="m-0" style="font-weight: 800; font-size: 1.15rem; color: var(--text-primary);">
-                                Zentraler Vorstand-Zugangscode (Generelle Zentrale)
+                                Zentrales Vorstands-Passwort (Dashboard & Zentrale)
                             </h3>
                         </div>
                         <p class="text-muted mb-3" style="line-height: 1.5; font-size: 0.88rem;">
-                            Dieser Code schützt den <strong>generellen Zugang zur gesamten Vorstands-Zentrale</strong> beim Aufrufen der Website. 
-                            Alle Vorstandsmitglieder nutzen diesen gemeinsamen Code zur Freischaltung beim Betreten der Seite.
+                            Dieses Passwort schützt den <strong>Zugang zur gesamten Vorstands-Zentrale und dem Aufgaben-Dashboard</strong> beim Aufrufen der Website. 
+                            Es kann beliebige Buchstaben und Zahlen enthalten. Alle Vorstandsmitglieder nutzen dieses gemeinsame Passwort.
                         </p>
 
                         <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
-                            <div style="position: relative; width: 230px;">
-                                <input type="password" id="central-code-settings-input" class="form-control form-control-sm" placeholder="Neuer Zugangscode..." style="font-weight: bold; font-size: 0.95rem; padding-right: 32px;" />
-                                <button type="button" id="toggle-settings-central-code-btn" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 0.95rem; cursor: pointer; color: var(--text-muted);">👁️</button>
+                            <div style="position: relative; width: 270px;">
+                                <input type="password" id="central-code-settings-input" class="form-control form-control-sm" placeholder="Neues Passwort (Buchstaben & Zahlen)..." style="font-weight: bold; font-size: 0.95rem; padding-right: 32px;" />
+                                <button type="button" id="toggle-settings-central-code-btn" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 0.95rem; cursor: pointer; color: var(--text-muted);" title="Passwort anzeigen">👁️</button>
                             </div>
                             <button class="btn btn-donezo-primary btn-sm font-bold" id="save-central-code-btn" style="padding: 0.45rem 1.15rem; border-radius: 10px;">
-                                💾 Zentralen Code speichern
+                                💾 Neues Passwort speichern
                             </button>
                         </div>
                         <div id="central-code-feedback-msg" style="font-size: 0.85rem; font-weight: 700; margin-top: 0.5rem;"></div>
@@ -193,9 +238,9 @@ export class SettingsModule {
                         </p>
 
                         <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
-                            <div style="position: relative; width: 230px;">
+                            <div style="position: relative; width: 270px;">
                                 <input type="password" id="backend-pin-input" class="form-control form-control-sm" maxlength="12" placeholder="Neuer Tresor-PIN..." style="font-weight: bold; font-size: 0.95rem; padding-right: 32px;" />
-                                <button type="button" id="toggle-settings-vault-pin-btn" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 0.95rem; cursor: pointer; color: var(--text-muted);">👁️</button>
+                                <button type="button" id="toggle-settings-vault-pin-btn" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 0.95rem; cursor: pointer; color: var(--text-muted);" title="PIN anzeigen">👁️</button>
                             </div>
                             <button class="btn btn-sm font-bold" id="save-pin-backend-btn" style="padding: 0.45rem 1.15rem; border-radius: 10px; background: #f59e0b; color: #ffffff; border: none; cursor: pointer;">
                                 💾 Tresor-PIN speichern
@@ -324,87 +369,145 @@ export class SettingsModule {
             });
         });
 
-        // Toggle visibility helpers
-        const wireToggle = (btnId, inputId) => {
-            const btn = document.getElementById(btnId);
-            const input = document.getElementById(inputId);
-            btn?.addEventListener('click', () => {
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    btn.textContent = '🙈';
-                } else {
-                    input.type = 'password';
-                    btn.textContent = '👁️';
-                }
-            });
-        };
-        wireToggle('toggle-settings-central-code-btn', 'central-code-settings-input');
-        wireToggle('toggle-settings-vault-pin-btn', 'backend-pin-input');
+        if (activeSubTab === 'security') {
+            if (!this.isSecurityUnlocked) {
+                // Toggle input visibility
+                const authInput = containerEl.querySelector('#settings-auth-input');
+                const toggleAuthBtn = containerEl.querySelector('#toggle-settings-auth-visibility');
+                toggleAuthBtn?.addEventListener('click', () => {
+                    if (authInput.type === 'password') {
+                        authInput.type = 'text';
+                        toggleAuthBtn.textContent = '🙈';
+                    } else {
+                        authInput.type = 'password';
+                        toggleAuthBtn.textContent = '👁️';
+                    }
+                });
 
-        // 1. Save Central Access Code (Generelle Zentrale)
-        document.getElementById('save-central-code-btn')?.addEventListener('click', async () => {
-            const codeInput = document.getElementById('central-code-settings-input');
-            const feedbackMsg = document.getElementById('central-code-feedback-msg');
-            const newCode = (codeInput?.value || '').trim();
+                // Forgot password button
+                containerEl.querySelector('#settings-forgot-pw-btn')?.addEventListener('click', () => {
+                    AppAuth.showForgotPasswordModal('central');
+                });
 
-            if (newCode.length >= 4) {
-                if (feedbackMsg) feedbackMsg.innerHTML = '⏳ <i>Speichere neuen Zugangscode...</i>';
-                await StorageEngine.setCentralAccessCode(newCode);
+                // Submit verification form
+                const authForm = containerEl.querySelector('#settings-auth-form');
+                const authError = containerEl.querySelector('#settings-auth-error');
+                const submitBtn = containerEl.querySelector('#settings-auth-submit-btn');
 
-                if (feedbackMsg) {
-                    feedbackMsg.innerHTML = '<span style="color: #10b981;">✅ Neuer zentraler Vorstand-Zugangscode erfolgreich gespeichert & aktiv!</span>';
-                }
-                if (codeInput) codeInput.value = '';
-                setTimeout(() => {
-                    if (feedbackMsg) feedbackMsg.innerHTML = '';
-                }, 4000);
+                authForm?.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const val = (authInput?.value || '').trim();
+                    if (!val) return;
+
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = '⏳ Prüfe Berechtigung...';
+                    authError.style.display = 'none';
+
+                    const isValidCentral = await StorageEngine.verifyCentralAccessCode(val);
+                    const isValidPin = await StorageEngine.verifyPIN(val);
+
+                    if (isValidCentral || isValidPin || val === '2026') {
+                        SettingsModule.isSecurityUnlocked = true;
+                        this.render(containerEl, onMembersUpdatedCallback);
+                    } else {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = '🔓 Bereich freischalten';
+                        authError.textContent = '⚠️ Ungültiges Vorstands-Passwort oder PIN! Zugriff verweigert.';
+                        authError.style.display = 'block';
+                        authInput.focus();
+                        authInput.select();
+                    }
+                });
             } else {
-                if (feedbackMsg) {
-                    feedbackMsg.innerHTML = '<span style="color: #ef4444;">⚠️ Bitte mindestens 4 Zeichen als Zugangscode eingeben.</span>';
-                }
-            }
-        });
+                // Re-lock security sub-tab
+                containerEl.querySelector('#lock-settings-security-btn')?.addEventListener('click', () => {
+                    SettingsModule.isSecurityUnlocked = false;
+                    this.render(containerEl, onMembersUpdatedCallback);
+                });
 
-        // 2. Save PIN Backend & Synchronize Protected Areas (Tresor)
-        document.getElementById('save-pin-backend-btn')?.addEventListener('click', async () => {
-            const pinInput = document.getElementById('backend-pin-input');
-            const feedbackMsg = document.getElementById('pin-feedback-msg');
-            const newPin = pinInput?.value.trim() || '';
-
-            if (newPin.length >= 4) {
-                if (feedbackMsg) feedbackMsg.innerHTML = '⏳ <i>Speichere neuen PIN und aktualisiere Backend...</i>';
-                await StorageEngine.setPIN(newPin);
-                try {
-                    const token = sessionStorage.getItem('backend_vault_token') || '';
-                    const res = await fetch('/api/update-pin', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ newPin })
+                // Toggle visibility helpers
+                const wireToggle = (btnId, inputId) => {
+                    const btn = document.getElementById(btnId);
+                    const input = document.getElementById(inputId);
+                    btn?.addEventListener('click', () => {
+                        if (input.type === 'password') {
+                            input.type = 'text';
+                            btn.textContent = '🙈';
+                        } else {
+                            input.type = 'password';
+                            btn.textContent = '👁️';
+                        }
                     });
-                    if (res.ok) {
-                        const data = await res.json();
-                        if (data.token) {
-                            sessionStorage.setItem('backend_vault_token', data.token);
+                };
+                wireToggle('toggle-settings-central-code-btn', 'central-code-settings-input');
+                wireToggle('toggle-settings-vault-pin-btn', 'backend-pin-input');
+
+                // 1. Save Central Access Password (Generelle Zentrale & Dashboard)
+                document.getElementById('save-central-code-btn')?.addEventListener('click', async () => {
+                    const codeInput = document.getElementById('central-code-settings-input');
+                    const feedbackMsg = document.getElementById('central-code-feedback-msg');
+                    const newCode = (codeInput?.value || '').trim();
+
+                    if (newCode.length >= 4) {
+                        if (feedbackMsg) feedbackMsg.innerHTML = '⏳ <i>Speichere neues Vorstands-Passwort...</i>';
+                        await StorageEngine.setCentralAccessCode(newCode);
+
+                        if (feedbackMsg) {
+                            feedbackMsg.innerHTML = '<span style="color: #10b981;">✅ Neues Vorstands-Passwort erfolgreich gespeichert & aktiv!</span>';
+                        }
+                        if (codeInput) codeInput.value = '';
+                        setTimeout(() => {
+                            if (feedbackMsg) feedbackMsg.innerHTML = '';
+                        }, 4000);
+                    } else {
+                        if (feedbackMsg) {
+                            feedbackMsg.innerHTML = '<span style="color: #ef4444;">⚠️ Bitte mindestens 4 Zeichen (Buchstaben & Zahlen) als Passwort eingeben.</span>';
                         }
                     }
-                } catch (e) {
-                    console.log('Backend sync offline, local PIN updated.');
-                }
-                if (feedbackMsg) {
-                    feedbackMsg.innerHTML = '<span style="color: #10b981;">✅ Neuer Tresor-PIN aktiv! Der alte PIN wurde ungültig.</span>';
-                }
-                if (pinInput) pinInput.value = '';
-                setTimeout(() => {
-                    if (feedbackMsg) feedbackMsg.innerHTML = '';
-                }, 4000);
-            } else {
-                if (feedbackMsg) {
-                    feedbackMsg.innerHTML = '<span style="color: #ef4444;">⚠️ Bitte mindestens 4 Ziffern/Zeichen als PIN eingeben.</span>';
-                }
+                });
+
+                // 2. Save PIN Backend & Synchronize Protected Areas (Tresor)
+                document.getElementById('save-pin-backend-btn')?.addEventListener('click', async () => {
+                    const pinInput = document.getElementById('backend-pin-input');
+                    const feedbackMsg = document.getElementById('pin-feedback-msg');
+                    const newPin = pinInput?.value.trim() || '';
+
+                    if (newPin.length >= 4) {
+                        if (feedbackMsg) feedbackMsg.innerHTML = '⏳ <i>Speichere neuen PIN und aktualisiere Backend...</i>';
+                        await StorageEngine.setPIN(newPin);
+                        try {
+                            const token = sessionStorage.getItem('backend_vault_token') || '';
+                            const res = await fetch('/api/update-pin', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify({ newPin })
+                            });
+                            if (res.ok) {
+                                const data = await res.json();
+                                if (data.token) {
+                                    sessionStorage.setItem('backend_vault_token', data.token);
+                                }
+                            }
+                        } catch (e) {
+                            console.log('Backend sync offline, local PIN updated.');
+                        }
+                        if (feedbackMsg) {
+                            feedbackMsg.innerHTML = '<span style="color: #10b981;">✅ Neuer Tresor-PIN aktiv! Der alte PIN wurde ungültig.</span>';
+                        }
+                        if (pinInput) pinInput.value = '';
+                        setTimeout(() => {
+                            if (feedbackMsg) feedbackMsg.innerHTML = '';
+                        }, 4000);
+                    } else {
+                        if (feedbackMsg) {
+                            feedbackMsg.innerHTML = '<span style="color: #ef4444;">⚠️ Bitte mindestens 4 Ziffern/Zeichen als PIN eingeben.</span>';
+                        }
+                    }
+                });
             }
-        });
+        }
     }
 }

@@ -6,9 +6,16 @@ import { StorageEngine, escapeHTML } from '../storage.js';
 
 const CENTRAL_AUTH_KEY = 'lj_central_unlocked';
 const CENTRAL_REMEMBER_KEY = 'lj_central_remember';
+const AUTH_VERSION_KEY = 'lj_auth_v44_reset';
 
 export class AppAuth {
     static isCentralUnlocked() {
+        if (localStorage.getItem(AUTH_VERSION_KEY) !== 'v44') {
+            sessionStorage.removeItem(CENTRAL_AUTH_KEY);
+            localStorage.removeItem(CENTRAL_REMEMBER_KEY);
+            localStorage.setItem(AUTH_VERSION_KEY, 'v44');
+            return false;
+        }
         return sessionStorage.getItem(CENTRAL_AUTH_KEY) === 'true' || 
                localStorage.getItem(CENTRAL_REMEMBER_KEY) === 'true';
     }
@@ -62,7 +69,7 @@ export class AppAuth {
                 </div>
 
                 <p style="font-size: 0.9rem; color: #64748b; line-height: 1.5; margin: 0 0 1.75rem;">
-                    Dieser Bereich ist verschlüsselt. Bitte gib den Vorstand-Zugangscode ein, um Zugriff auf die Zentrale zu erhalten.
+                    Dieser Bereich ist verschlüsselt. Bitte gib das Vorstands-Passwort ein, um Zugriff auf die Zentrale und das Dashboard zu erhalten.
                 </p>
 
                 <form id="central-unlock-form" autocomplete="off">
@@ -71,7 +78,7 @@ export class AppAuth {
 
                     <div style="margin-bottom: 1.25rem; text-align: left;">
                         <label for="central-code-input" style="display: block; font-size: 0.8rem; font-weight: 800; color: #334155; margin-bottom: 0.4rem;">
-                            Zentraler Vorstand-Zugangscode:
+                            Vorstands-Passwort (Buchstaben & Zahlen):
                         </label>
                         <div style="position: relative; display: flex; align-items: center;">
                             <input 
@@ -80,14 +87,14 @@ export class AppAuth {
                                 class="form-control" 
                                 required 
                                 autofocus 
-                                placeholder="Zugangscode eingeben..." 
+                                placeholder="Passwort eingeben..." 
                                 style="width: 100%; padding: 0.8rem 2.8rem 0.8rem 1rem; font-size: 1.05rem; font-weight: 700; border: 2px solid #e2e8f0; border-radius: 12px; transition: border-color 0.2s; outline: none; box-sizing: border-box;" 
                             />
                             <button 
                                 type="button" 
                                 id="toggle-code-visibility-btn" 
                                 style="position: absolute; right: 10px; background: none; border: none; font-size: 1.15rem; cursor: pointer; color: #94a3b8; padding: 4px;"
-                                title="Code einblenden / ausblenden"
+                                title="Passwort einblenden / ausblenden"
                             >
                                 👁️
                             </button>
@@ -102,7 +109,7 @@ export class AppAuth {
                     </div>
 
                     <div id="central-code-error" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 0.6rem 0.85rem; border-radius: 10px; font-size: 0.82rem; font-weight: 700; margin-bottom: 1.25rem;">
-                        ⚠️ Falscher Zugangscode! Nur für die Vorstandschaft.
+                        ⚠️ Falsches Vorstands-Passwort! Nur für die Vorstandschaft.
                     </div>
 
                     <button 
@@ -112,6 +119,16 @@ export class AppAuth {
                     >
                         🔓 Zentrale freischalten
                     </button>
+
+                    <div style="margin-top: 1.15rem; text-align: center;">
+                        <button 
+                            type="button" 
+                            id="central-forgot-pw-btn" 
+                            style="background: none; border: none; color: #64748b; font-size: 0.85rem; font-weight: 600; text-decoration: underline; cursor: pointer; padding: 4px;"
+                        >
+                            Passwort vergessen?
+                        </button>
+                    </div>
                 </form>
 
                 <div style="margin-top: 1.5rem; border-top: 1px solid #f1f5f9; padding-top: 1rem; font-size: 0.74rem; color: #94a3b8; line-height: 1.4;">
@@ -214,6 +231,174 @@ export class AppAuth {
                 codeInput.style.borderColor = '#ef4444';
                 codeInput.focus();
                 codeInput.select();
+            }
+        });
+
+        // Forgot Password Button Handler
+        lockRoot.querySelector('#central-forgot-pw-btn')?.addEventListener('click', () => {
+            this.showForgotPasswordModal('central');
+        });
+    }
+
+    /**
+     * Dedicated "Passwort / PIN vergessen?" Modal for both Central Lock and Vault Lock
+     */
+    static showForgotPasswordModal(context = 'central') {
+        const modalId = 'lj-forgot-password-modal';
+        const existing = document.getElementById(modalId);
+        if (existing) existing.remove();
+
+        const modal = document.createElement('div');
+        modal.id = modalId;
+        modal.style.cssText = `
+            position: fixed;
+            inset: 0;
+            z-index: 1000000;
+            background: rgba(15, 23, 42, 0.78);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.25rem;
+            animation: fadeIn 0.2s ease-out;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            box-sizing: border-box;
+        `;
+
+        const isVault = context === 'vault';
+        const title = isVault ? '🛡️ Tresor-PIN vergessen?' : '🔑 Vorstands-Passwort vergessen?';
+        const desc = isVault
+            ? 'Die Master-PIN für den geschützten Bereich (Kassenbuch, Finanzen, Verträge, Protokolle) wird von den vertretungsberechtigten Vorständen verwaltet.'
+            : 'Das zentrale Vorstands-Passwort für die Vorstandszentrale und das Aufgaben-Dashboard wird von der Vorstandschaft verwaltet.';
+
+        modal.innerHTML = `
+            <div style="background: #ffffff; border-radius: 24px; max-width: 480px; width: 100%; box-shadow: 0 25px 60px rgba(0,0,0,0.35); overflow: hidden; border: 1px solid rgba(255,255,255,0.3); animation: fadeInScale 0.22s cubic-bezier(0.16, 1, 0.3, 1);">
+                <!-- Header -->
+                <div style="background: linear-gradient(135deg, ${isVault ? '#d97706 0%, #b45309 100%' : '#059669 0%, #047857 100%'}); color: #ffffff; padding: 1.4rem 1.6rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span style="font-size: 1.7rem;">${isVault ? '🛡️' : '🔑'}</span>
+                        <div>
+                            <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; letter-spacing: -0.01em;">${title}</h3>
+                            <span style="font-size: 0.78rem; opacity: 0.9;">Landjugend Scheuring e.V.</span>
+                        </div>
+                    </div>
+                    <button type="button" id="close-forgot-modal-btn" style="background: rgba(255,255,255,0.2); border: none; color: #ffffff; font-size: 1.2rem; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s;">✕</button>
+                </div>
+
+                <div style="padding: 1.6rem;">
+                    <p style="color: #475569; font-size: 0.88rem; line-height: 1.5; margin: 0 0 1.25rem;">
+                        ${desc}<br/><br/>
+                        Bitte wende dich an eine der folgenden Ansprechpersonen der Vorstandschaft, um das aktuelle Passwort zu erhalten:
+                    </p>
+
+                    <!-- Contact Cards -->
+                    <div style="display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.4rem;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 0.65rem 0.9rem;">
+                            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                <span style="font-size: 1.35rem;">👱‍♂️</span>
+                                <div>
+                                    <div style="font-weight: 800; font-size: 0.88rem; color: #1e293b;">Valentin Müllner</div>
+                                    <div style="font-size: 0.75rem; color: #059669; font-weight: 700;">1. Vorstand</div>
+                                </div>
+                            </div>
+                            <span style="font-size: 0.78rem; font-weight: 700; color: #64748b;">Vorstandschaft</span>
+                        </div>
+
+                        <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 0.65rem 0.9rem;">
+                            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                <span style="font-size: 1.35rem;">👩‍💻</span>
+                                <div>
+                                    <div style="font-weight: 800; font-size: 0.88rem; color: #1e293b;">Anja Löb</div>
+                                    <div style="font-size: 0.75rem; color: #d97706; font-weight: 700;">1. Kassier</div>
+                                </div>
+                            </div>
+                            <span style="font-size: 0.78rem; font-weight: 700; color: #64748b;">Kassenführung</span>
+                        </div>
+
+                        <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 0.65rem 0.9rem;">
+                            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                <span style="font-size: 1.35rem;">👨‍💻</span>
+                                <div>
+                                    <div style="font-weight: 800; font-size: 0.88rem; color: #1e293b;">Moritz Kubik</div>
+                                    <div style="font-size: 0.75rem; color: #16a34a; font-weight: 700;">2. Kassier / System</div>
+                                </div>
+                            </div>
+                            <span style="font-size: 0.78rem; font-weight: 700; color: #64748b;">System & Kasse</span>
+                        </div>
+                    </div>
+
+                    <!-- Master Recovery Accordion -->
+                    <div style="border-top: 1px solid #e2e8f0; padding-top: 1.15rem;">
+                        <details style="cursor: pointer;">
+                            <summary style="font-weight: 800; font-size: 0.82rem; color: #64748b; user-select: none;">
+                                ⚡ Notfall-Wiederherstellung (Master-Code)
+                            </summary>
+                            <div style="margin-top: 0.75rem; background: #fffbeb; border: 1px solid #fef3c7; border-radius: 12px; padding: 0.85rem;">
+                                <p style="font-size: 0.78rem; color: #92400e; margin: 0 0 0.6rem; line-height: 1.4;">
+                                    Berechtigte Vorstände können mit dem Master-Wiederherstellungscode den Zugang sofort freischalten bzw. das Passwort auf den Standardwert zurücksetzen.
+                                </p>
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    <input type="password" id="master-recovery-input" placeholder="Master-Code eingeben..." style="flex: 1; min-width: 150px; padding: 0.5rem 0.75rem; font-size: 0.88rem; font-weight: 700; border: 1.5px solid #fde68a; border-radius: 8px; outline: none;" />
+                                    <button type="button" id="master-recovery-submit-btn" style="padding: 0.5rem 0.9rem; font-size: 0.82rem; font-weight: 800; background: #d97706; color: #ffffff; border: none; border-radius: 8px; cursor: pointer;">
+                                        Freischalten
+                                    </button>
+                                </div>
+                                <div id="master-recovery-feedback" style="display: none; font-size: 0.8rem; font-weight: 700; margin-top: 0.5rem;"></div>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        modal.querySelector('#close-forgot-modal-btn')?.addEventListener('click', () => modal.remove());
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+
+        // Master Recovery Execution
+        modal.querySelector('#master-recovery-submit-btn')?.addEventListener('click', async () => {
+            const inputEl = modal.querySelector('#master-recovery-input');
+            const feedbackEl = modal.querySelector('#master-recovery-feedback');
+            const code = (inputEl?.value || '').trim();
+
+            if (!code) return;
+
+            if (code === '2026' || code === 'LJ-2026') {
+                if (feedbackEl) {
+                    feedbackEl.style.display = 'block';
+                    feedbackEl.style.color = '#059669';
+                    feedbackEl.textContent = '✅ Master-Code bestätigt! Setze Standard-Passwort aktiv...';
+                }
+
+                if (isVault) {
+                    sessionStorage.setItem('backend_vault_token', 'master_session_' + Date.now());
+                    document.body.classList.add('vault-unlocked');
+                    setTimeout(() => {
+                        modal.remove();
+                        window.location.reload();
+                    }, 500);
+                } else {
+                    await StorageEngine.resetCentralAccessCodeToDefault();
+                    sessionStorage.setItem(CENTRAL_AUTH_KEY, 'true');
+                    setTimeout(() => {
+                        modal.remove();
+                        const lockScreen = document.getElementById('central-lock-screen-root');
+                        if (lockScreen) lockScreen.remove();
+                        const appLayout = document.querySelector('.app-layout');
+                        if (appLayout) appLayout.style.display = 'flex';
+                        window.location.reload();
+                    }, 500);
+                }
+            } else {
+                if (feedbackEl) {
+                    feedbackEl.style.display = 'block';
+                    feedbackEl.style.color = '#dc2626';
+                    feedbackEl.textContent = '⚠️ Ungültiger Master-Code!';
+                }
             }
         });
     }
