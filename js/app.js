@@ -40,16 +40,30 @@ class App {
         }
     }
 
-    static showMainApp() {
+    static async showMainApp() {
         const appLayout = document.querySelector('.app-layout');
         if (appLayout) appLayout.style.display = 'flex';
         this.renderNavbar();
         this.bindGlobalEvents();
         AutoSaveEngine.init();
+
+        // 1. Fetch authoritative live data directly from the online cloud database first
+        CloudStorageEngine.updateStatus('syncing', '🔄 Lade Live-Daten aus der Cloud...');
+        try {
+            await CloudStorageEngine.pullAllFromCloud();
+        } catch (e) {
+            console.warn('Initial cloud fetch error:', e);
+        }
+
+        // 2. Render initial view with fresh online data
+        this.renderNavbar();
+        this.switchTab(activeTab);
+
+        // 3. Listen for live updates from other devices
         CloudStorageEngine.init(() => {
+            this.renderNavbar();
             this.switchTab(activeTab);
         });
-        this.switchTab(activeTab);
     }
 
     static renderNavbar() {

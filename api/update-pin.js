@@ -71,8 +71,8 @@ module.exports = async (req, res) => {
         try { fs.writeFileSync(ROOT_FILE, JSON.stringify(currentDb, null, 2), "utf-8"); } catch (e) {}
 
         // Persist to Upstash KV if present
-        const kvUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-        const kvToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+        const kvUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || process.env.REDIS_REST_API_URL;
+        const kvToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || process.env.REDIS_REST_API_TOKEN;
         if (kvUrl && kvToken && typeof fetch === "function") {
             try {
                 const cleanUrl = kvUrl.replace(/\/$/, "");

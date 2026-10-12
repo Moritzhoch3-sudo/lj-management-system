@@ -109,23 +109,8 @@ export class StorageEngine {
         }
 
         if (tasks === null) {
-            const fallbackKeys = ['lj_tasks_v4_live', 'lj_tasks_v3_11', 'lj_tasks_v3'];
-            for (const fk of fallbackKeys) {
-                const fallbackRaw = localStorage.getItem(fk);
-                if (fallbackRaw) {
-                    try {
-                        const parsed = JSON.parse(fallbackRaw);
-                        if (Array.isArray(parsed) && parsed.length > 0) {
-                            tasks = parsed;
-                            localStorage.setItem(STORAGE_KEYS.TASKS, fallbackRaw);
-                            break;
-                        }
-                    } catch (e) {}
-                }
-            }
+            tasks = [];
         }
-
-        if (tasks === null) tasks = INITIAL_TASKS;
 
         // Strictly filter out any task that has been marked deleted
         const deletedIds = new Set(this.getDeletedTaskIds());

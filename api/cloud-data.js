@@ -51,8 +51,8 @@ module.exports = async (req, res) => {
     // Helper to get stored DB data across Vercel serverless containers
     const getStoredData = async () => {
         // 1. Upstash / Vercel KV if configured in environment
-        const kvUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-        const kvToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+        const kvUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || process.env.REDIS_REST_API_URL;
+        const kvToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || process.env.REDIS_REST_API_TOKEN;
         if (kvUrl && kvToken && typeof fetch === 'function') {
             try {
                 const cleanUrl = kvUrl.replace(/\/$/, '');
@@ -100,8 +100,8 @@ module.exports = async (req, res) => {
         memoryStore = data;
 
         // 1. Persist to Upstash / Vercel KV if available
-        const kvUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-        const kvToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+        const kvUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || process.env.REDIS_REST_API_URL;
+        const kvToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || process.env.REDIS_REST_API_TOKEN;
         if (kvUrl && kvToken && typeof fetch === 'function') {
             try {
                 const cleanUrl = kvUrl.replace(/\/$/, '');
