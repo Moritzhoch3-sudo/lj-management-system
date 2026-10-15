@@ -6,23 +6,39 @@ import { StorageEngine, escapeHTML } from '../storage.js';
 
 const CENTRAL_AUTH_KEY = 'lj_central_unlocked';
 const CENTRAL_REMEMBER_KEY = 'lj_central_remember';
-const AUTH_VERSION_KEY = 'lj_auth_v44_reset';
+const AUTH_VERSION_KEY = 'lj_auth_v49_multiuser';
 
 export class AppAuth {
     static isCentralUnlocked() {
-        if (localStorage.getItem(AUTH_VERSION_KEY) !== 'v44') {
+        if (localStorage.getItem(AUTH_VERSION_KEY) !== 'v49') {
             sessionStorage.removeItem(CENTRAL_AUTH_KEY);
+            sessionStorage.removeItem('lj_logged_in_user_id');
             localStorage.removeItem(CENTRAL_REMEMBER_KEY);
-            localStorage.setItem(AUTH_VERSION_KEY, 'v44');
+            localStorage.removeItem('lj_remembered_user_id');
+            localStorage.setItem(AUTH_VERSION_KEY, 'v49');
             return false;
         }
-        return sessionStorage.getItem(CENTRAL_AUTH_KEY) === 'true' || 
-               localStorage.getItem(CENTRAL_REMEMBER_KEY) === 'true';
+
+        const remUser = localStorage.getItem('lj_remembered_user_id');
+        if (remUser && localStorage.getItem(CENTRAL_REMEMBER_KEY) === 'true') {
+            StorageEngine.setCurrentUserId(remUser);
+            return true;
+        }
+
+        const sessUser = sessionStorage.getItem('lj_logged_in_user_id');
+        if (sessUser && sessionStorage.getItem(CENTRAL_AUTH_KEY) === 'true') {
+            StorageEngine.setCurrentUserId(sessUser);
+            return true;
+        }
+
+        return false;
     }
 
     static lockCentral(containerEl, onUnlockedCallback) {
         sessionStorage.removeItem(CENTRAL_AUTH_KEY);
+        sessionStorage.removeItem('lj_logged_in_user_id');
         localStorage.removeItem(CENTRAL_REMEMBER_KEY);
+        localStorage.removeItem('lj_remembered_user_id');
 
         const appLayout = document.querySelector('.app-layout');
         if (appLayout) appLayout.style.display = 'none';
@@ -63,103 +79,122 @@ export class AppAuth {
                     <img src="assets/wappen_scheuring.png" alt="Wappen Scheuring" style="width: 76px; height: 90px; object-fit: contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.15));" />
                 </div>
 
-                <h1 style="font-size: 1.55rem; font-weight: 900; color: #0f172a; margin: 0 0 0.4rem; letter-spacing: -0.02em;">Landjugend Scheuring e.V.</h1>
+                <h1 style="font-size: 1.55rem; font-weight: 900; color: #0f172a; margin: 0 0 0.35rem; letter-spacing: -0.02em;">Landjugend Scheuring e.V.</h1>
                 <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-weight: 800; font-size: 0.76rem; padding: 0.25rem 0.75rem; border-radius: 9999px; margin-bottom: 1.15rem;">
-                    <span>🔒</span> <span>Vorstands-Zentrale geschützt</span>
+                    <span>👤</span> <span>Vorstands-Zentrale Login</span>
                 </div>
 
-                <p style="font-size: 0.9rem; color: #64748b; line-height: 1.5; margin: 0 0 1.75rem;">
-                    Dieser Bereich ist verschlüsselt. Bitte gib das Vorstands-Passwort ein, um Zugriff auf die Zentrale und das Dashboard zu erhalten.
+                <p style="font-size: 0.88rem; color: #64748b; line-height: 1.5; margin: 0 0 1.5rem;">
+                    Melde dich mit deinem persönlichen Vorstands-Account an, um deine Aufgaben und Daten zu verwalten.
                 </p>
 
-                <form id="central-unlock-form" autocomplete="off">
-                    <!-- Anti-Bot Honeypot Field (Invisible to Humans) -->
+                <form id="central-login-form" autocomplete="on">
+                    <!-- Anti-Bot Honeypot Field -->
                     <input type="text" name="website_verification_trap" id="central-bot-trap" value="" style="display:none !important; position:absolute; left:-9999px;" tabindex="-1" autocomplete="off" />
 
-                    <div style="margin-bottom: 1.25rem; text-align: left;">
-                        <label for="central-code-input" style="display: block; font-size: 0.8rem; font-weight: 800; color: #334155; margin-bottom: 0.4rem;">
-                            Vorstands-Passwort (Buchstaben & Zahlen):
+                    <!-- Username Input -->
+                    <div style="margin-bottom: 1rem; text-align: left;">
+                        <label for="login-username-input" style="display: block; font-size: 0.8rem; font-weight: 800; color: #334155; margin-bottom: 0.35rem;">
+                            Benutzername oder Vorname:
+                        </label>
+                        <input 
+                            type="text" 
+                            id="login-username-input" 
+                            name="username"
+                            class="form-control" 
+                            required 
+                            autofocus 
+                            placeholder="z. B. moritz, valentin, linda..." 
+                            style="width: 100%; padding: 0.8rem 1rem; font-size: 1rem; font-weight: 700; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; box-sizing: border-box;" 
+                        />
+                    </div>
+
+                    <!-- Password Input -->
+                    <div style="margin-bottom: 1.15rem; text-align: left;">
+                        <label for="login-password-input" style="display: block; font-size: 0.8rem; font-weight: 800; color: #334155; margin-bottom: 0.35rem;">
+                            Persönliches Passwort:
                         </label>
                         <div style="position: relative; display: flex; align-items: center;">
                             <input 
                                 type="password" 
-                                id="central-code-input" 
+                                id="login-password-input" 
+                                name="password"
                                 class="form-control" 
                                 required 
-                                autofocus 
                                 placeholder="Passwort eingeben..." 
-                                style="width: 100%; padding: 0.8rem 2.8rem 0.8rem 1rem; font-size: 1.05rem; font-weight: 700; border: 2px solid #e2e8f0; border-radius: 12px; transition: border-color 0.2s; outline: none; box-sizing: border-box;" 
+                                style="width: 100%; padding: 0.8rem 2.8rem 0.8rem 1rem; font-size: 1rem; font-weight: 700; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; box-sizing: border-box;" 
                             />
                             <button 
                                 type="button" 
-                                id="toggle-code-visibility-btn" 
+                                id="toggle-login-password-btn" 
                                 style="position: absolute; right: 10px; background: none; border: none; font-size: 1.15rem; cursor: pointer; color: #94a3b8; padding: 4px;"
-                                title="Passwort einblenden / ausblenden"
+                                title="Passwort anzeigen / verbergen"
                             >
                                 👁️
                             </button>
                         </div>
                     </div>
 
-                    <div style="display: flex; align-items: center; justify-content: flex-start; gap: 0.5rem; margin-bottom: 1.5rem; text-align: left;">
-                        <input type="checkbox" id="central-remember-me" style="width: 17px; height: 17px; cursor: pointer; accent-color: #10b981;" />
-                        <label for="central-remember-me" style="font-size: 0.82rem; font-weight: 600; color: #64748b; cursor: pointer; user-select: none;">
+                    <!-- Remember Me Checkbox -->
+                    <div style="display: flex; align-items: center; justify-content: flex-start; gap: 0.5rem; margin-bottom: 1.35rem; text-align: left;">
+                        <input type="checkbox" id="login-remember-me" checked style="width: 17px; height: 17px; cursor: pointer; accent-color: #10b981;" />
+                        <label for="login-remember-me" style="font-size: 0.82rem; font-weight: 600; color: #64748b; cursor: pointer; user-select: none;">
                             Auf diesem Gerät angemeldet bleiben
                         </label>
                     </div>
 
-                    <div id="central-code-error" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 0.6rem 0.85rem; border-radius: 10px; font-size: 0.82rem; font-weight: 700; margin-bottom: 1.25rem;">
-                        ⚠️ Falsches Vorstands-Passwort! Nur für die Vorstandschaft.
-                    </div>
+                    <!-- Error Feedback -->
+                    <div id="login-error-msg" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 0.6rem 0.85rem; border-radius: 10px; font-size: 0.82rem; font-weight: 700; margin-bottom: 1.15rem;"></div>
 
+                    <!-- Submit Button -->
                     <button 
                         type="submit" 
-                        id="central-unlock-submit-btn" 
+                        id="login-submit-btn" 
                         style="width: 100%; padding: 0.85rem; font-size: 1rem; font-weight: 800; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4); transition: transform 0.15s ease, box-shadow 0.15s ease;"
                     >
-                        🔓 Zentrale freischalten
+                        🔓 Anmelden & Zentrale öffnen
                     </button>
 
                     <div style="margin-top: 1.15rem; text-align: center;">
                         <button 
                             type="button" 
-                            id="central-forgot-pw-btn" 
-                            style="background: none; border: none; color: #64748b; font-size: 0.85rem; font-weight: 600; text-decoration: underline; cursor: pointer; padding: 4px;"
+                            id="login-forgot-pw-btn" 
+                            style="background: none; border: none; color: #64748b; font-size: 0.84rem; font-weight: 600; text-decoration: underline; cursor: pointer; padding: 4px;"
                         >
-                            Passwort vergessen?
+                            Passwort vergessen / Notfall-Code?
                         </button>
                     </div>
                 </form>
 
-                <div style="margin-top: 1.5rem; border-top: 1px solid #f1f5f9; padding-top: 1rem; font-size: 0.74rem; color: #94a3b8; line-height: 1.4;">
-                    🛡️ Verschlüsselte Vorstands-Zentrale der Landjugend Scheuring e.V.
+                <div style="margin-top: 1.35rem; border-top: 1px solid #f1f5f9; padding-top: 0.85rem; font-size: 0.74rem; color: #94a3b8; line-height: 1.4;">
+                    🛡️ Sicheres Multi-User System • Landjugend Scheuring e.V.
                 </div>
             </div>
         `;
 
         containerEl.appendChild(lockRoot);
 
-        const form = lockRoot.querySelector('#central-unlock-form');
-        const codeInput = lockRoot.querySelector('#central-code-input');
-        const errorEl = lockRoot.querySelector('#central-code-error');
-        const rememberCheckbox = lockRoot.querySelector('#central-remember-me');
-        const toggleBtn = lockRoot.querySelector('#toggle-code-visibility-btn');
-        const submitBtn = lockRoot.querySelector('#central-unlock-submit-btn');
+        const form = lockRoot.querySelector('#central-login-form');
+        const usernameInput = lockRoot.querySelector('#login-username-input');
+        const passwordInput = lockRoot.querySelector('#login-password-input');
+        const errorEl = lockRoot.querySelector('#login-error-msg');
+        const rememberCheckbox = lockRoot.querySelector('#login-remember-me');
+        const toggleBtn = lockRoot.querySelector('#toggle-login-password-btn');
+        const submitBtn = lockRoot.querySelector('#login-submit-btn');
         const botTrapInput = lockRoot.querySelector('#central-bot-trap');
         const renderTime = Date.now();
         let failedAttempts = 0;
         let lockoutUntil = 0;
 
-        // Immediate autofocus
-        setTimeout(() => codeInput?.focus(), 80);
+        setTimeout(() => usernameInput?.focus(), 80);
 
-        // Toggle code visibility
+        // Toggle password visibility
         toggleBtn?.addEventListener('click', () => {
-            if (codeInput.type === 'password') {
-                codeInput.type = 'text';
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
                 toggleBtn.textContent = '🙈';
             } else {
-                codeInput.type = 'password';
+                passwordInput.type = 'password';
                 toggleBtn.textContent = '👁️';
             }
         });
@@ -168,7 +203,6 @@ export class AppAuth {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Rate Limit Lockout Check
             const now = Date.now();
             if (now < lockoutUntil) {
                 const remainingSec = Math.ceil((lockoutUntil - now) / 1000);
@@ -177,65 +211,70 @@ export class AppAuth {
                 return;
             }
 
-            // Anti-Bot Protection: Honeypot & Timing Check
-            if ((botTrapInput && botTrapInput.value) || (now - renderTime < 250)) {
-                errorEl.textContent = '⚠️ Automatisierte Anfrage abgewiesen (Bot-Schutz).';
+            if ((botTrapInput && botTrapInput.value) || (now - renderTime < 200)) {
+                errorEl.textContent = '⚠️ Bot-Schutz aktiv.';
                 errorEl.style.display = 'block';
                 return;
             }
 
-            const inputVal = (codeInput.value || '').trim();
-            if (!inputVal) return;
+            const username = (usernameInput.value || '').trim();
+            const password = (passwordInput.value || '').trim();
+            if (!username || !password) return;
 
             submitBtn.disabled = true;
-            submitBtn.textContent = '⏳ Prüfe Code...';
+            submitBtn.textContent = '⏳ Anmelden...';
             errorEl.style.display = 'none';
 
-            // Progressive delay against brute force
             if (failedAttempts > 0) {
                 await new Promise(r => setTimeout(r, Math.min(failedAttempts * 300, 2000)));
             }
 
-            const isValid = await StorageEngine.verifyCentralAccessCode(inputVal);
+            const loginRes = await StorageEngine.verifyUserLogin(username, password);
 
-            if (isValid) {
+            if (loginRes.success) {
                 failedAttempts = 0;
                 sessionStorage.setItem(CENTRAL_AUTH_KEY, 'true');
+                sessionStorage.setItem('lj_logged_in_user_id', loginRes.user.id);
+
                 if (rememberCheckbox && rememberCheckbox.checked) {
                     localStorage.setItem(CENTRAL_REMEMBER_KEY, 'true');
+                    localStorage.setItem('lj_remembered_user_id', loginRes.user.id);
                 } else {
                     localStorage.removeItem(CENTRAL_REMEMBER_KEY);
+                    localStorage.removeItem('lj_remembered_user_id');
                 }
 
-                submitBtn.textContent = '✅ Freigeschaltet!';
+                submitBtn.textContent = `✅ Willkommen, ${loginRes.user.name.split(' ')[0]}!`;
                 submitBtn.style.background = '#059669';
 
                 setTimeout(() => {
                     lockRoot.remove();
+                    const appLayout = document.querySelector('.app-layout');
+                    if (appLayout) appLayout.style.display = 'flex';
                     if (onUnlockedCallback) onUnlockedCallback();
                 }, 300);
             } else {
                 failedAttempts++;
                 submitBtn.disabled = false;
-                submitBtn.textContent = '🔓 Zentrale freischalten';
+                submitBtn.textContent = '🔓 Anmelden & Zentrale öffnen';
 
                 if (failedAttempts >= 5) {
                     const lockDuration = failedAttempts >= 8 ? 60000 : 30000;
                     lockoutUntil = Date.now() + lockDuration;
-                    errorEl.textContent = `⚠️ Zu viele Fehlversuche! Zugang für ${lockDuration / 1000} Sekunden gesperrt.`;
+                    errorEl.textContent = `⚠️ Zu viele Fehlversuche! Zugang für ${lockDuration / 1000}s gesperrt.`;
                 } else {
-                    errorEl.textContent = `⚠️ Falscher Zugangscode! Nur für die Vorstandschaft. (Versuch ${failedAttempts}/5)`;
+                    errorEl.textContent = `⚠️ ${loginRes.error || 'Ungültige Anmeldedaten.'} (Versuch ${failedAttempts}/5)`;
                 }
 
                 errorEl.style.display = 'block';
-                codeInput.style.borderColor = '#ef4444';
-                codeInput.focus();
-                codeInput.select();
+                passwordInput.style.borderColor = '#ef4444';
+                passwordInput.focus();
+                passwordInput.select();
             }
         });
 
         // Forgot Password Button Handler
-        lockRoot.querySelector('#central-forgot-pw-btn')?.addEventListener('click', () => {
+        lockRoot.querySelector('#login-forgot-pw-btn')?.addEventListener('click', () => {
             this.showForgotPasswordModal('central');
         });
     }
@@ -404,97 +443,14 @@ export class AppAuth {
     }
 
     /**
-     * "Wer bist du?" Post-Login Modal
-     * Directly asks which board member is accessing the Vorstands-Zentrale
+     * Deprecated in Multi-User Mode: User is authenticated directly on login
      */
     static promptUserSelection(containerEl, onSelectedCallback) {
         const existing = document.getElementById('user-selection-modal-root');
         if (existing) existing.remove();
-
-        const members = StorageEngine.getMembers();
-        const currentUserId = StorageEngine.getCurrentUserId();
-
-        const modalBackdrop = document.createElement('div');
-        modalBackdrop.id = 'user-selection-modal-root';
-        modalBackdrop.style.cssText = `
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            max-width: 100vw;
-            height: 100vh;
-            z-index: 100001;
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1.25rem;
-            box-sizing: border-box;
-            overflow-y: auto;
-            overflow-x: hidden;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            animation: fadeIn 0.2s ease-out;
-        `;
-
-        modalBackdrop.innerHTML = `
-            <div class="user-selection-card" style="max-width: 680px; width: 100%; background: #ffffff; border-radius: 24px; padding: 2.25rem 2rem; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4); text-align: center; border: 1px solid rgba(255,255,255,0.6); animation: fadeInScale 0.25s cubic-bezier(0.16, 1, 0.3, 1);">
-                <div style="width: 58px; height: 58px; border-radius: 16px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; display: inline-flex; align-items: center; justify-content: center; font-size: 1.75rem; box-shadow: 0 8px 18px rgba(16, 185, 129, 0.35); margin-bottom: 1rem;">
-                    👋
-                </div>
-                <h2 style="font-size: 1.55rem; font-weight: 900; color: #0f172a; margin: 0 0 0.4rem; letter-spacing: -0.02em;">
-                    Wer bist du?
-                </h2>
-                <p style="font-size: 0.92rem; color: #64748b; line-height: 1.5; margin: 0 0 1.5rem;">
-                    Bitte wähle dein Vorstands-Profil aus, um an der Zentrale zu arbeiten:
-                </p>
-
-                <div id="user-selection-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.75rem; max-height: 52vh; overflow-y: auto; padding: 0.25rem; margin-bottom: 0.5rem;">
-                    ${members.map(m => `
-                        <button type="button" class="user-select-tile" data-member-id="${m.id}" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0.9rem; background: ${m.id === currentUserId ? '#ecfdf5' : '#f8fafc'}; border: 2px solid ${m.id === currentUserId ? '#10b981' : '#e2e8f0'}; border-radius: 14px; cursor: pointer; text-align: left; transition: all 0.15s ease; outline: none; width: 100%;">
-                            <div style="width: 40px; height: 40px; border-radius: 10px; background: ${m.color}20; color: ${m.color}; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0; border: 1.5px solid ${m.color}44;">
-                                ${m.avatar || '👤'}
-                            </div>
-                            <div style="overflow: hidden; flex: 1;">
-                                <div style="font-weight: 800; font-size: 0.88rem; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                    ${escapeHTML(m.name)}
-                                </div>
-                                <div style="font-size: 0.74rem; font-weight: 700; color: ${m.color}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                    ${escapeHTML(m.role)}
-                                </div>
-                            </div>
-                        </button>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-
-        (containerEl || document.body).appendChild(modalBackdrop);
-
-        modalBackdrop.querySelectorAll('.user-select-tile[data-member-id]').forEach(btn => {
-            btn.addEventListener('mouseenter', () => {
-                btn.style.transform = 'translateY(-2px)';
-                btn.style.borderColor = '#10b981';
-                btn.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.15)';
-            });
-            btn.addEventListener('mouseleave', () => {
-                btn.style.transform = 'none';
-                const isCur = btn.dataset.memberId === StorageEngine.getCurrentUserId();
-                btn.style.borderColor = isCur ? '#10b981' : '#e2e8f0';
-                btn.style.boxShadow = 'none';
-            });
-            btn.addEventListener('click', (e) => {
-                const memberId = e.currentTarget.dataset.memberId;
-                const member = members.find(m => m.id === memberId);
-                StorageEngine.setCurrentUserId(memberId);
-
-                modalBackdrop.style.transition = 'opacity 0.2s ease-out';
-                modalBackdrop.style.opacity = '0';
-                setTimeout(() => {
-                    modalBackdrop.remove();
-                    if (onSelectedCallback) onSelectedCallback(member);
-                }, 200);
-            });
-        });
+        if (typeof onSelectedCallback === 'function') {
+            const member = StorageEngine.getLoggedInUser();
+            onSelectedCallback(member);
+        }
     }
 }

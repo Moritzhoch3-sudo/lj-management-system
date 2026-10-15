@@ -3,18 +3,24 @@
  */
 
 export const INITIAL_MEMBERS = [
-    { id: 'm1', name: 'Valentin Müllner', role: '1. Vorstand', avatar: '👱‍♂️', color: '#10b981', bgLight: 'rgba(16, 185, 129, 0.15)' },
-    { id: 'm2', name: 'Linda Schweiger', role: '2. Vorstand', avatar: '👱‍♀️', color: '#0284c7', bgLight: 'rgba(2, 132, 199, 0.15)' },
-    { id: 'm3', name: 'Anja Löb', role: '1. Kassier', avatar: '👩‍💻', color: '#f59e0b', bgLight: 'rgba(245, 158, 11, 0.15)' },
-    { id: 'm4', name: 'Moritz Kubik', role: '2. Kassier', avatar: '👨‍💻', color: '#16a34a', bgLight: 'rgba(22, 163, 74, 0.15)' },
-    { id: 'm5', name: 'Lena Senior', role: '1. Schriftführer', avatar: '📝', color: '#ec4899', bgLight: 'rgba(236, 72, 153, 0.15)' },
-    { id: 'm6', name: 'Rosa Krieglmeier', role: '2. Schriftführer', avatar: '📋', color: '#4f46e5', bgLight: 'rgba(79, 70, 229, 0.15)' },
-    { id: 'm7', name: 'Cassandra Wunner', role: 'Getränkewart', avatar: '🍺', color: '#dc2626', bgLight: 'rgba(220, 38, 38, 0.15)' },
-    { id: 'm8', name: 'Felix Premer', role: 'Beisitzer', avatar: '🎪', color: '#7c3aed', bgLight: 'rgba(124, 58, 237, 0.15)' },
-    { id: 'm9', name: 'Johannes Erhard', role: 'Beisitzer', avatar: '🌱', color: '#0d9488', bgLight: 'rgba(13, 148, 136, 0.15)' },
-    { id: 'm10', name: 'Dominique Zahn', role: 'Beisitzer', avatar: '🔧', color: '#2563eb', bgLight: 'rgba(37, 99, 235, 0.15)' },
-    { id: 'm11', name: 'Michaela Grabmaier', role: 'Beisitzer', avatar: '📸', color: '#d97706', bgLight: 'rgba(217, 119, 6, 0.15)' },
-    { id: 'm12', name: 'Kilian Salai', role: 'Beisitzer', avatar: '🔊', color: '#ea580c', bgLight: 'rgba(234, 88, 12, 0.15)' }
+    { id: 'm1', name: 'Valentin Müllner', role: '1. Vorstand', systemRole: 'admin', username: 'valentin', avatar: '👱‍♂️', color: '#10b981', bgLight: 'rgba(16, 185, 129, 0.15)', passwordHash: '613b66d02886f515f7d7969e989420d2f3575163dc4455a7d93aca74db7ae56c' },
+    { id: 'm2', name: 'Linda Schweiger', role: '2. Vorstand', systemRole: 'admin', username: 'linda', avatar: '👱‍♀️', color: '#0284c7', bgLight: 'rgba(2, 132, 199, 0.15)', passwordHash: '613b66d02886f515f7d7969e989420d2f3575163dc4455a7d93aca74db7ae56c' },
+    { id: 'm3', name: 'Anja Löb', role: '1. Kassier', systemRole: 'admin', username: 'anja', avatar: '👩‍💻', color: '#f59e0b', bgLight: 'rgba(245, 158, 11, 0.15)', passwordHash: '613b66d02886f515f7d7969e989420d2f3575163dc4455a7d93aca74db7ae56c' },
+    { id: 'm4', name: 'Moritz Kubik', role: '2. Kassier', systemRole: 'superuser', username: 'moritz', avatar: '👨‍💻', color: '#16a34a', bgLight: 'rgba(22, 163, 74, 0.15)', passwordHash: '613b66d02886f515f7d7969e989420d2f3575163dc4455a7d93aca74db7ae56c' },
+    { id: 'm5', name: 'Lena Senior', role: '1. Schriftführer', systemRole: 'member', username: 'lena', avatar: '📝', color: '#ec4899', bgLight: 'rgba(236, 72, 153, 0.15)', passwordHash: '613b66d02886f515f7d7969e989420d2f3575163dc4455a7d93aca74db7ae56c' },
+    { id: 'm6', name: 'Rosa Krieglmeier', role: '2. Schriftführer', systemRole: 'member', username: 'rosa', avatar: '📋', color: '#4f46e5', bgLight: 'rgba(79, 70, 229, 0.15)', passwordHash: '613b66d02886f515f7d7969e989420d2f3575163dc4455a7d93aca74db7ae56c' },
+    { id: 'm7', name: 'Cassandra Wunner', role: 'Getränkewart', systemRole: 'member', username: 'cassandra', avatar: '🍺', color: '#dc2626', bgLight: 'rgba(220, 38, 38, 0.15)', passwordHash: '613b66d02886f515f7d7969e989420d2f3575163dc4455a7d93aca74db7ae56c' },
+    { id: 'm8', name: 'Felix Premer', role: 'Beisitzer', systemRole: 'member', username: 'felix', avatar: '🎪', color: '#7c3aed', bgLight: 'rgba(124, 58, 237, 0.15)', passwordHash: '613b66d02886f515f7d7969e989420d2f3575163dc4455a7d93aca74db7ae56c' },
+    { id: 'm9', name: 'Johannes Erhard', role: 'Beisitzer', systemRole: 'member', username: 'johannes', avatar: '🌱', color: '#0d9488', bgLight: 'rgba(13, 148, 136, 0.15)', passwordHash: '613b66d02886f515f7d7969e989420d2f3575163dc4455a7d93aca74db7ae56c' },
+    { id: 'm10', name: 'Dominique Zahn', role: 'Beisitzer', systemRole: 'member', username: 'dominique', avatar: '🔧', color: '#2563eb', bgLight: 'rgba(37, 99, 235, 0.15)', passwordHash: '613b66d02886f515f7d7969e989420d2f3575163dc4455a7d93aca74db7ae56c' },
+    { id: 'm11', name: 'Michaela Grabmaier', role: 'Beisitzer', systemRole: 'member', username: 'michaela', avatar: '📸', color: '#d97706', bgLight: 'rgba(217, 119, 6, 0.15)', passwordHash: '613b66d02886f515f7d7969e989420d2f3575163dc4455a7d93aca74db7ae56c' },
+    { id: 'm12', name: 'Kilian Salai', role: 'Beisitzer', systemRole: 'member', username: 'kilian', avatar: '🔊', color: '#ea580c', bgLight: 'rgba(234, 88, 12, 0.15)', passwordHash: '613b66d02886f515f7d7969e989420d2f3575163dc4455a7d93aca74db7ae56c' }
+];
+
+export const SYSTEM_ROLE_OPTIONS = [
+    { id: 'superuser', label: '👑 Superuser (Haupt-Admin & System-Chef)' },
+    { id: 'admin', label: '🛡️ Vorstand / Admin (Sieht alle Aufgaben)' },
+    { id: 'member', label: '👤 Vorstandsmitglied (Nur eigene Aufgaben)' }
 ];
 
 export const BOARD_ROLE_OPTIONS = [

@@ -49,29 +49,48 @@ export class StorageEngine {
     }
 
     static getMembers() {
-        const filterRealMembers = (arr) => {
+        const filterAndMigrateMembers = (arr) => {
             if (!Array.isArray(arr)) return [];
-            return arr.filter(m => m && m.id !== 'm0' && (m.name || '').trim().toLowerCase() !== 'allgemein');
+            return arr.filter(m => m && m.id !== 'm0' && (m.name || '').trim().toLowerCase() !== 'allgemein').map(m => {
+                const name = (m.name || '').trim();
+                const firstName = name.split(' ')[0].toLowerCase().replace(/[^a-z0-9]/g, '') || 'mitglied';
+                const username = m.username || firstName;
+                let systemRole = m.systemRole;
+                if (!systemRole) {
+                    if (m.id === 'm4' || name.toLowerCase().includes('moritz')) {
+                        systemRole = 'superuser';
+                    } else if (['1. vorstand', '2. vorstand', '1. kassier'].some(r => (m.role || '').toLowerCase().includes(r))) {
+                        systemRole = 'admin';
+                    } else {
+                        systemRole = 'member';
+                    }
+                }
+                const passwordHash = m.passwordHash || '613b66d02886f515f7d7969e989420d2f3575163dc4455a7d93aca74db7ae56c';
+                return {
+                    ...m,
+                    username,
+                    systemRole,
+                    passwordHash
+                };
+            });
         };
 
         let raw = localStorage.getItem(STORAGE_KEYS.MEMBERS);
         if (!raw) {
-            const clean = filterRealMembers(INITIAL_MEMBERS);
+            const clean = filterAndMigrateMembers(INITIAL_MEMBERS);
             localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(clean));
             return clean;
         }
         try {
             const parsed = JSON.parse(raw);
             if (Array.isArray(parsed) && parsed.length > 0) {
-                const cleaned = filterRealMembers(parsed);
-                if (cleaned.length !== parsed.length) {
-                    localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(cleaned));
-                }
+                const cleaned = filterAndMigrateMembers(parsed);
+                localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(cleaned));
                 return cleaned;
             }
         } catch (e) {}
 
-        const clean = filterRealMembers(INITIAL_MEMBERS);
+        const clean = filterAndMigrateMembers(INITIAL_MEMBERS);
         localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(clean));
         return clean;
     }
@@ -116,16 +135,27 @@ export class StorageEngine {
         const deletedIds = new Set(this.getDeletedTaskIds());
         tasks = tasks.filter(t => t && t.id && !deletedIds.has(t.id));
 
-        // Ensure no tasks point to deleted 'm0' / Allgemein
-        let hasM0 = false;
+        // Ensure multi-assignee support and no tasks pointing to deleted 'm0'
+        let hasChanges = false;
         const cleanedTasks = tasks.map(t => {
-            if (t.assigneeId === 'm0') {
-                hasM0 = true;
-                return { ...t, assigneeId: 'm1' };
+            let assigneeIds = Array.isArray(t.assigneeIds) && t.assigneeIds.length > 0
+                ? t.assigneeIds.filter(id => id && id !== 'm0')
+                : (t.assigneeId && t.assigneeId !== 'm0' ? [t.assigneeId] : ['m1']);
+            if (assigneeIds.length === 0) assigneeIds = ['m1'];
+
+            const primaryAssignee = assigneeIds[0] || 'm1';
+            if (!Array.isArray(t.assigneeIds) || t.assigneeId === 'm0' || t.assigneeId !== primaryAssignee) {
+                hasChanges = true;
             }
-            return t;
+
+            return {
+                ...t,
+                assigneeIds,
+                assigneeId: primaryAssignee
+            };
         });
-        if (hasM0) {
+
+        if (hasChanges) {
             localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(cleanedTasks));
         }
         return cleanedTasks;
@@ -374,11 +404,149 @@ export class StorageEngine {
     static getCurrentUserId() {
         const stored = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
         if (stored && stored !== 'm0') return stored;
-        return 'm1';
+        return 'm4'; // Default to Moritz Kubik
     }
 
     static setCurrentUserId(memberId) {
         localStorage.setItem(STORAGE_KEYS.CURRENT_USER, memberId);
+    }
+
+    static getLoggedInUser() {
+        const members = this.getMembers();
+        const currentUserId = this.getCurrentUserId();
+        return members.find(m => m.id === currentUserId) || members.find(m => m.id === 'm4') || members[0] || {
+            id: 'm4',
+            name: 'Moritz Kubik',
+            role: '2. Kassier',
+            systemRole: 'superuser',
+            username: 'moritz',
+            avatar: '👨‍💻',
+            color: '#16a34a'
+        };
+    }
+
+    static isSuperUser() {
+        const user = this.getLoggedInUser();
+        return user && user.systemRole === 'superuser';
+    }
+
+    static isAdminOrSuperUser() {
+        const user = this.getLoggedInUser();
+        return user && (user.systemRole === 'superuser' || user.systemRole === 'admin');
+    }
+
+    static canUserAccessTask(task) {
+        if (!task) return false;
+        if (this.isAdminOrSuperUser()) return true;
+        const currentUserId = this.getCurrentUserId();
+        const assignees = Array.isArray(task.assigneeIds) && task.assigneeIds.length > 0 
+            ? task.assigneeIds 
+            : (task.assigneeId ? [task.assigneeId] : []);
+        return assignees.includes(currentUserId);
+    }
+
+    static async verifyUserLogin(usernameInput, passwordInput) {
+        const cleanUser = String(usernameInput || '').trim().toLowerCase();
+        const cleanPass = String(passwordInput || '').trim();
+        if (!cleanUser || !cleanPass) {
+            return { success: false, error: 'Bitte Benutzername und Passwort eingeben.' };
+        }
+
+        const members = this.getMembers();
+        const user = members.find(m => {
+            const uName = (m.username || '').toLowerCase();
+            const fName = (m.name || '').toLowerCase().split(' ')[0];
+            const fullName = (m.name || '').toLowerCase();
+            return uName === cleanUser || fName === cleanUser || fullName === cleanUser;
+        });
+
+        if (!user) {
+            return { success: false, error: 'Benutzername nicht gefunden.' };
+        }
+
+        // 1. Emergency Master Code (2026) works for any account
+        if (cleanPass === '2026') {
+            this.setCurrentUserId(user.id);
+            return { success: true, user };
+        }
+
+        // 2. Hash password and verify
+        const inputHash = await this.hashPassword(cleanPass);
+        const validHashes = [
+            user.passwordHash,
+            '613b66d02886f515f7d7969e989420d2f3575163dc4455a7d93aca74db7ae56c', // Scheuring2026!
+            '5255e7dc733ec745757b591c8738824f1a633aa21c1c02ca030502ef1c79c15b', // vorstand123
+        ].filter(Boolean);
+
+        if (validHashes.includes(inputHash)) {
+            this.setCurrentUserId(user.id);
+            return { success: true, user };
+        }
+
+        return { success: false, error: 'Falsches Passwort.' };
+    }
+
+    static async transferSuperUser(targetMemberId, currentPassword) {
+        const currentUser = this.getLoggedInUser();
+        if (!this.isSuperUser()) {
+            return { success: false, error: 'Nur der amtierende Superuser kann diesen Status übertragen.' };
+        }
+
+        if (currentPassword !== '2026') {
+            const passCheck = await this.verifyUserLogin(currentUser.username, currentPassword);
+            if (!passCheck.success) {
+                return { success: false, error: 'Passwort-Bestätigung fehlgeschlagen.' };
+            }
+        }
+
+        const members = this.getMembers();
+        const target = members.find(m => m.id === targetMemberId);
+        if (!target) {
+            return { success: false, error: 'Ziel-Mitglied nicht gefunden.' };
+        }
+
+        const updated = members.map(m => {
+            if (m.id === currentUser.id) {
+                return { ...m, systemRole: 'admin' };
+            }
+            if (m.id === targetMemberId) {
+                return { ...m, systemRole: 'superuser' };
+            }
+            return m;
+        });
+
+        this.saveMembers(updated);
+        return { success: true, message: `Superuser-Status erfolgreich an ${target.name} übertragen!` };
+    }
+
+    static async updateMemberCredentials(memberId, { username, role, systemRole, newPassword, color, avatar, name }) {
+        const members = this.getMembers();
+        const target = members.find(m => m.id === memberId);
+        if (!target) return { success: false, error: 'Mitglied nicht gefunden.' };
+
+        let newHash = target.passwordHash;
+        if (newPassword && String(newPassword).trim()) {
+            newHash = await this.hashPassword(String(newPassword).trim());
+        }
+
+        const updated = members.map(m => {
+            if (m.id === memberId) {
+                return {
+                    ...m,
+                    name: name !== undefined ? name : m.name,
+                    avatar: avatar !== undefined ? avatar : m.avatar,
+                    color: color !== undefined ? color : m.color,
+                    role: role !== undefined ? role : m.role,
+                    systemRole: systemRole !== undefined ? systemRole : (m.systemRole || 'member'),
+                    username: username !== undefined ? username.toLowerCase().replace(/[^a-z0-9._-]/g, '') : m.username,
+                    passwordHash: newHash
+                };
+            }
+            return m;
+        });
+
+        this.saveMembers(updated);
+        return { success: true };
     }
 
     static getLastSelectedCategory() {

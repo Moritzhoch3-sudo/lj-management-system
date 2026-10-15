@@ -151,7 +151,8 @@ export class TasksModule {
                     </div>
 
                     <div class="filter-controls">
-                        <!-- Custom In-App Member Filter -->
+                        <!-- Custom In-App Member Filter (Admins can filter by member; regular members see their personal badge) -->
+                        ${StorageEngine.isAdminOrSuperUser() ? `
                         <div class="custom-inapp-dropdown" id="filter-member-dropdown-container" style="min-width: 220px; position: relative;">
                             <div class="custom-inapp-trigger" id="filter-member-trigger" style="height: 38px; border-radius: 10px; background: #ffffff; padding: 0 0.85rem;">
                                 <span id="filter-member-display" style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">
@@ -176,6 +177,12 @@ export class TasksModule {
                                 `).join('')}
                             </div>
                         </div>
+                        ` : `
+                        <div style="height: 38px; border-radius: 10px; background: #ecfdf5; border: 1.5px solid #a7f3d0; padding: 0 0.85rem; display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.85rem; font-weight: 700; color: #047857; user-select: none;">
+                            <span>${selectedMemberObj ? selectedMemberObj.avatar : '👤'}</span>
+                            <span>Meine Aufgaben</span>
+                        </div>
+                        `}
 
                         <!-- Custom In-App Category Filter -->
                         <div class="custom-inapp-dropdown" id="filter-category-dropdown-container" style="min-width: 175px; position: relative;">
@@ -266,9 +273,21 @@ export class TasksModule {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
+        const isUserAdmin = StorageEngine.isAdminOrSuperUser();
+        const currentUserId = StorageEngine.getCurrentUserId();
+
         // Filter tasks using semantic query, status, member, category and due date
         let filteredTasks = tasks.filter(t => {
-            if (currentFilterMember !== 'all' && t.assigneeId !== currentFilterMember) return false;
+            const taskAssigneeIds = Array.isArray(t.assigneeIds) && t.assigneeIds.length > 0
+                ? t.assigneeIds
+                : (t.assigneeId ? [t.assigneeId] : []);
+
+            // Role-based visibility: regular members strictly ONLY see tasks where they are assigned!
+            if (!isUserAdmin && !taskAssigneeIds.includes(currentUserId)) {
+                return false;
+            }
+
+            if (currentFilterMember !== 'all' && !taskAssigneeIds.includes(currentFilterMember)) return false;
             if (currentFilterCategory !== 'all' && t.categoryId !== currentFilterCategory) return false;
             if (currentFilterStatus !== 'all' && t.status !== currentFilterStatus) return false;
             if (currentFilterDue === 'next_2_weeks') {
@@ -297,7 +316,8 @@ export class TasksModule {
         // Auto-expand cards that have matching tasks so results are immediately visible
         if (hasActiveFilter) {
             filteredTasks.forEach(t => {
-                if (t.assigneeId) expandedMemberIds.add(t.assigneeId);
+                const ids = Array.isArray(t.assigneeIds) && t.assigneeIds.length > 0 ? t.assigneeIds : [t.assigneeId];
+                ids.forEach(id => { if (id) expandedMemberIds.add(id); });
             });
         }
 
@@ -312,14 +332,21 @@ export class TasksModule {
      * Clean Table Layout per Person with Direct Inline Quick-Add Form (NO SOLID WHITE BACKGROUNDS)
      */
     static renderPersonGroupedCleanTables(tasks, members, categories, hasActiveFilter = false) {
+        const isUserAdmin = StorageEngine.isAdminOrSuperUser();
         const currentUserId = StorageEngine.getCurrentUserId();
 
         let activeMembers = [...members];
-        if (currentFilterMember !== 'all') {
+        if (!isUserAdmin) {
+            // Regular members only see their own section
+            activeMembers = members.filter(m => m.id === currentUserId);
+        } else if (currentFilterMember !== 'all') {
             activeMembers = members.filter(m => m.id === currentFilterMember);
         } else if (hasActiveFilter) {
             // When filtering by status, category, due date or search: ONLY show people who actually have matching tasks!
-            activeMembers = members.filter(m => tasks.some(t => t.assigneeId === m.id));
+            activeMembers = members.filter(m => tasks.some(t => {
+                const ids = Array.isArray(t.assigneeIds) && t.assigneeIds.length > 0 ? t.assigneeIds : [t.assigneeId];
+                return ids.includes(m.id);
+            }));
         } else if (currentUserId) {
             activeMembers.sort((a, b) => {
                 if (a.id === currentUserId) return -1;
@@ -349,7 +376,7 @@ export class TasksModule {
         return `
             <div class="person-tasks-container">
                 ${activeMembers.map(m => {
-                    const memberTasks = tasks.filter(t => t.assigneeId === m.id);
+                    const memberTasks = tasks.filter(t => (Array.isArray(t.assigneeIds) && t.assigneeIds.includes(m.id)) || t.assigneeId === m.id);
                     const completedCount = memberTasks.filter(t => t.status === 'erledigt').length;
                     const percent = memberTasks.length > 0 ? Math.round((completedCount / memberTasks.length) * 100) : 0;
                     const memberColor = m.color || '#10b981';
@@ -460,6 +487,14 @@ export class TasksModule {
                                                                 ${escapeHTML(t.title)}
                                                                 ${t.subtasks && t.subtasks.length > 0 ? `<span class="badge badge-neutral" style="font-size: 0.7rem; margin-left: 4px;">☑️ ${t.subtasks.filter(s=>s.done).length}/${t.subtasks.length}</span>` : ''}
                                                             </span>
+                                                            ${t.assigneeIds && t.assigneeIds.length > 1 ? `
+                                                                <span class="co-assignees-badge" style="display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; vertical-align: middle;">
+                                                                    ${t.assigneeIds.map(id => {
+                                                                        const co = members.find(mem => mem.id === id);
+                                                                        return co ? `<span title="Zuständig: ${escapeHTML(co.name)}" style="font-size: 0.76rem; background: ${co.color}20; color: ${co.color}; border: 1px solid ${co.color}40; border-radius: 6px; padding: 1px 4px;">${co.avatar}</span>` : '';
+                                                                    }).join('')}
+                                                                </span>
+                                                            ` : ''}
                                                         </td>
                                                         <td style="position: relative;">
                                                             <div class="task-cat-picker-wrapper" style="position: relative; display: inline-block;">
@@ -597,11 +632,20 @@ export class TasksModule {
                                                 </h5>
                                             </div>
 
-                                            <!-- Footer: Assignee & Action Buttons -->
+                                            <!-- Footer: Assignees & Action Buttons -->
                                             <div class="d-flex align-items-center justify-content-between mt-2 pt-2" style="border-top: 1px solid rgba(0,0,0,0.06);">
-                                                <div class="d-flex align-items-center gap-1.5 overflow-hidden" style="max-width: 120px;" title="${escapeHTML(assignee.name)} (${escapeHTML(assignee.role || '')})">
-                                                    <span style="font-size: 0.95rem; flex-shrink: 0;">${assignee.avatar}</span>
-                                                    <span style="font-size: 0.76rem; color: ${assignee.color}; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(assignee.name.split(' ')[0])}</span>
+                                                <div class="d-flex align-items-center gap-1 overflow-hidden" style="max-width: 140px;">
+                                                    ${(Array.isArray(t.assigneeIds) && t.assigneeIds.length > 0 ? t.assigneeIds : [t.assigneeId]).map(id => {
+                                                        const a = members.find(m => m.id === id);
+                                                        return a ? `
+                                                            <span title="${escapeHTML(a.name)} (${escapeHTML(a.role || '')})" style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 6px; background: ${a.color}20; color: ${a.color}; border: 1px solid ${a.color}40; font-size: 0.85rem; flex-shrink: 0;">
+                                                                ${a.avatar || '👤'}
+                                                            </span>
+                                                        ` : '';
+                                                    }).join('')}
+                                                    <span style="font-size: 0.74rem; color: var(--text-secondary); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                                        ${(Array.isArray(t.assigneeIds) && t.assigneeIds.length > 0 ? t.assigneeIds : [t.assigneeId]).map(id => members.find(m => m.id === id)?.name?.split(' ')[0]).filter(Boolean).join(', ')}
+                                                    </span>
                                                 </div>
 
                                                 <div class="d-flex align-items-center gap-1">
@@ -918,6 +962,7 @@ export class TasksModule {
                     tasks.unshift({
                         id: 't_' + Date.now(),
                         title,
+                        assigneeIds: [memberId],
                         assigneeId: memberId,
                         categoryId: catId,
                         status: 'offen',
@@ -1057,19 +1102,27 @@ export class TasksModule {
                             <input type="text" id="modal-task-title" class="form-control" required value="${escapeHTML(task.title)}" placeholder="Aufgabentitel..." />
                         </div>
 
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <label class="form-label small mb-1" style="color: var(--text-secondary); font-weight: 700;">Zugewiesen an</label>
-                                <select id="modal-task-assignee" class="form-select form-select-sm">
-                                    <option value="" ${!task.assigneeId ? 'selected' : ''}>Unzugewiesen</option>
-                                    ${members.map(m => `
-                                        <option value="${m.id}" ${task.assigneeId === m.id ? 'selected' : ''}>
-                                            ${escapeHTML(m.name)} (${escapeHTML(m.role)})
-                                        </option>
-                                    `).join('')}
-                                </select>
+                        <div>
+                            <label class="form-label small mb-1" style="color: var(--text-secondary); font-weight: 700;">
+                                👥 Zuständige Vorstandsmitglieder (Mehrfachauswahl möglich):
+                            </label>
+                            <div id="modal-assignees-picker" style="display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0.6rem; background: #f8fafc; border: 1.5px solid var(--border-medium); border-radius: 12px; max-height: 125px; overflow-y: auto;">
+                                ${members.map(m => {
+                                    const isAssigned = (Array.isArray(task.assigneeIds) && task.assigneeIds.includes(m.id)) || task.assigneeId === m.id;
+                                    return `
+                                        <label class="modal-assignee-chip" data-member-id="${m.id}" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.65rem; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; border: 1.5px solid ${isAssigned ? m.color : '#e2e8f0'}; background: ${isAssigned ? m.color + '22' : '#ffffff'}; color: ${isAssigned ? m.color : '#475569'}; user-select: none; transition: all 0.15s ease;">
+                                            <input type="checkbox" class="modal-assignee-checkbox" value="${m.id}" ${isAssigned ? 'checked' : ''} style="display: none;" />
+                                            <span>${m.avatar}</span>
+                                            <span>${escapeHTML(m.name)}</span>
+                                            <span class="chip-check-indicator" style="font-size: 0.75rem; font-weight: 800; display: ${isAssigned ? 'inline' : 'none'};">✓</span>
+                                        </label>
+                                    `;
+                                }).join('')}
                             </div>
-                            <div class="col-6">
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-12">
                                 <label class="form-label small mb-1" style="color: var(--text-secondary); font-weight: 700;">Kategorie</label>
                                 <select id="modal-task-category" class="form-select form-select-sm">
                                     ${categories.map(c => `
@@ -1135,6 +1188,30 @@ export class TasksModule {
             if (e.target === modal) closeModal();
         });
 
+        // Toggle Assignee Chips
+        modal.querySelectorAll('.modal-assignee-chip').forEach(chip => {
+            chip.addEventListener('click', (e) => {
+                e.preventDefault();
+                const cb = chip.querySelector('.modal-assignee-checkbox');
+                if (!cb) return;
+                cb.checked = !cb.checked;
+                const m = members.find(mem => mem.id === cb.value);
+                const color = m ? m.color : '#10b981';
+                const indicator = chip.querySelector('.chip-check-indicator');
+                if (cb.checked) {
+                    chip.style.borderColor = color;
+                    chip.style.backgroundColor = color + '22';
+                    chip.style.color = color;
+                    if (indicator) indicator.style.display = 'inline';
+                } else {
+                    chip.style.borderColor = '#e2e8f0';
+                    chip.style.backgroundColor = '#ffffff';
+                    chip.style.color = '#475569';
+                    if (indicator) indicator.style.display = 'none';
+                }
+            });
+        });
+
         // Delete handler
         modal.querySelector('#modal-task-delete-btn').addEventListener('click', () => {
             if (confirm('Aufgabe wirklich löschen?')) {
@@ -1154,7 +1231,10 @@ export class TasksModule {
             const targetTask = currentTasks.find(t => t.id === taskId);
             if (targetTask) {
                 targetTask.title = document.getElementById('modal-task-title').value.trim() || targetTask.title;
-                targetTask.assigneeId = document.getElementById('modal-task-assignee').value;
+                const checkedBoxes = Array.from(modal.querySelectorAll('.modal-assignee-checkbox:checked'));
+                const newAssigneeIds = checkedBoxes.map(cb => cb.value);
+                targetTask.assigneeIds = newAssigneeIds.length > 0 ? newAssigneeIds : ['m1'];
+                targetTask.assigneeId = targetTask.assigneeIds[0];
                 targetTask.categoryId = document.getElementById('modal-task-category').value;
                 targetTask.status = document.getElementById('modal-task-status').value;
                 targetTask.priority = document.getElementById('modal-task-priority').value;

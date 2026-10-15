@@ -101,12 +101,8 @@
                             <span class="nav-title">PDF / Backup</span>
                         </button>
                         <button type="button" class="sidebar-nav-link" id="mobile-lock-app-btn">
-                            <span class="nav-icon">🔒</span>
-                            <span class="nav-title">Zentrale sperren</span>
-                        </button>
-                        <button type="button" class="sidebar-nav-link danger-text" id="mobile-reset-data-btn">
-                            <span class="nav-icon">🔄</span>
-                            <span class="nav-title">Daten zurücksetzen</span>
+                            <span class="nav-icon">🚪</span>
+                            <span class="nav-title">Abmelden</span>
                         </button>
                     </div>
                 </div>
@@ -115,7 +111,7 @@
 
         <!-- Main Content Area -->
         <div class="app-main-wrapper">
-            <!-- Top Action Bar (Previous Clean Layout with In-App User Selector) -->
+            <!-- Top Action Bar with Real-Time User Badge and Actions -->
             <header class="topbar-header">
                 <div class="topbar-left">
                     <h2 class="view-title" id="page-view-title">📊 Vorstands-Dashboard & Übersicht</h2>
@@ -127,33 +123,18 @@
                         <span>🟢</span> <span>Cloud-Sync aktiv</span>
                     </div>
 
-                    <!-- Custom In-App Expandable User Selector (NOT native Apple select) -->
-                    <div class="user-selector-container" id="user-selector-container" style="position: relative;">
-                        <div class="user-selector-trigger" id="user-selector-trigger" style="display: flex; align-items: center; gap: 0.6rem; background: var(--bg-canvas); border: 1px solid var(--border-medium); padding: 0.35rem 0.85rem; border-radius: 12px; cursor: pointer; user-select: none; transition: all 0.2s ease;">
-                            <span class="user-selector-label" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; white-space: nowrap;">Angemeldet als:</span>
-                            <span id="current-user-avatar" style="font-size: 1.15rem; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: #ffffff; border: 1px solid var(--border-subtle); border-radius: 8px;">👱‍♂️</span>
-                            <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.15;">
-                                <span id="current-user-name" style="font-size: 0.85rem; font-weight: 800; color: var(--text-primary); white-space: nowrap;">Valentin Müllner</span>
-                                <span id="current-user-role" style="font-size: 0.72rem; font-weight: 700; color: #10b981; white-space: nowrap;">1. Vorstand</span>
-                            </div>
-                            <span id="user-selector-caret" style="margin-left: 4px; font-size: 0.8rem; color: var(--text-muted); transition: transform 0.2s;">▾</span>
-                        </div>
-
-                        <!-- In-App Expandable Dropdown List -->
-                        <div class="user-selector-menu hidden" id="user-selector-menu" style="position: absolute; top: calc(100% + 8px); right: 0; min-width: 290px; max-height: 380px; overflow-y: auto; overscroll-behavior: contain; background: #ffffff; border: 1px solid var(--border-medium); border-radius: 14px; box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.16); padding: 0.5rem; z-index: 1200;">
-                            <div style="padding: 0.4rem 0.65rem 0.55rem; font-size: 0.72rem; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid var(--border-subtle); margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                                👤 Vorstandsmitglied auswählen (12)
-                            </div>
-                            <div id="user-selector-list" style="display: flex; flex-direction: column; gap: 0.25rem;">
-                                <!-- Injected dynamically via App.renderNavbar() -->
-                            </div>
+                    <!-- Logged-in User Profile Badge (Derived from active authenticated session) -->
+                    <div class="logged-in-user-badge" id="logged-in-user-badge" style="display: flex; align-items: center; gap: 0.6rem; background: var(--bg-canvas); border: 1px solid var(--border-medium); padding: 0.35rem 0.85rem; border-radius: 12px; user-select: none;">
+                        <span id="current-user-avatar" style="font-size: 1.15rem; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: #ffffff; border: 1px solid var(--border-subtle); border-radius: 8px;">👨‍💻</span>
+                        <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.15;">
+                            <span id="current-user-name" style="font-size: 0.85rem; font-weight: 800; color: var(--text-primary); white-space: nowrap;">Moritz Kubik</span>
+                            <span id="current-user-role" style="font-size: 0.72rem; font-weight: 700; color: #16a34a; white-space: nowrap;">👑 Superuser</span>
                         </div>
                     </div>
 
                     <div class="topbar-action-buttons">
                         <button class="btn btn-sm btn-ghost" id="export-backup-btn" title="PDF-Übersicht anzeigen & Backup herunterladen">📄 PDF / Backup</button>
-                        <button class="btn btn-sm btn-ghost" id="lock-app-btn" title="Vorstands-Zentrale jetzt sperren">🔒 Sperren</button>
-                        <button class="btn btn-sm btn-ghost danger-text" id="reset-data-btn" title="Auf Standarddaten zurücksetzen">🔄 Reset</button>
+                        <button class="btn btn-sm btn-ghost" id="lock-app-btn" title="Von der Vorstands-Zentrale abmelden">🚪 Abmelden</button>
                     </div>
                 </div>
             </header>

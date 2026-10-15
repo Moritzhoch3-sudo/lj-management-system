@@ -13,11 +13,17 @@ export class DashboardModule {
         const finances = StorageEngine.getFinances() || [];
         const isVaultUnlocked = VaultGuard.isUnlockedSync();
 
-        // Calculate statistics
-        const totalTasks = tasks.length;
-        const completedTasks = tasks.filter(t => t && t.status === 'erledigt').length;
-        const inProgressTasks = tasks.filter(t => t && t.status === 'in_bearbeitung').length;
-        const openTasks = tasks.filter(t => t && t.status === 'offen').length;
+        const isUserAdmin = StorageEngine.isAdminOrSuperUser();
+        const currentUserId = StorageEngine.getCurrentUserId();
+        const displayTasks = isUserAdmin 
+            ? tasks 
+            : tasks.filter(t => (Array.isArray(t.assigneeIds) && t.assigneeIds.includes(currentUserId)) || t.assigneeId === currentUserId);
+
+        // Calculate statistics based on view permission
+        const totalTasks = displayTasks.length;
+        const completedTasks = displayTasks.filter(t => t && t.status === 'erledigt').length;
+        const inProgressTasks = displayTasks.filter(t => t && t.status === 'in_bearbeitung').length;
+        const openTasks = displayTasks.filter(t => t && t.status === 'offen').length;
         const globalPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
         // Calculate finances
@@ -26,7 +32,7 @@ export class DashboardModule {
         const kassenstand = totalEinnahmen - totalAusgaben;
 
         // Top 4 Priority Tasks for Quick List
-        const topTasks = tasks.slice(0, 4);
+        const topTasks = displayTasks.slice(0, 4);
 
         containerEl.innerHTML = `
             <div class="donezo-dashboard-wrapper">
@@ -34,14 +40,11 @@ export class DashboardModule {
                 <div class="donezo-page-header">
                     <div class="donezo-header-text">
                         <h1>Dashboard</h1>
-                        <p>Plane, priorisiere und verwalte die Landjugend Scheuring mit Leichtigkeit.</p>
+                        <p>${isUserAdmin ? 'Plane, priorisiere und verwalte die Landjugend Scheuring mit Leichtigkeit.' : 'Deine persönliche Übersicht über alle an dich zugewiesenen Aufgaben.'}</p>
                     </div>
                     <div class="donezo-header-actions">
                         <button class="btn btn-donezo-primary" id="donezo-add-task-btn">
                             ➕ Neue Aufgabe
-                        </button>
-                        <button class="btn btn-donezo-outline" id="donezo-export-data-btn">
-                            📥 Daten Exportieren
                         </button>
                     </div>
                 </div>
@@ -49,21 +52,24 @@ export class DashboardModule {
                 <!-- 1. Top Stats Row (4 Columns matching Donezo) -->
                 <div class="donezo-stats-row">
                     <!-- Hero Dark Green Stat Card -->
-                    <div class="donezo-stat-hero" id="dash-stat-total" title="Zu allen Aufgaben wechseln">
+                    <div class="donezo-stat-hero" id="dash-stat-total" title="Zu Aufgaben wechseln">
                         <div class="stat-top">
-                            <span class="stat-label">Gesamte Aufgaben</span>
+                            <span class="stat-label">${isUserAdmin ? 'Gesamte Aufgaben' : 'Meine Aufgaben'}</span>
                             <span class="donezo-arrow-badge">↗</span>
                         </div>
                         <div class="stat-number">${totalTasks}</div>
-                        <div class="stat-pill">+3 neu diese Woche</div>
+                        <div class="stat-pill">${isUserAdmin ? 'Alle Vorstands-To-Dos' : 'Dir zugewiesen'}</div>
                     </div>
 
                     <!-- White Card 2: Ended Projects -->
                     <div class="donezo-stat-card" id="dash-stat-completed" title="Zu erledigten Aufgaben wechseln">
                         <div class="stat-top">
-                            <span class="stat-label">Erledigte To-Dos</span>
+                            <span class="stat-label">${isUserAdmin ? 'Erledigte To-Dos' : 'Meine Erledigten'}</span>
                             <span class="donezo-arrow-badge">↗</span>
                         </div>
+                        <div class="stat-number">${completedTasks}</div>
+                        <div class="stat-pill">Erfolgreich abgeschlossen</div>
+                    </div>
                         <div class="stat-number">${completedTasks}</div>
                         <div class="stat-pill">Erfolgreich abgeschlossen</div>
                     </div>
@@ -226,11 +232,8 @@ export class DashboardModule {
                         </div>
 
                         <div class="dark-widget-controls">
-                            <button class="widget-control-btn" id="open-finance-shortcut-btn" title="${isVaultUnlocked ? 'Kassenbuch öffnen' : 'Mit PIN entsperren'}">
-                                ${isVaultUnlocked ? '📊 Kassenbuch' : '🔑 Entsperren'}
-                            </button>
-                            <button class="widget-control-btn" id="donezo-audio-shortcut-btn" title="Audio-Aufnahme starten">
-                                🎙️ Audio
+                            <button class="widget-control-btn" id="open-finance-shortcut-btn" style="flex: 1; justify-content: center; text-align: center;" title="${isVaultUnlocked ? 'Kassenbuch öffnen' : 'Mit PIN entsperren'}">
+                                ${isVaultUnlocked ? '📊 Kassenbuch öffnen' : '🔑 Bereich mit PIN entsperren'}
                             </button>
                         </div>
                     </div>
@@ -245,11 +248,6 @@ export class DashboardModule {
         // Add Task Shortcut
         containerEl.querySelector('#donezo-add-task-btn')?.addEventListener('click', () => {
             window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'tasks' } }));
-        });
-
-        // Export Data
-        containerEl.querySelector('#donezo-export-data-btn')?.addEventListener('click', () => {
-            StorageEngine.exportFullBackup();
         });
 
         // Start Meeting / Open Minutes

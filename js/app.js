@@ -30,10 +30,8 @@ class App {
 
         if (!AppAuth.isCentralUnlocked()) {
             AppAuth.renderCentralLockScreen(document.body, () => {
-                VaultGuard.lock(); // Ensure strictly locked after master login
-                AppAuth.promptUserSelection(document.body, () => {
-                    this.showMainApp();
-                });
+                VaultGuard.lock(); // Ensure strictly locked after login
+                this.showMainApp();
             });
         } else {
             this.showMainApp();
@@ -67,9 +65,7 @@ class App {
     }
 
     static renderNavbar() {
-        const members = StorageEngine.getMembers();
-        const currentUserId = StorageEngine.getCurrentUserId();
-        const currentUser = members.find(m => m.id === currentUserId) || members[0];
+        const currentUser = StorageEngine.getLoggedInUser();
 
         // Update Topbar & Mobile User Selector Button Display
         const avatarEl = document.getElementById('current-user-avatar');
@@ -82,7 +78,10 @@ class App {
             if (avatarEl) avatarEl.textContent = currentUser.avatar || '👤';
             if (nameEl) nameEl.textContent = currentUser.name || 'Vorstand';
             if (roleEl) {
-                roleEl.textContent = currentUser.role || 'Landjugend Scheuring';
+                let rolePrefix = '👤';
+                if (currentUser.systemRole === 'superuser') rolePrefix = '👑 Superuser •';
+                else if (currentUser.systemRole === 'admin') rolePrefix = '🛡️ Vorstand •';
+                roleEl.textContent = `${rolePrefix} ${currentUser.role || 'Vorstand'}`;
                 roleEl.style.color = currentUser.color || '#10b981';
             }
             if (mobAvatarEl) mobAvatarEl.textContent = currentUser.avatar || '👤';
@@ -90,53 +89,6 @@ class App {
                 const firstName = (currentUser.name || 'Vorstand').split(' ')[0];
                 mobNameEl.textContent = firstName;
             }
-        }
-
-        // Populate In-App Expandable Dropdown List
-        const listEl = document.getElementById('user-selector-list');
-        const menuEl = document.getElementById('user-selector-menu');
-        const caretEl = document.getElementById('user-selector-caret');
-
-        if (listEl) {
-            listEl.innerHTML = members.map(m => {
-                const safeColor = SecurityUtils.sanitizeColor(m.color);
-                return `
-                <div class="user-selector-item ${m.id === currentUserId ? 'active' : ''}" data-user-id="${m.id}" style="cursor: pointer; padding: 0.55rem 0.75rem; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; transition: background 0.15s; background: ${m.id === currentUserId ? 'rgba(16, 185, 129, 0.08)' : 'transparent'};">
-                    <div style="display: flex; align-items: center; gap: 0.6rem; overflow: hidden;">
-                        <span style="font-size: 1.2rem; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: ${safeColor}18; color: ${safeColor}; border-radius: 8px; border: 1.5px solid ${safeColor}40; flex-shrink: 0;">${escapeHTML(m.avatar || '👤')}</span>
-                        <div style="overflow: hidden;">
-                            <span style="font-weight: 800; font-size: 0.88rem; color: var(--text-primary); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(m.name)}</span>
-                            <span style="font-size: 0.74rem; color: ${safeColor}; font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(m.role)}</span>
-                        </div>
-                    </div>
-                    ${m.id === currentUserId ? `<span style="color: var(--donezo-green); font-weight: 800; font-size: 1rem;">✓</span>` : ''}
-                </div>
-            `;
-            }).join('');
-
-            listEl.querySelectorAll('.user-selector-item[data-user-id]').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    const uid = e.currentTarget.dataset.userId;
-                    StorageEngine.setCurrentUserId(uid);
-                    menuEl?.classList.add('hidden');
-                    if (caretEl) caretEl.textContent = '▾';
-                    this.renderNavbar();
-                    this.switchTab(activeTab);
-                });
-            });
-        }
-
-        // Toggle Expand/Collapse Dropdown
-        const triggerEl = document.getElementById('user-selector-trigger');
-        if (triggerEl && !triggerEl._hasClickListener) {
-            triggerEl._hasClickListener = true;
-            triggerEl.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const isHidden = menuEl?.classList.toggle('hidden');
-                if (caretEl) {
-                    caretEl.textContent = isHidden ? '▾' : '▲';
-                }
-            });
         }
 
         // Update Sidebar Active Task Counter
@@ -207,16 +159,14 @@ class App {
             });
         });
 
-        // Mobile User Chip Trigger (Prompt user selection modal on mobile)
+        // Mobile User Chip Trigger (Navigate to settings on click)
         const mobUserChipBtn = document.getElementById('mobile-user-chip-btn');
         if (mobUserChipBtn && !mobUserChipBtn._hasListener) {
             mobUserChipBtn._hasListener = true;
             mobUserChipBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                AppAuth.promptUserSelection(document.body, () => {
-                    this.renderNavbar();
-                    this.switchTab(activeTab);
-                });
+                this.toggleMobileMenu(false);
+                this.handleTabClick('settings');
             });
         }
 
@@ -225,9 +175,7 @@ class App {
             VaultGuard.lock();
             AppAuth.lockCentral(document.body, () => {
                 VaultGuard.lock();
-                AppAuth.promptUserSelection(document.body, () => {
-                    this.showMainApp();
-                });
+                this.showMainApp();
             });
         };
         document.getElementById('lock-app-btn')?.addEventListener('click', handleLockApp);
@@ -236,7 +184,7 @@ class App {
             handleLockApp();
         });
 
-        // Backup & Reset Buttons
+        // Backup & PDF Overview Button
         const handlePdfOverview = () => {
             PdfReportModule.openPdfOverview();
         };
@@ -244,17 +192,6 @@ class App {
         document.getElementById('mobile-export-backup-btn')?.addEventListener('click', () => {
             this.toggleMobileMenu(false);
             handlePdfOverview();
-        });
-
-        const handleResetData = () => {
-            if (confirm('Achtung: Auf Standarddaten zurücksetzen? Alle Änderungen gehen verloren.')) {
-                StorageEngine.resetToDefaults();
-            }
-        };
-        document.getElementById('reset-data-btn')?.addEventListener('click', handleResetData);
-        document.getElementById('mobile-reset-data-btn')?.addEventListener('click', () => {
-            this.toggleMobileMenu(false);
-            handleResetData();
         });
 
         // Custom Navigation Event from Dashboard Cards
