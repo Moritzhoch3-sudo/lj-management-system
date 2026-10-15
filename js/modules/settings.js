@@ -23,7 +23,9 @@ export class SettingsModule {
 
             // Guard activeSubTab based on permissions
             if (!isAdmin) {
-                activeSubTab = 'my_account';
+                if (activeSubTab !== 'ai_assistant' && activeSubTab !== 'my_account') {
+                    activeSubTab = 'my_account';
+                }
             } else if (!activeSubTab || activeSubTab === 'my_account') {
                 // If admin, default to members unless they deliberately chose my_account
                 if (!activeSubTab) activeSubTab = 'members';
@@ -58,7 +60,10 @@ export class SettingsModule {
                                         👤 Mein Profil
                                     </button>
                                 ` : `
-                                    <button type="button" class="sub-tab-btn active" data-subtab="my_account">
+                                    <button type="button" class="sub-tab-btn ${activeSubTab === 'ai_assistant' ? 'active' : ''}" data-subtab="ai_assistant">
+                                        🤖 KI-Copilot
+                                    </button>
+                                    <button type="button" class="sub-tab-btn ${activeSubTab === 'my_account' ? 'active' : ''}" data-subtab="my_account">
                                         👤 Mein Profil & Passwort
                                     </button>
                                 `}
@@ -421,7 +426,7 @@ export class SettingsModule {
                     </div>
                 </div>
             `;
-        } else if (subTab === 'ai_assistant' && isAdmin) {
+        } else if (subTab === 'ai_assistant') {
             const aiConfig = StorageEngine.getAiConfig();
             return `
                 <div class="d-flex flex-column gap-4" style="max-width: 760px;">
@@ -953,7 +958,7 @@ export class SettingsModule {
         }
 
         // 6. AI Assistant Settings (Gemini / OpenAI API Key & Provider)
-        if (activeSubTab === 'ai_assistant' && isAdmin) {
+        if (activeSubTab === 'ai_assistant') {
             containerEl.querySelectorAll('.toggle-ai-key-vis').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const targetId = btn.dataset.target;

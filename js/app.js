@@ -1,19 +1,19 @@
 /**
  * Main Application Orchestrator (Next-Gen Executive Standard)
  */
-import { StorageEngine, escapeHTML } from './storage.js';
-import { TasksModule } from './modules/tasks.js';
-import { DashboardModule } from './modules/dashboard.js';
-import { VaultGuard } from './modules/vault.js';
-import { FinanceModule } from './modules/finance.js';
-import { ContractsModule } from './modules/contracts.js';
-import { MinutesModule } from './modules/minutes.js';
-import { SettingsModule } from './modules/settings.js';
-import { PdfReportModule } from './modules/pdf_report.js';
-import { AutoSaveEngine } from './modules/autosave.js';
-import { CloudStorageEngine } from './cloud-storage.js';
-import { AppAuth } from './modules/auth.js';
-import { SecurityUtils } from './utils/security.js';
+import { StorageEngine, escapeHTML } from './storage.js?v=54.1';
+import { TasksModule } from './modules/tasks.js?v=54.1';
+import { DashboardModule } from './modules/dashboard.js?v=54.1';
+import { VaultGuard } from './modules/vault.js?v=54.1';
+import { FinanceModule } from './modules/finance.js?v=54.1';
+import { ContractsModule } from './modules/contracts.js?v=54.1';
+import { MinutesModule } from './modules/minutes.js?v=54.1';
+import { SettingsModule } from './modules/settings.js?v=54.1';
+import { PdfReportModule } from './modules/pdf_report.js?v=54.1';
+import { AutoSaveEngine } from './modules/autosave.js?v=54.1';
+import { CloudStorageEngine } from './cloud-storage.js?v=54.1';
+import { AppAuth } from './modules/auth.js?v=54.1';
+import { SecurityUtils } from './utils/security.js?v=54.1';
 
 let savedTab = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('lj_active_tab') : null;
 const sensitiveTabsList = ['finance', 'contracts', 'minutes'];

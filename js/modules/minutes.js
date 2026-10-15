@@ -22,11 +22,12 @@ export class MinutesModule {
     static render(containerEl) {
         const minutes = StorageEngine.getMinutes() || [];
         const members = StorageEngine.getMembers() || [];
+        const aiConfig = StorageEngine.getAiConfig();
 
         containerEl.innerHTML = `
             <div class="minutes-wrapper">
                 <!-- Recorder Widget Bar -->
-                <div class="card-glow recorder-widget">
+                <div class="card-glow recorder-widget mb-3">
                     <div class="recorder-left">
                         <div class="mic-status-badge" id="mic-badge">🎙️ Bereit</div>
                         <div class="recorder-title-block">
@@ -45,6 +46,69 @@ export class MinutesModule {
                     <div class="recorder-right">
                         <button class="btn btn-donezo-primary" id="start-rec-btn" style="padding: 0.65rem 1.35rem; font-weight: 700; font-size: 0.92rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.5rem; white-space: nowrap;">🎙️ Aufnahme starten</button>
                         <button class="btn btn-danger hidden" id="stop-rec-btn" style="padding: 0.65rem 1.35rem; font-weight: 700; font-size: 0.92rem; border-radius: 12px; display: inline-flex; align-items: center; gap: 0.5rem; white-space: nowrap;">⏹️ Aufnahme beenden</button>
+                    </div>
+                </div>
+
+                <!-- AI Copilot Status & Inline Quick-Setup Card -->
+                <div class="card-glow p-3 mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2" style="background: #ffffff; border-radius: 14px; border: 1px solid var(--border-subtle); border-left: 5px solid #3b82f6;">
+                    <div class="d-flex align-items-center gap-2.5">
+                        <span style="font-size: 1.5rem;">🤖</span>
+                        <div>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <strong style="font-size: 1rem; color: var(--text-primary);">KI-Sitzungs-Copilot (Teams-Modus)</strong>
+                                ${aiConfig.geminiKey || aiConfig.openaiKey
+                                    ? `<span class="badge" style="background: #ecfdf5; color: #047857; font-weight: 800; font-size: 0.76rem; padding: 3px 8px; border-radius: 6px;">🟢 ${aiConfig.provider === 'openai' ? 'OpenAI GPT-4o' : 'Google Gemini'} Key aktiv</span>`
+                                    : `<span class="badge" style="background: #fef3c7; color: #b45309; font-weight: 800; font-size: 0.76rem; padding: 3px 8px; border-radius: 6px;">🟡 Kein API-Schlüssel hinterlegt</span>`}
+                            </div>
+                            <p class="text-muted m-0 small">Automatische Gliederung in TOPs, Management-Summary & 1-Klick-Aufgabenübernahme</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <button type="button" class="btn btn-sm btn-secondary" id="toggle-minutes-ai-config-btn" style="border-radius: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem;">
+                            ⚙️ API-Schlüssel verwalten
+                        </button>
+                        <button type="button" class="btn btn-sm btn-ghost" id="open-text-transcript-btn" style="border-radius: 10px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.35rem;">
+                            📝 Notizen eingeben
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Collapsible Inline AI Config Panel -->
+                <div class="card-glow p-4 mb-3 hidden" id="minutes-inline-ai-config-panel" style="background: #f8fafc; border-radius: 16px; border: 1px solid #cbd5e1; box-shadow: var(--shadow-donezo);">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span style="font-size: 1.25rem;">🔑</span>
+                            <h4 class="m-0" style="font-weight: 800; font-size: 1.05rem; color: #0f172a;">
+                                Google Gemini API-Schlüssel direkt einrichten
+                            </h4>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-ghost" id="close-minutes-ai-config-btn" style="font-size: 1.1rem; line-height: 1;">✕</button>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #475569; line-height: 1.5; margin-bottom: 1rem;">
+                        Für die kostenlose KI-Zusammenfassung auf Microsoft Teams-Niveau wird ein kostenloser Google Gemini API-Key benötigt (dauert ca. 30 Sekunden im Google AI Studio).
+                    </p>
+                    <div class="d-flex flex-column gap-3" style="max-width: 680px;">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin: 0;">Google Gemini API-Key (beginnt mit AIzaSy...):</label>
+                                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="font-size: 0.8rem; font-weight: 700; color: #0284c7; text-decoration: underline;">
+                                    ↗ 1. Kostenlosen Key bei Google AI Studio holen
+                                </a>
+                            </div>
+                            <div style="position: relative;">
+                                <input type="password" id="minutes-gemini-key-input" class="form-control" placeholder="AIzaSy..." value="${escapeHTML(aiConfig.geminiKey || '')}" style="font-family: monospace; font-size: 0.88rem; padding-right: 36px;">
+                                <button type="button" class="btn btn-sm btn-ghost" id="minutes-toggle-key-vis" style="position: absolute; right: 4px; top: 50%; transform: translateY(-50%); z-index: 5;">👁️</button>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2 align-items-center flex-wrap">
+                            <button type="button" class="btn btn-donezo-primary" id="minutes-save-ai-key-btn" style="font-weight: 700; border-radius: 10px; padding: 0.55rem 1.35rem;">
+                                💾 Schlüssel speichern
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="minutes-test-ai-key-btn" style="font-weight: 600; border-radius: 10px; padding: 0.55rem 1.15rem;">
+                                ⚡ Verbindung testen
+                            </button>
+                        </div>
+                        <div id="minutes-ai-test-feedback" style="font-size: 0.86rem; font-weight: 700; margin-top: 0.25rem;"></div>
                     </div>
                 </div>
 
@@ -258,6 +322,95 @@ export class MinutesModule {
         const textarea = document.getElementById("transcript-textarea");
         const wordCountEl = document.getElementById("trans-word-count");
         const aiStatusEl = document.getElementById("ai-generating-status");
+
+        // 0. Inline AI Copilot Quick-Setup Handlers
+        const toggleAiConfigBtn = document.getElementById("toggle-minutes-ai-config-btn");
+        const closeAiConfigBtn = document.getElementById("close-minutes-ai-config-btn");
+        const inlineAiPanel = document.getElementById("minutes-inline-ai-config-panel");
+        const openTranscriptBtn = document.getElementById("open-text-transcript-btn");
+        const geminiKeyInput = document.getElementById("minutes-gemini-key-input");
+        const toggleKeyVisBtn = document.getElementById("minutes-toggle-key-vis");
+        const saveKeyBtn = document.getElementById("minutes-save-ai-key-btn");
+        const testKeyBtn = document.getElementById("minutes-test-ai-key-btn");
+        const testFeedbackEl = document.getElementById("minutes-ai-test-feedback");
+
+        toggleAiConfigBtn?.addEventListener("click", () => {
+            if (inlineAiPanel) {
+                inlineAiPanel.classList.toggle("hidden");
+                if (!inlineAiPanel.classList.contains("hidden")) {
+                    geminiKeyInput?.focus();
+                }
+            }
+        });
+
+        closeAiConfigBtn?.addEventListener("click", () => {
+            if (inlineAiPanel) inlineAiPanel.classList.add("hidden");
+        });
+
+        openTranscriptBtn?.addEventListener("click", () => {
+            if (liveBox) {
+                liveBox.classList.remove("hidden");
+                textarea?.focus();
+            }
+        });
+
+        toggleKeyVisBtn?.addEventListener("click", () => {
+            if (geminiKeyInput) {
+                if (geminiKeyInput.type === "password") {
+                    geminiKeyInput.type = "text";
+                    toggleKeyVisBtn.textContent = "🙈";
+                } else {
+                    geminiKeyInput.type = "password";
+                    toggleKeyVisBtn.textContent = "👁️";
+                }
+            }
+        });
+
+        saveKeyBtn?.addEventListener("click", () => {
+            const newKey = (geminiKeyInput?.value || "").trim();
+            StorageEngine.saveAiConfig({ provider: "gemini", geminiKey: newKey });
+            if (testFeedbackEl) {
+                testFeedbackEl.innerHTML = '<span style="color: #10b981;">✅ Gemini API-Schlüssel erfolgreich gespeichert!</span>';
+                setTimeout(() => {
+                    this.render(containerEl);
+                }, 1000);
+            } else {
+                this.render(containerEl);
+            }
+        });
+
+        testKeyBtn?.addEventListener("click", async () => {
+            const key = (geminiKeyInput?.value || "").trim();
+            if (!key) {
+                if (testFeedbackEl) testFeedbackEl.innerHTML = '<span style="color: #ef4444;">⚠️ Bitte zuerst einen Key eingeben.</span>';
+                return;
+            }
+            if (testFeedbackEl) testFeedbackEl.innerHTML = '⏳ <i>Verbindung wird getestet (Sende Test-Anfrage an Google Gemini 1.5 Flash)...</i>';
+            try {
+                const resp = await fetch("/api/ai-summarize", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        transcript: "Test der Verbindung zur Landjugend Scheuring.",
+                        members: members,
+                        apiKey: key,
+                        provider: "gemini"
+                    })
+                });
+                const data = await resp.json();
+                if (data.success && data.protocol) {
+                    StorageEngine.saveAiConfig({ provider: "gemini", geminiKey: key });
+                    if (testFeedbackEl) testFeedbackEl.innerHTML = '<span style="color: #10b981;">🎉 Verbindung erfolgreich! Google Gemini 1.5 Flash antwortet blitzschnell und ist einsatzbereit.</span>';
+                    setTimeout(() => {
+                        this.render(containerEl);
+                    }, 1500);
+                } else {
+                    if (testFeedbackEl) testFeedbackEl.innerHTML = `<span style="color: #ef4444;">❌ Fehler: ${data.message || data.error || "Verbindung fehlgeschlagen"}</span>`;
+                }
+            } catch (err) {
+                if (testFeedbackEl) testFeedbackEl.innerHTML = `<span style="color: #ef4444;">❌ Netzwerkfehler: ${err.message}</span>`;
+            }
+        });
 
         // 1. Audio Recording Handlers
         startBtn?.addEventListener("click", async () => {
