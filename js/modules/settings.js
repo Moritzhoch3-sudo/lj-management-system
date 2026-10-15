@@ -51,6 +51,9 @@ export class SettingsModule {
                                     <button type="button" class="sub-tab-btn ${activeSubTab === 'security' ? 'active' : ''}" data-subtab="security">
                                         🔒 Sicherheit & Passwörter
                                     </button>
+                                    <button type="button" class="sub-tab-btn ${activeSubTab === 'ai_assistant' ? 'active' : ''}" data-subtab="ai_assistant">
+                                        🤖 KI-Copilot
+                                    </button>
                                     <button type="button" class="sub-tab-btn ${activeSubTab === 'my_account' ? 'active' : ''}" data-subtab="my_account">
                                         👤 Mein Profil
                                     </button>
@@ -413,6 +416,101 @@ export class SettingsModule {
                                 <li><strong>Initial-Passwort für neue Mitglieder:</strong> <code>Scheuring2026!</code> (kann nach Login direkt geändert werden)</li>
                                 <li><strong>Notfall Master-Code:</strong> <code>2026</code> (funktioniert stets als Master-Wiederherstellungsschlüssel für Administratoren)</li>
                                 <li><strong>Sicherheit:</strong> Alle Passwörter und PINs werden mit SHA-256 kryptografisch gehasht und clientseitig gesalzen. Es werden keine Passwörter im Klartext gespeichert.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else if (subTab === 'ai_assistant' && isAdmin) {
+            const aiConfig = StorageEngine.getAiConfig();
+            return `
+                <div class="d-flex flex-column gap-4" style="max-width: 760px;">
+                    <div class="card-glow p-4" style="background: #ffffff; border-radius: 16px; border: 1px solid var(--border-subtle); box-shadow: var(--shadow-donezo); border-left: 5px solid #10b981;">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span style="font-size: 1.5rem;">🤖</span>
+                            <div>
+                                <h3 class="m-0" style="font-weight: 800; font-size: 1.2rem; color: var(--text-primary);">
+                                    KI-Vorstands-Copilot (Sitzungszusammenfassung & TOPs)
+                                </h3>
+                                <p class="text-muted m-0 mt-0.5" style="font-size: 0.85rem;">
+                                    Generiert vollautomatisch Zusammenfassungen, Tagesordnungspunkte (TOPs) und Aufgaben auf Microsoft Teams Niveau.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <label class="form-label" style="font-weight: 700; font-size: 0.9rem;">Bevorzugter KI-Anbieter:</label>
+                            <div class="d-flex gap-3 mb-3 flex-wrap">
+                                <label class="d-flex align-items-center gap-2" style="cursor: pointer; font-weight: 600; font-size: 0.9rem;">
+                                    <input type="radio" name="ai-provider-choice" value="gemini" ${aiConfig.provider === 'gemini' ? 'checked' : ''}>
+                                    ✨ Google Gemini 1.5 Flash <span class="badge" style="background: #dcfce7; color: #15803d; font-size: 0.75rem; padding: 2px 6px; border-radius: 6px;">Kostenlos & Empfohlen</span>
+                                </label>
+                                <label class="d-flex align-items-center gap-2" style="cursor: pointer; font-weight: 600; font-size: 0.9rem;">
+                                    <input type="radio" name="ai-provider-choice" value="openai" ${aiConfig.provider === 'openai' ? 'checked' : ''}>
+                                    🧠 OpenAI GPT-4o-mini
+                                </label>
+                            </div>
+
+                            <!-- Gemini Box -->
+                            <div class="ai-provider-box p-3 rounded mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+                                <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-1">
+                                    <label class="form-label m-0" style="font-weight: 700; font-size: 0.88rem;">Google Gemini API-Key:</label>
+                                    <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="font-size: 0.8rem; font-weight: 700; color: #2563eb; text-decoration: none;">
+                                        🔑 Kostenlosen Key bei Google AI Studio holen ↗
+                                    </a>
+                                </div>
+                                <div class="input-group" style="position: relative;">
+                                    <input type="password" id="gemini-api-key-input" class="form-control" placeholder="AIzaSy..." value="${escapeHTML(aiConfig.geminiKey || '')}" style="font-family: monospace; font-size: 0.88rem; padding-right: 36px;">
+                                    <button type="button" class="btn btn-sm btn-ghost toggle-ai-key-vis" data-target="gemini-api-key-input" style="position: absolute; right: 4px; top: 50%; transform: translateY(-50%); z-index: 5;">👁️</button>
+                                </div>
+                                <div class="text-muted small mt-1" style="font-size: 0.78rem; line-height: 1.4;">
+                                    💡 <strong>Tipp:</strong> Im Google AI Studio kostenlos mit Google-Account anmelden und auf „Create API Key“ klicken. 15 Anfragen/Minute und 1.500 pro Tag sind dauerhaft kostenlos.
+                                </div>
+                            </div>
+
+                            <!-- OpenAI Box -->
+                            <div class="ai-provider-box p-3 rounded mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+                                <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-1">
+                                    <label class="form-label m-0" style="font-weight: 700; font-size: 0.88rem;">OpenAI API-Key (Optional für GPT-4o):</label>
+                                    <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" style="font-size: 0.8rem; font-weight: 700; color: #2563eb; text-decoration: none;">
+                                        OpenAI Dashboard ↗
+                                    </a>
+                                </div>
+                                <div class="input-group" style="position: relative;">
+                                    <input type="password" id="openai-api-key-input" class="form-control" placeholder="sk-proj-..." value="${escapeHTML(aiConfig.openaiKey || '')}" style="font-family: monospace; font-size: 0.88rem; padding-right: 36px;">
+                                    <button type="button" class="btn btn-sm btn-ghost toggle-ai-key-vis" data-target="openai-api-key-input" style="position: absolute; right: 4px; top: 50%; transform: translateY(-50%); z-index: 5;">👁️</button>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2 align-items-center mt-3 flex-wrap">
+                                <button class="btn btn-donezo-primary" id="save-ai-config-btn" style="padding: 0.55rem 1.4rem; font-weight: 700; border-radius: 10px;">
+                                    💾 Einstellungen speichern
+                                </button>
+                                <button class="btn btn-secondary" id="test-ai-connection-btn" style="padding: 0.55rem 1.15rem; font-weight: 600; border-radius: 10px;">
+                                    ⚡ Verbindung testen
+                                </button>
+                            </div>
+                            <div id="ai-test-feedback-msg" class="mt-2" style="font-size: 0.88rem; font-weight: 700;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Copilot / Teams Information Card -->
+                    <div class="card-glow p-4" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 16px;">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span style="font-size: 1.3rem;">ℹ️</span>
+                            <h4 class="m-0" style="font-weight: 800; font-size: 1.05rem; color: #1e40af;">
+                                Wie funktioniert die Zusammenfassung auf Teams-Niveau?
+                            </h4>
+                        </div>
+                        <div style="font-size: 0.85rem; line-height: 1.6; color: #1e3a8a;">
+                            <p style="margin-bottom: 0.5rem;">
+                                Sobald ein Key hinterlegt ist, analysiert die KI den gesprochenen Text der Vorstandssitzung mit dem Vorstands-Kontext der Landjugend Scheuring:
+                            </p>
+                            <ul style="margin: 0; padding-left: 1.25rem;">
+                                <li><strong>Filtert Smalltalk & Füllwörter</strong> automatisch heraus.</li>
+                                <li><strong>Erstellt Tagesordnungspunkte (TOPs)</strong> mit echtem inhaltlichem Kontext (z. B. Ablauf des Ausflugs: Frühstück, Aktivität, Fahrradtour, Abendessen).</li>
+                                <li><strong>Erkennt Spitznamen</strong> (z. B. Mo = Moritz Kubik, Kiwi = Kilian Salai, Vali = Valentin Müllner).</li>
+                                <li><strong>Zieht Aufgaben & Fakten heraus</strong> (z. B. 29 Kürbisse) und erlaubt 1-Klick-Übernahme in die Aufgabenliste.</li>
                             </ul>
                         </div>
                     </div>
@@ -850,6 +948,76 @@ export class SettingsModule {
                     if (feedbackMsg) {
                         feedbackMsg.innerHTML = '<span style="color: #ef4444;">⚠️ Bitte mindestens 4 Ziffern/Zeichen als PIN eingeben.</span>';
                     }
+                }
+            });
+        }
+
+        // 6. AI Assistant Settings (Gemini / OpenAI API Key & Provider)
+        if (activeSubTab === 'ai_assistant' && isAdmin) {
+            containerEl.querySelectorAll('.toggle-ai-key-vis').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetId = btn.dataset.target;
+                    const input = document.getElementById(targetId);
+                    if (input) {
+                        if (input.type === 'password') {
+                            input.type = 'text';
+                            btn.textContent = '🙈';
+                        } else {
+                            input.type = 'password';
+                            btn.textContent = '👁️';
+                        }
+                    }
+                });
+            });
+
+            document.getElementById('save-ai-config-btn')?.addEventListener('click', () => {
+                const provider = containerEl.querySelector('input[name="ai-provider-choice"]:checked')?.value || 'gemini';
+                const geminiKey = (document.getElementById('gemini-api-key-input')?.value || '').trim();
+                const openaiKey = (document.getElementById('openai-api-key-input')?.value || '').trim();
+                
+                StorageEngine.saveAiConfig({ provider, geminiKey, openaiKey });
+                const feedback = document.getElementById('ai-test-feedback-msg');
+                if (feedback) {
+                    feedback.innerHTML = '<span style="color: #10b981;">✅ KI-Einstellungen erfolgreich gespeichert!</span>';
+                    setTimeout(() => { if (feedback) feedback.innerHTML = ''; }, 3500);
+                }
+            });
+
+            document.getElementById('test-ai-connection-btn')?.addEventListener('click', async () => {
+                const feedback = document.getElementById('ai-test-feedback-msg');
+                const provider = containerEl.querySelector('input[name="ai-provider-choice"]:checked')?.value || 'gemini';
+                const geminiKey = (document.getElementById('gemini-api-key-input')?.value || '').trim();
+                const openaiKey = (document.getElementById('openai-api-key-input')?.value || '').trim();
+                const key = provider === 'openai' ? openaiKey : geminiKey;
+
+                if (!key) {
+                    if (feedback) feedback.innerHTML = '<span style="color: #ef4444;">⚠️ Bitte gib zuerst einen API-Schlüssel für ' + (provider === 'openai' ? 'OpenAI' : 'Google Gemini') + ' ein.</span>';
+                    return;
+                }
+
+                if (feedback) feedback.innerHTML = '⏳ <i>Verbindung wird getestet (Sende Test-Anfrage an ' + (provider === 'openai' ? 'OpenAI GPT-4o-mini' : 'Google Gemini 1.5 Flash') + ')...</i>';
+
+                try {
+                    const resp = await fetch('/api/ai-summarize', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            transcript: 'Test der Verbindung. Vorstandschaftsausflug und Protokoll-Copilot funktionieren einwandfrei.',
+                            members: members,
+                            apiKey: key,
+                            provider: provider
+                        })
+                    });
+
+                    const data = await resp.json();
+                    if (data.success && data.protocol) {
+                        StorageEngine.saveAiConfig({ provider, geminiKey, openaiKey });
+                        if (feedback) feedback.innerHTML = '<span style="color: #10b981;">🎉 Verbindung erfolgreich! ' + (provider === 'openai' ? 'OpenAI GPT-4o-mini' : 'Google Gemini 1.5 Flash') + ' antwortet blitzschnell und ist einsatzbereit.</span>';
+                    } else {
+                        if (feedback) feedback.innerHTML = '<span style="color: #ef4444;">❌ Fehler: ' + (data.message || data.error || 'Verbindung fehlgeschlagen') + '</span>';
+                    }
+                } catch (err) {
+                    if (feedback) feedback.innerHTML = '<span style="color: #ef4444;">❌ Netzwerkfehler beim Testen: ' + err.message + '</span>';
                 }
             });
         }

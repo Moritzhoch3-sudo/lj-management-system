@@ -29,7 +29,8 @@ const STORAGE_KEYS = {
     LAST_CATEGORY: 'lj_last_category_v1',
     MEMBER_PASSWORDS: 'lj_member_passwords_v1',
     APP_CENTRAL_CODE: 'lj_app_central_code_v1',
-    APP_CENTRAL_CODE_HASH: 'lj_app_central_code_hash_v1'
+    APP_CENTRAL_CODE_HASH: 'lj_app_central_code_hash_v1',
+    AI_CONFIG: 'lj_ai_assistant_config_v1'
 };
 
 // Precomputed SHA-256 hashes with salts - no plaintext secrets stored in source code
@@ -219,6 +220,60 @@ export class StorageEngine {
         localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(cleaned));
         this.markDirty();
         CloudStorageEngine.scheduleImmediatePush({ tasks: cleaned, deletedTaskIds: this.getDeletedTaskIds() });
+    }
+
+    static addTask(task) {
+        if (!task || !task.title) return null;
+        const tasks = this.getTasks() || [];
+        const newId = task.id || ('t_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5));
+        const assigneeIds = Array.isArray(task.assigneeIds) && task.assigneeIds.length > 0
+            ? task.assigneeIds
+            : (task.assigneeId ? [task.assigneeId] : ['m1']);
+        const newTask = {
+            id: newId,
+            title: (task.title || '').trim(),
+            description: (task.description || task.details || '').trim(),
+            assigneeId: assigneeIds[0] || 'm1',
+            assigneeIds: assigneeIds,
+            categoryId: task.categoryId || task.category || 'sitzung',
+            priority: task.priority || 'mittel',
+            dueDate: task.dueDate || '',
+            status: task.status || 'open',
+            createdAt: new Date().toISOString()
+        };
+        tasks.unshift(newTask);
+        this.saveTasks(tasks);
+        return newTask;
+    }
+
+    static getAiConfig() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEYS.AI_CONFIG);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                return {
+                    provider: parsed.provider || 'gemini',
+                    geminiKey: parsed.geminiKey || '',
+                    openaiKey: parsed.openaiKey || ''
+                };
+            }
+        } catch (e) {}
+        return { provider: 'gemini', geminiKey: '', openaiKey: '' };
+    }
+
+    static saveAiConfig(config) {
+        try {
+            const current = this.getAiConfig();
+            const updated = {
+                ...current,
+                ...(config || {})
+            };
+            localStorage.setItem(STORAGE_KEYS.AI_CONFIG, JSON.stringify(updated));
+            this.markDirty();
+            return updated;
+        } catch (e) {
+            return null;
+        }
     }
 
     static getFinances() {
