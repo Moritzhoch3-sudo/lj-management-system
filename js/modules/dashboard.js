@@ -61,9 +61,11 @@ export class DashboardModule {
                         <button class="btn btn-donezo-primary" id="donezo-add-task-btn" title="Neue Aufgabe erstellen">
                             <span>➕</span> <span>Neue Aufgabe</span>
                         </button>
+                        ${isUserAdmin ? `
                         <button class="btn btn-donezo-outline" id="donezo-quick-minutes-btn" title="Sitzungsprotokoll öffnen">
                             <span>🎙️</span> <span>Sitzungsprotokoll</span>
                         </button>
+                        ` : ''}
                     </div>
                 </div>
 
@@ -178,9 +180,15 @@ export class DashboardModule {
                             </div>
                         </div>
 
+                        ${isUserAdmin ? `
                         <button class="btn btn-donezo-primary w-100" id="donezo-start-meeting-btn">
                             🎙️ Sitzungsprotokoll öffnen
                         </button>
+                        ` : `
+                        <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 0.5rem 0.75rem; background: #f8fafc; border-radius: 10px; border: 1px solid var(--border-subtle);">
+                            📌 Nächste Termine & Beschlüsse synchronisiert
+                        </div>
+                        `}
                     </div>
 
                     <!-- Column 3: Quick Tasks / Projects -->
@@ -244,8 +252,9 @@ export class DashboardModule {
                     </div>
                 </div>
 
-                <!-- 3. Bottom Row (2 Columns: Team Collaboration & Finance Widget) -->
+                <!-- 3. Bottom Row (Role-Gated: Full Board & Finances for Admin; Personal Profile & Info for Members) -->
                 <div class="donezo-grid-row-2">
+                    ${isUserAdmin ? `
                     <!-- Column 1: Team Collaboration (Board Members) -->
                     <div class="donezo-card">
                         <div class="donezo-card-header">
@@ -264,8 +273,8 @@ export class DashboardModule {
                                 return `
                                     <div class="donezo-team-member" style="cursor: pointer;" data-member-id="${m.id}" title="Klicken, um Aufgaben für ${escapeHTML(m.name)} im Overlay zu verwalten">
                                         <div class="member-left">
-                                            <div class="member-avatar-circle" style="background: ${m.color}15; color: ${m.color};">
-                                                ${m.avatar}
+                                            <div class="member-avatar-circle" style="background: ${m.color}15; color: ${m.color}; border: 1.5px solid ${m.color}30;">
+                                                ${StorageEngine.renderMemberAvatar(m, 32)}
                                             </div>
                                             <div class="member-meta">
                                                 <span class="name">${escapeHTML(m.name)}</span>
@@ -303,6 +312,65 @@ export class DashboardModule {
                             </button>
                         </div>
                     </div>
+                    ` : `
+                    <!-- Column 1 (Member View): Personal Profile & Status -->
+                    <div class="donezo-card">
+                        <div class="donezo-card-header">
+                            <h3 class="donezo-card-title">Mein Vorstandsprofil</h3>
+                            <span class="badge badge-success">Aktiv</span>
+                        </div>
+
+                        <div class="p-3" style="background: #f8fafc; border-radius: 14px; border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 0.85rem;">
+                                <div style="width: 50px; height: 50px; border-radius: 50%; background: ${loggedInUser.color}15; border: 2px solid ${loggedInUser.color}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    ${StorageEngine.renderMemberAvatar(loggedInUser, 44)}
+                                </div>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: var(--text-primary);">${escapeHTML(loggedInUser.name)}</h4>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 3px;">
+                                        <span class="badge" style="background: ${loggedInUser.color}; color: #ffffff; font-weight: 700; font-size: 0.72rem; padding: 2px 7px; border-radius: 10px;">${escapeHTML(loggedInUser.role || 'Vorstand')}</span>
+                                        <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">@${escapeHTML(loggedInUser.username || '')}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-donezo-primary" id="open-my-person-tasks-btn" style="border-radius: 10px; font-weight: 800; padding: 0.5rem 1rem;">
+                                📌 Meine Aufgaben verwalten (${totalTasks})
+                            </button>
+                        </div>
+
+                        <div class="mt-3 p-3" style="border-radius: 12px; background: #ffffff; border: 1px solid var(--border-subtle);">
+                            <div class="d-flex justify-content-between align-items-center mb-1.5" style="font-size: 0.82rem; font-weight: 700;">
+                                <span style="color: var(--text-secondary);">Erledigungsquote meiner Aufgaben</span>
+                                <span style="color: #10b981;">${globalPercentage}% (${completedTasks}/${totalTasks})</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 10px; overflow: hidden;">
+                                <div style="width: ${globalPercentage}%; height: 100%; background: #10b981; border-radius: 10px; transition: width 0.3s ease;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2 (Member View): Information & Support Box -->
+                    <div class="donezo-card d-flex flex-column justify-content-between" style="background: linear-gradient(145deg, #ffffff 0%, #f0fdf4 100%); border-left: 5px solid #10b981;">
+                        <div>
+                            <div class="donezo-card-header">
+                                <h3 class="donezo-card-title">📌 Vorstands-Infos & Hilfe</h3>
+                                <span class="badge" style="background: #ecfdf5; color: #047857; font-weight: 800;">Landjugend Scheuring</span>
+                            </div>
+                            <p style="font-size: 0.88rem; color: #334155; line-height: 1.5; margin-top: 0.5rem;">
+                                Als Vorstandsmitglied hast du hier den direkten Überblick über all deine anstehenden Vereinstermine und To-Dos.
+                            </p>
+                            <div class="p-2.5 mt-2" style="background: rgba(255,255,255,0.85); border-radius: 10px; border: 1px solid rgba(16,185,129,0.2); font-size: 0.82rem; color: #1e293b;">
+                                💡 <strong>Tipp:</strong> Halte deine Aufgaben auf aktuellem Stand (<em>In Arbeit</em> / <em>Erledigt</em>), damit die gesamte Vorstandschaft Bescheid weiß!
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <button type="button" class="btn btn-sm btn-ghost w-100" id="dash-switch-to-settings-btn" style="border: 1.5px solid var(--border-medium); border-radius: 10px; font-weight: 700; color: var(--text-primary); background: #ffffff;">
+                                👤 Mein Profilbild & Passwort ändern
+                            </button>
+                        </div>
+                    </div>
+                    `}
                 </div>
             </div>
         `;
@@ -427,6 +495,17 @@ export class DashboardModule {
                     TasksModule.openPersonTasksModal(memberId, () => DashboardModule.render(containerEl, onFilterMemberClick));
                 }
             });
+        });
+
+        // Open Own Tasks Modal (for regular members on dashboard)
+        containerEl.querySelector('#open-my-person-tasks-btn')?.addEventListener('click', () => {
+            const currentUserId = StorageEngine.getCurrentUserId();
+            TasksModule.openPersonTasksModal(currentUserId, () => DashboardModule.render(containerEl, onFilterMemberClick));
+        });
+
+        // Switch to Settings (for regular members profile button)
+        containerEl.querySelector('#dash-switch-to-settings-btn')?.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'settings' } }));
         });
     }
 }

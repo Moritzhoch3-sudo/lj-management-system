@@ -22,9 +22,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Stylesheets with v51.0 Cache-Buster Query Tags -->
-    <link rel="stylesheet" href="css/main.css?v=51.0">
-    <link rel="stylesheet" href="css/components.css?v=51.0">
+    <!-- Stylesheets with v52.0 Cache-Buster Query Tags -->
+    <link rel="stylesheet" href="css/main.css?v=52.0">
+    <link rel="stylesheet" href="css/components.css?v=52.0">
 </head>
 <body class="theme-donezo">
     <div class="app-layout">
@@ -42,7 +42,7 @@
                 </div>
                 <div class="sidebar-header-right d-flex align-items-center gap-1.5">
                     <button type="button" class="mobile-user-chip" id="mobile-user-chip-btn" title="Vorstandsmitglied wechseln" aria-label="Vorstandsmitglied wechseln">
-                        <span id="mobile-user-avatar" class="mobile-user-avatar">👱‍♂️</span>
+                        <span id="mobile-user-avatar" class="mobile-user-avatar" style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; overflow: hidden;">👱‍♂️</span>
                         <span id="mobile-user-name" class="mobile-user-name">Valentin</span>
                         <span class="mobile-user-caret">▾</span>
                     </button>
@@ -125,7 +125,7 @@
 
                     <!-- Logged-in User Profile Badge (Derived from active authenticated session) -->
                     <div class="logged-in-user-badge" id="logged-in-user-badge" style="display: flex; align-items: center; gap: 0.6rem; background: var(--bg-canvas); border: 1px solid var(--border-medium); padding: 0.35rem 0.85rem; border-radius: 12px; user-select: none;">
-                        <span id="current-user-avatar" style="font-size: 1.15rem; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: #ffffff; border: 1px solid var(--border-subtle); border-radius: 8px;">👨‍💻</span>
+                        <span id="current-user-avatar" style="font-size: 1.15rem; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: #ffffff; border: 1px solid var(--border-subtle); border-radius: 50%; overflow: hidden;">👨‍💻</span>
                         <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.15;">
                             <span id="current-user-name" style="font-size: 0.85rem; font-weight: 800; color: var(--text-primary); white-space: nowrap;">Moritz Kubik</span>
                             <span id="current-user-role" style="font-size: 0.72rem; font-weight: 700; color: #16a34a; white-space: nowrap;">👑 Superuser</span>
@@ -149,6 +149,6 @@
     <!-- External Client-side PDF Generation Engine -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <!-- Application Script Engine -->
-    <script type="module" src="js/app.js?v=51.0"></script>
+    <script type="module" src="js/app.js?v=52.0"></script>
 </body>
 </html>

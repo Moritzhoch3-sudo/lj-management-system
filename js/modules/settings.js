@@ -22,11 +22,11 @@ export class SettingsModule {
             const isSuper = StorageEngine.isSuperUser();
 
             // Guard activeSubTab based on permissions
-            if (!isAdmin && (activeSubTab === 'members' || activeSubTab === 'security')) {
+            if (!isAdmin) {
                 activeSubTab = 'my_account';
-            }
-            if (isAdmin && activeSubTab === 'my_account') {
-                activeSubTab = 'members';
+            } else if (!activeSubTab || activeSubTab === 'my_account') {
+                // If admin, default to members unless they deliberately chose my_account
+                if (!activeSubTab) activeSubTab = 'members';
             }
 
             containerEl.innerHTML = `
@@ -51,12 +51,12 @@ export class SettingsModule {
                                     <button type="button" class="sub-tab-btn ${activeSubTab === 'security' ? 'active' : ''}" data-subtab="security">
                                         🔒 Sicherheit & Passwörter
                                     </button>
-                                ` : `
                                     <button type="button" class="sub-tab-btn ${activeSubTab === 'my_account' ? 'active' : ''}" data-subtab="my_account">
-                                        👤 Mein Account & Passwort
+                                        👤 Mein Profil
                                     </button>
-                                    <button type="button" class="sub-tab-btn ${activeSubTab === 'categories' ? 'active' : ''}" data-subtab="categories">
-                                        🏷️ Kategorien (${categories.length})
+                                ` : `
+                                    <button type="button" class="sub-tab-btn active" data-subtab="my_account">
+                                        👤 Mein Profil & Passwort
                                     </button>
                                 `}
                             </div>
@@ -115,8 +115,12 @@ export class SettingsModule {
                                     <div data-member-id="${m.id}" class="member-inline-row">
                                         <!-- Top row (Avatar, Name, Actions on mobile) -->
                                         <div class="member-row-top">
-                                            <div class="member-col-avatar">
-                                                <input type="text" class="form-control form-control-sm inline-avatar-input" value="${escapeHTML(m.avatar || '👤')}" title="Emoji-Avatar" />
+                                            <div class="member-col-avatar" style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                                <div class="admin-table-avatar-trigger" data-member-id="${m.id}" style="cursor: pointer; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;" title="Klicken, um Foto hochzuladen">
+                                                    ${StorageEngine.renderMemberAvatar(m, 32)}
+                                                </div>
+                                                <input type="file" class="admin-member-photo-input" data-member-id="${m.id}" accept="image/*" style="display: none;" />
+                                                <input type="text" class="form-control form-control-sm inline-avatar-input" value="${escapeHTML(m.avatar || '👤')}" title="Emoji-Avatar Fallback" style="width: 32px; padding: 2px; text-align: center;" />
                                             </div>
                                             <div class="member-col-name">
                                                 <input type="text" class="form-control form-control-sm inline-name-input" value="${escapeHTML(m.name || '')}" placeholder="Name eingeben..." />
@@ -225,8 +229,8 @@ export class SettingsModule {
                     <!-- User Info Card -->
                     <div class="card-glow p-4" style="background: #ffffff; border-radius: 16px; border: 1px solid var(--border-subtle);">
                         <div class="d-flex align-items-center gap-3 mb-3">
-                            <div style="width: 56px; height: 56px; border-radius: 50%; background: ${loggedInUser.color}22; border: 2px solid ${loggedInUser.color}; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">
-                                ${escapeHTML(loggedInUser.avatar || '👤')}
+                            <div style="width: 56px; height: 56px; border-radius: 50%; background: ${loggedInUser.color}22; border: 2px solid ${loggedInUser.color}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;">
+                                ${StorageEngine.renderMemberAvatar(loggedInUser, 52)}
                             </div>
                             <div>
                                 <h3 class="m-0" style="font-weight: 800; font-size: 1.25rem; color: var(--text-primary);">${escapeHTML(loggedInUser.name)}</h3>
@@ -275,23 +279,47 @@ export class SettingsModule {
                         </form>
                     </div>
 
-                    <!-- Personal Profile Customization -->
+                    <!-- Personal Profile Customization with Real Photo Upload -->
                     <div class="card-glow p-4" style="background: #ffffff; border-radius: 16px; border: 1px solid var(--border-subtle);">
                         <div class="d-flex align-items-center gap-2 mb-2">
                             <span style="font-size: 1.35rem;">🎨</span>
                             <h4 class="m-0" style="font-weight: 800; font-size: 1.15rem; color: var(--text-primary);">
-                                Mein Profil & Farbe anpassen
+                                Mein Profilbild & Farbe anpassen
                             </h4>
                         </div>
-                        <form id="change-own-profile-form" style="max-width: 420px;">
+                        <p class="text-muted mb-3" style="font-size: 0.88rem; line-height: 1.5;">
+                            Lade ein echtes Profilfoto hoch (wird automatisch optimiert) oder nutze einen Emoji-Avatar als Fallback.
+                        </p>
+                        <form id="change-own-profile-form" style="max-width: 480px;">
+                            <!-- Photo Uploader Section -->
+                            <div class="profile-photo-uploader-box">
+                                <div class="profile-photo-preview-wrap" id="own-photo-preview-wrap">
+                                    ${StorageEngine.renderMemberAvatar(loggedInUser, 70)}
+                                </div>
+                                <div class="profile-photo-actions">
+                                    <input type="file" id="own-photo-file-input" accept="image/*" style="display: none;" />
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <button type="button" class="btn btn-sm btn-donezo-primary" id="own-photo-upload-trigger-btn" style="border-radius: 8px; font-weight: 700;">
+                                            📷 Foto auswählen
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-ghost" id="own-photo-remove-btn" style="border-radius: 8px; color: #ef4444; border: 1px solid #fecaca; ${loggedInUser.photoUrl ? '' : 'display: none;'}" title="Foto löschen und Emoji verwenden">
+                                            🗑️ Löschen
+                                        </button>
+                                    </div>
+                                    <span style="font-size: 0.75rem; color: var(--text-muted);">
+                                        JPG, PNG, WebP (automatisch komprimiert auf 160×160px)
+                                    </span>
+                                </div>
+                            </div>
+
                             <div class="mb-3">
                                 <label style="font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem; display: block;">Mein Anzeigename</label>
                                 <input type="text" id="own-profile-name" class="form-control" value="${escapeHTML(loggedInUser.name)}" required style="border-radius: 10px; height: 42px; font-weight: 700;" />
                             </div>
                             <div class="d-flex gap-3 mb-3">
                                 <div style="flex: 1;">
-                                    <label style="font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem; display: block;">Mein Emoji-Avatar</label>
-                                    <input type="text" id="own-profile-avatar" class="form-control text-center" value="${escapeHTML(loggedInUser.avatar || '👤')}" maxlength="4" style="border-radius: 10px; height: 42px; font-size: 1.4rem;" />
+                                    <label style="font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem; display: block;">Emoji-Fallback</label>
+                                    <input type="text" id="own-profile-avatar" class="form-control text-center" value="${escapeHTML(loggedInUser.avatar || '👤')}" maxlength="4" style="border-radius: 10px; height: 42px; font-size: 1.4rem;" title="Wird verwendet, falls kein Foto hochgeladen wurde" />
                                 </div>
                                 <div style="flex: 1;">
                                     <label style="font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem; display: block;">Meine Kennfarbe</label>
@@ -303,7 +331,7 @@ export class SettingsModule {
                             </div>
                             <div id="own-profile-feedback" style="display: none; padding: 0.6rem 0.85rem; border-radius: 10px; font-size: 0.85rem; font-weight: 700; margin-bottom: 1rem;"></div>
                             <button type="submit" id="own-profile-submit-btn" class="btn btn-secondary w-100" style="height: 42px; font-weight: 800; border-radius: 10px; background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1;">
-                                💾 Profil aktualisieren
+                                💾 Profil & Foto speichern
                             </button>
                         </form>
                     </div>
@@ -402,7 +430,12 @@ export class SettingsModule {
         // 1. Sub-Tabs Navigation
         containerEl.querySelectorAll('.sub-tab-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                activeSubTab = e.currentTarget.dataset.subtab;
+                const targetSubTab = e.currentTarget.dataset.subtab;
+                if (!isAdmin && targetSubTab !== 'my_account') {
+                    activeSubTab = 'my_account';
+                } else {
+                    activeSubTab = targetSubTab;
+                }
                 this.render(containerEl, onMembersUpdatedCallback);
             });
         });
@@ -440,6 +473,7 @@ export class SettingsModule {
                         role,
                         systemRole,
                         avatar,
+                        photoUrl: existing.photoUrl || null,
                         color,
                         bgLight: color + '22',
                         passwordHash: existing.passwordHash || '613b66d02886f515f7d7969e989420d2f3575163dc4455a7d93aca74db7ae56c'
@@ -462,6 +496,31 @@ export class SettingsModule {
                         swatch.style.backgroundColor = e.target.value;
                     }
                     saveMembersState();
+                });
+            });
+
+            // Admin Table Photo Upload Triggers
+            containerEl.querySelectorAll('.admin-table-avatar-trigger').forEach(trigger => {
+                trigger.addEventListener('click', () => {
+                    const mId = trigger.dataset.memberId;
+                    const fileInput = containerEl.querySelector(`.admin-member-photo-input[data-member-id="${mId}"]`);
+                    fileInput?.click();
+                });
+            });
+
+            containerEl.querySelectorAll('.admin-member-photo-input').forEach(input => {
+                input.addEventListener('change', async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const mId = input.dataset.memberId;
+                    try {
+                        const compressed = await StorageEngine.compressImageFile(file, 160, 0.82);
+                        await StorageEngine.updateMemberCredentials(mId, { photoUrl: compressed });
+                        if (onMembersUpdatedCallback) onMembersUpdatedCallback();
+                        this.render(containerEl, onMembersUpdatedCallback);
+                    } catch (err) {
+                        alert('Fehler beim Verarbeiten des Fotos: ' + err.message);
+                    }
                 });
             });
 
@@ -622,10 +681,45 @@ export class SettingsModule {
                 document.getElementById('own-repeat-password').value = '';
             });
 
-            // Change Own Profile
+            // Change Own Profile with Real Photo Upload
             const ownProfileForm = document.getElementById('change-own-profile-form');
             const colorInput = document.getElementById('own-profile-color');
             const colorText = document.getElementById('own-color-preview-text');
+            const photoFileInput = document.getElementById('own-photo-file-input');
+            const photoUploadTrigger = document.getElementById('own-photo-upload-trigger-btn');
+            const photoRemoveBtn = document.getElementById('own-photo-remove-btn');
+            const previewWrap = document.getElementById('own-photo-preview-wrap');
+
+            let currentPhotoUrl = loggedInUser.photoUrl || null;
+
+            photoUploadTrigger?.addEventListener('click', () => {
+                photoFileInput?.click();
+            });
+
+            photoFileInput?.addEventListener('change', async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                try {
+                    const compressed = await StorageEngine.compressImageFile(file, 160, 0.82);
+                    currentPhotoUrl = compressed;
+                    if (previewWrap) {
+                        previewWrap.innerHTML = StorageEngine.renderMemberAvatar({ ...loggedInUser, photoUrl: currentPhotoUrl }, 70);
+                    }
+                    if (photoRemoveBtn) photoRemoveBtn.style.display = 'inline-flex';
+                } catch (err) {
+                    alert('Fehler beim Verarbeiten des Fotos: ' + err.message);
+                }
+            });
+
+            photoRemoveBtn?.addEventListener('click', () => {
+                currentPhotoUrl = null;
+                const avatar = (document.getElementById('own-profile-avatar')?.value || '').trim() || '👤';
+                if (previewWrap) {
+                    previewWrap.innerHTML = StorageEngine.renderMemberAvatar({ ...loggedInUser, photoUrl: null, avatar }, 70);
+                }
+                if (photoRemoveBtn) photoRemoveBtn.style.display = 'none';
+                if (photoFileInput) photoFileInput.value = '';
+            });
 
             colorInput?.addEventListener('input', (e) => {
                 if (colorText) colorText.textContent = e.target.value;
@@ -640,19 +734,24 @@ export class SettingsModule {
 
                 if (!name) return;
 
-                await StorageEngine.updateMemberCredentials(loggedInUser.id, { name, avatar, color });
+                await StorageEngine.updateMemberCredentials(loggedInUser.id, { 
+                    name, 
+                    avatar, 
+                    photoUrl: currentPhotoUrl, 
+                    color 
+                });
 
                 if (feedbackEl) {
                     feedbackEl.style.display = 'block';
                     feedbackEl.style.background = '#ecfdf5';
                     feedbackEl.style.color = '#059669';
-                    feedbackEl.textContent = '✅ Profil erfolgreich aktualisiert!';
+                    feedbackEl.textContent = '✅ Profil & Foto erfolgreich gespeichert!';
                 }
 
                 if (onMembersUpdatedCallback) onMembersUpdatedCallback();
                 setTimeout(() => {
                     this.render(containerEl, onMembersUpdatedCallback);
-                }, 1000);
+                }, 800);
             });
         }
 

@@ -75,7 +75,9 @@ class App {
         const mobNameEl = document.getElementById('mobile-user-name');
 
         if (currentUser) {
-            if (avatarEl) avatarEl.textContent = currentUser.avatar || '👤';
+            if (avatarEl) {
+                avatarEl.innerHTML = StorageEngine.renderMemberAvatar(currentUser, 28);
+            }
             if (nameEl) nameEl.textContent = currentUser.name || 'Vorstand';
             if (roleEl) {
                 let rolePrefix = '👤';
@@ -84,7 +86,9 @@ class App {
                 roleEl.textContent = `${rolePrefix} ${currentUser.role || 'Vorstand'}`;
                 roleEl.style.color = currentUser.color || '#10b981';
             }
-            if (mobAvatarEl) mobAvatarEl.textContent = currentUser.avatar || '👤';
+            if (mobAvatarEl) {
+                mobAvatarEl.innerHTML = StorageEngine.renderMemberAvatar(currentUser, 28);
+            }
             if (mobNameEl) {
                 const firstName = (currentUser.name || 'Vorstand').split(' ')[0];
                 mobNameEl.textContent = firstName;
@@ -104,6 +108,25 @@ class App {
     static renderProtectedSidebar() {
         const container = document.getElementById('sidebar-protected-nav');
         if (!container) return;
+
+        const isAdmin = StorageEngine.isAdminOrSuperUser();
+        const sectionLabel = container.previousElementSibling;
+
+        // Strictly hide protected section from regular members (Beisitzer)
+        if (!isAdmin) {
+            container.innerHTML = '';
+            container.style.display = 'none';
+            if (sectionLabel && sectionLabel.classList.contains('nav-section-label')) {
+                sectionLabel.style.display = 'none';
+            }
+            return;
+        }
+
+        // Admin / Superuser: ensure container and section label are visible
+        container.style.display = '';
+        if (sectionLabel && sectionLabel.classList.contains('nav-section-label')) {
+            sectionLabel.style.display = '';
+        }
 
         const isUnlocked = VaultGuard.isUnlockedSync();
 
@@ -300,7 +323,13 @@ class App {
         // Automatically collapse mobile menu drawer on tab switch
         this.toggleMobileMenu(false);
 
-        const protectedTabs = ['finance', 'contracts', 'minutes'];
+        const protectedTabs = ['finance', 'contracts', 'minutes', 'vault-login'];
+
+        // Strictly block regular members from protected areas
+        if (protectedTabs.includes(targetTab) && !StorageEngine.isAdminOrSuperUser()) {
+            this.switchTab('dashboard');
+            return;
+        }
 
         if (targetTab === 'vault-login') {
             if (VaultGuard.isUnlockedSync()) {
@@ -321,6 +350,11 @@ class App {
     }
 
     static switchTab(tabName) {
+        const protectedTabs = ['finance', 'contracts', 'minutes', 'vault-login'];
+        if (protectedTabs.includes(tabName) && !StorageEngine.isAdminOrSuperUser()) {
+            tabName = 'dashboard';
+        }
+
         activeTab = tabName;
         if (typeof sessionStorage !== 'undefined' && ['dashboard', 'tasks', 'settings', 'vault-login'].includes(tabName)) {
             sessionStorage.setItem('lj_active_tab', tabName);

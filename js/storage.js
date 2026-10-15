@@ -519,7 +519,7 @@ export class StorageEngine {
         return { success: true, message: `Superuser-Status erfolgreich an ${target.name} übertragen!` };
     }
 
-    static async updateMemberCredentials(memberId, { username, role, systemRole, newPassword, color, avatar, name }) {
+    static async updateMemberCredentials(memberId, { username, role, systemRole, newPassword, color, avatar, name, photoUrl }) {
         const members = this.getMembers();
         const target = members.find(m => m.id === memberId);
         if (!target) return { success: false, error: 'Mitglied nicht gefunden.' };
@@ -535,6 +535,7 @@ export class StorageEngine {
                     ...m,
                     name: name !== undefined ? name : m.name,
                     avatar: avatar !== undefined ? avatar : m.avatar,
+                    photoUrl: photoUrl !== undefined ? photoUrl : (m.photoUrl || null),
                     color: color !== undefined ? color : m.color,
                     role: role !== undefined ? role : m.role,
                     systemRole: systemRole !== undefined ? systemRole : (m.systemRole || 'member'),
@@ -547,6 +548,49 @@ export class StorageEngine {
 
         this.saveMembers(updated);
         return { success: true };
+    }
+
+    static renderMemberAvatar(member, size = 36, extraStyle = '', extraClass = '') {
+        if (!member) {
+            return `<span class="member-emoji-avatar ${extraClass}" style="font-size: ${Math.round(size * 0.55)}px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; ${extraStyle}">👤</span>`;
+        }
+        const photo = member.photoUrl || (typeof member.avatar === 'string' && (member.avatar.startsWith('data:image/') || member.avatar.startsWith('http')) ? member.avatar : null);
+        if (photo) {
+            return `<img src="${photo}" alt="${escapeHTML(member.name || '')}" class="member-photo-avatar ${extraClass}" style="width: ${size}px; height: ${size}px; min-width: ${size}px; min-height: ${size}px; border-radius: 50%; object-fit: cover; display: inline-block; vertical-align: middle; ${extraStyle}" />`;
+        }
+        const emoji = member.avatar || '👤';
+        return `<span class="member-emoji-avatar ${extraClass}" style="font-size: ${Math.round(size * 0.55)}px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; ${extraStyle}">${emoji}</span>`;
+    }
+
+    static compressImageFile(file, maxDimension = 160, quality = 0.82) {
+        return new Promise((resolve, reject) => {
+            if (!file || !file.type.startsWith('image/')) {
+                return reject(new Error('Ungültige Bilddatei'));
+            }
+            const reader = new FileReader();
+            reader.onerror = () => reject(new Error('Fehler beim Lesen der Datei'));
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onerror = () => reject(new Error('Fehler beim Laden des Bildes'));
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = maxDimension;
+                    canvas.height = maxDimension;
+                    const ctx = canvas.getContext('2d');
+
+                    // Center-crop to square
+                    const minDim = Math.min(img.width, img.height);
+                    const sx = (img.width - minDim) / 2;
+                    const sy = (img.height - minDim) / 2;
+
+                    ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, maxDimension, maxDimension);
+                    const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                    resolve(dataUrl);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
     }
 
     static getLastSelectedCategory() {
@@ -585,4 +629,10 @@ export class StorageEngine {
         sessionStorage.clear();
         window.location.reload();
     }
+}
+
+export const renderMemberAvatar = StorageEngine.renderMemberAvatar.bind(StorageEngine);
+export const compressImageFile = StorageEngine.compressImageFile.bind(StorageEngine);
+if (typeof window !== 'undefined') {
+    window.renderMemberAvatar = StorageEngine.renderMemberAvatar.bind(StorageEngine);
 }

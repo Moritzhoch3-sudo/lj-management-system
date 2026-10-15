@@ -162,7 +162,7 @@ export class TasksModule {
                         <div class="custom-inapp-dropdown" id="filter-member-dropdown-container" style="min-width: 220px; position: relative;">
                             <div class="custom-inapp-trigger" id="filter-member-trigger" style="height: 38px; border-radius: 10px; background: #ffffff; padding: 0 0.85rem;">
                                 <span id="filter-member-display" style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">
-                                    ${selectedMemberObj ? `${selectedMemberObj.avatar} ${escapeHTML(selectedMemberObj.name)}` : `👥 Alle Mitglieder (${members.length})`}
+                                    ${selectedMemberObj ? `${StorageEngine.renderMemberAvatar(selectedMemberObj, 22)} ${escapeHTML(selectedMemberObj.name)}` : `👥 Alle Mitglieder (${members.length})`}
                                 </span>
                                 <span class="custom-inapp-caret">▾</span>
                             </div>
@@ -174,7 +174,7 @@ export class TasksModule {
                                 ${members.map(m => `
                                     <div class="custom-inapp-item ${currentFilterMember === m.id ? 'active' : ''}" data-member-id="${m.id}">
                                         <span style="display: flex; align-items: center; gap: 0.45rem;">
-                                            <span>${m.avatar}</span>
+                                            <span>${StorageEngine.renderMemberAvatar(m, 22)}</span>
                                             <span>${escapeHTML(m.name)}</span>
                                             <small style="color: var(--text-muted); font-size: 0.72rem;">(${escapeHTML(m.role)})</small>
                                         </span>
@@ -185,7 +185,7 @@ export class TasksModule {
                         </div>
                         ` : `
                         <div style="height: 38px; border-radius: 10px; background: #ecfdf5; border: 1.5px solid #a7f3d0; padding: 0 0.85rem; display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.85rem; font-weight: 700; color: #047857; user-select: none;">
-                            <span>${selectedMemberObj ? selectedMemberObj.avatar : '👤'}</span>
+                            <span>${selectedMemberObj ? StorageEngine.renderMemberAvatar(selectedMemberObj, 22) : '👤'}</span>
                             <span>Meine Aufgaben</span>
                         </div>
                         `}
@@ -398,8 +398,8 @@ export class TasksModule {
                             <!-- Card Header -->
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center gap-2.5">
-                                    <div class="member-avatar" style="width: 44px; height: 44px; border-radius: 12px; background: ${memberColor}15; border: 2px solid ${memberColor}; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; color: ${memberColor}; flex-shrink: 0;">
-                                        ${m.avatar}
+                                    <div class="member-avatar" style="width: 44px; height: 44px; border-radius: 12px; background: ${memberColor}15; border: 2px solid ${memberColor}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;">
+                                        ${StorageEngine.renderMemberAvatar(m, 40)}
                                     </div>
                                     <div>
                                         <div class="d-flex align-items-center gap-1.5 flex-wrap">
@@ -527,8 +527,8 @@ export class TasksModule {
                                                     ${(Array.isArray(t.assigneeIds) && t.assigneeIds.length > 0 ? t.assigneeIds : [t.assigneeId]).map(id => {
                                                         const a = members.find(m => m.id === id);
                                                         return a ? `
-                                                            <span title="${escapeHTML(a.name)} (${escapeHTML(a.role || '')})" style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 6px; background: ${a.color}20; color: ${a.color}; border: 1px solid ${a.color}40; font-size: 0.85rem; flex-shrink: 0;">
-                                                                ${a.avatar || '👤'}
+                                                            <span title="${escapeHTML(a.name)} (${escapeHTML(a.role || '')})" style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: ${a.color}20; color: ${a.color}; border: 1px solid ${a.color}40; flex-shrink: 0; overflow: hidden;">
+                                                                ${StorageEngine.renderMemberAvatar(a, 22)}
                                                             </span>
                                                         ` : '';
                                                     }).join('')}
@@ -986,6 +986,12 @@ export class TasksModule {
      * Overlay Modal to view, edit, add, and change status of tasks for a specific person
      */
     static openPersonTasksModal(memberId, onModalClose = null) {
+        const isUserAdmin = StorageEngine.isAdminOrSuperUser();
+        const currentUserId = StorageEngine.getCurrentUserId();
+        if (!isUserAdmin && memberId !== currentUserId) {
+            return;
+        }
+
         const existing = document.getElementById('person-tasks-overlay-modal');
         if (existing) existing.remove();
 
@@ -1028,8 +1034,8 @@ export class TasksModule {
                     <!-- Modal Header -->
                     <div class="person-tasks-dialog-header">
                         <div class="d-flex align-items-center gap-3">
-                            <div style="width: 48px; height: 48px; border-radius: 12px; background: ${memberColor}18; border: 2.5px solid ${memberColor}; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: ${memberColor}; flex-shrink: 0;">
-                                ${member.avatar}
+                            <div style="width: 48px; height: 48px; border-radius: 12px; background: ${memberColor}18; border: 2.5px solid ${memberColor}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;">
+                                ${StorageEngine.renderMemberAvatar(member, 44)}
                             </div>
                             <div>
                                 <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -1127,7 +1133,7 @@ export class TasksModule {
                                                             <span class="co-assignees-badge" style="display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; vertical-align: middle;">
                                                                 ${t.assigneeIds.map(id => {
                                                                     const co = members.find(mem => mem.id === id);
-                                                                    return co ? `<span title="Zuständig: ${escapeHTML(co.name)}" style="font-size: 0.76rem; background: ${co.color}20; color: ${co.color}; border: 1px solid ${co.color}40; border-radius: 6px; padding: 1px 4px;">${co.avatar}</span>` : '';
+                                                                    return co ? `<span title="Zuständig: ${escapeHTML(co.name)}" style="display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; overflow: hidden; vertical-align: middle;">${StorageEngine.renderMemberAvatar(co, 18)}</span>` : '';
                                                                 }).join('')}
                                                             </span>
                                                         ` : ''}
@@ -1457,7 +1463,7 @@ static openTaskModal(taskId, containerEl, onTaskSaved = null) {
                                     return `
                                         <label class="modal-assignee-chip" data-member-id="${m.id}" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.65rem; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; border: 1.5px solid ${isAssigned ? m.color : '#e2e8f0'}; background: ${isAssigned ? m.color + '22' : '#ffffff'}; color: ${isAssigned ? m.color : '#475569'}; user-select: none; transition: all 0.15s ease;">
                                             <input type="checkbox" class="modal-assignee-checkbox" value="${m.id}" ${isAssigned ? 'checked' : ''} style="display: none;" />
-                                            <span>${m.avatar}</span>
+                                            <span>${StorageEngine.renderMemberAvatar(m, 20)}</span>
                                             <span>${escapeHTML(m.name)}</span>
                                             <span class="chip-check-indicator" style="font-size: 0.75rem; font-weight: 800; display: ${isAssigned ? 'inline' : 'none'};">✓</span>
                                         </label>
