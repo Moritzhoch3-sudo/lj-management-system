@@ -367,7 +367,9 @@ export class MinutesModule {
         });
 
         saveKeyBtn?.addEventListener("click", () => {
-            const newKey = (geminiKeyInput?.value || "").trim();
+            const rawKey = geminiKeyInput?.value || "";
+            const newKey = rawKey.trim().replace(/^["']|["']$/g, '').replace(/^key\s*=\s*/i, '').trim();
+            if (geminiKeyInput) geminiKeyInput.value = newKey;
             StorageEngine.saveAiConfig({ provider: "gemini", geminiKey: newKey });
             if (testFeedbackEl) {
                 testFeedbackEl.innerHTML = '<span style="color: #10b981;">✅ Gemini API-Schlüssel erfolgreich gespeichert!</span>';
@@ -380,18 +382,20 @@ export class MinutesModule {
         });
 
         testKeyBtn?.addEventListener("click", async () => {
-            const key = (geminiKeyInput?.value || "").trim();
+            const rawKey = geminiKeyInput?.value || "";
+            const key = rawKey.trim().replace(/^["']|["']$/g, '').replace(/^key\s*=\s*/i, '').trim();
+            if (geminiKeyInput) geminiKeyInput.value = key;
             if (!key) {
                 if (testFeedbackEl) testFeedbackEl.innerHTML = '<span style="color: #ef4444;">⚠️ Bitte zuerst einen Key eingeben.</span>';
                 return;
             }
-            if (testFeedbackEl) testFeedbackEl.innerHTML = '⏳ <i>Verbindung wird getestet (Sende Test-Anfrage an Google Gemini 1.5 Flash)...</i>';
+            if (testFeedbackEl) testFeedbackEl.innerHTML = '⏳ <i>Verbindung wird getestet (Sende Test-Anfrage an Google Gemini)...</i>';
             try {
                 const resp = await fetch("/api/ai-summarize", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        transcript: "Test der Verbindung zur Landjugend Scheuring.",
+                        transcript: "Test der Verbindung zur Landjugend Scheuring für die Sitzungszusammenfassung.",
                         members: members,
                         apiKey: key,
                         provider: "gemini"
@@ -400,7 +404,7 @@ export class MinutesModule {
                 const data = await resp.json();
                 if (data.success && data.protocol) {
                     StorageEngine.saveAiConfig({ provider: "gemini", geminiKey: key });
-                    if (testFeedbackEl) testFeedbackEl.innerHTML = '<span style="color: #10b981;">🎉 Verbindung erfolgreich! Google Gemini 1.5 Flash antwortet blitzschnell und ist einsatzbereit.</span>';
+                    if (testFeedbackEl) testFeedbackEl.innerHTML = '<span style="color: #10b981;">🎉 Verbindung erfolgreich! Google Gemini antwortet blitzschnell und ist einsatzbereit.</span>';
                     setTimeout(() => {
                         this.render(containerEl);
                     }, 1500);
@@ -469,7 +473,8 @@ export class MinutesModule {
 
             const aiConfig = StorageEngine.getAiConfig();
             const provider = aiConfig.provider || "gemini";
-            const key = provider === "openai" ? aiConfig.openaiKey : aiConfig.geminiKey;
+            const rawKey = provider === "openai" ? aiConfig.openaiKey : aiConfig.geminiKey;
+            const key = (rawKey || "").trim().replace(/^["']|["']$/g, '').replace(/^key\s*=\s*/i, '').trim();
 
             generateAiBtn.disabled = true;
             generateAiBtn.innerHTML = "⏳ <i>KI analysiert Sitzung...</i>";

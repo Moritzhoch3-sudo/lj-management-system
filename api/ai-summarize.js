@@ -43,7 +43,9 @@ module.exports = async (req, res) => {
         const geminiKey = (body.apiKey && provider === "gemini") ? body.apiKey.trim() : (process.env.GEMINI_API_KEY || (provider === "gemini" ? (body.apiKey || "").trim() : ""));
         const openaiKey = (body.apiKey && provider === "openai") ? body.apiKey.trim() : (process.env.OPENAI_API_KEY || (provider === "openai" ? (body.apiKey || "").trim() : ""));
 
-        const effectiveKey = provider === "openai" ? openaiKey : geminiKey;
+        let effectiveKey = (provider === "openai" ? openaiKey : geminiKey) || "";
+        // Sanitize API key: remove whitespace, quotes, and optional key= prefix
+        effectiveKey = effectiveKey.trim().replace(/^["']|["']$/g, '').replace(/^key\s*=\s*/i, '').trim();
 
         if (!effectiveKey) {
             return res.status(400).json({
@@ -158,19 +160,18 @@ Du MUSST deine Antwort zwingend als valides JSON nach diesem Schema liefern, ohn
             aiResultText = aiData.choices?.[0]?.message?.content || "{}";
         } else {
             // Dynamic Auto-Discovery & Multi-Model Fallback for Google Gemini
+            // Priority: gemini-1.5-flash is Google's most reliable, highest-quota, battle-tested model
             let candidateModels = [
-                "gemini-2.0-flash",
-                "gemini-1.5-flash-8b",
-                "gemini-1.5-flash-latest",
-                "gemini-2.5-flash",
-                "gemini-flash-latest",
                 "gemini-1.5-flash",
-                "gemini-2.0-flash-exp",
-                "gemini-pro"
+                "gemini-1.5-flash-latest",
+                "gemini-2.0-flash",
+                "gemini-1.5-pro",
+                "gemini-1.5-flash-8b",
+                "gemini-2.0-flash-exp"
             ];
 
             try {
-                const listResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${effectiveKey}`);
+                const listResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(effectiveKey)}`);
                 if (listResp.ok) {
                     const listData = await listResp.json();
                     const available = (listData.models || [])
@@ -193,7 +194,7 @@ Du MUSST deine Antwort zwingend als valides JSON nach diesem Schema liefern, ohn
             let usedModel = "";
 
             for (const model of candidateModels) {
-                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${effectiveKey}`;
+                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(effectiveKey)}`;
                 try {
                     const aiResp = await fetch(geminiUrl, {
                         method: "POST",
@@ -220,15 +221,33 @@ Du MUSST deine Antwort zwingend als valides JSON nach diesem Schema liefern, ohn
                     } else {
                         lastStatus = aiResp.status;
                         lastErrBody = await aiResp.text();
-                        // If model not found (404), temporarily high demand (503), rate limited (429), or server error (500/502/504):
-                        // Automatically fall through to the next candidate model!
-                        if ([404, 429, 500, 502, 503, 504].includes(aiResp.status)) {
-                            console.warn(`Gemini model ${model} returned status ${aiResp.status}, falling back to next candidate...`);
-                            continue;
-                        } else {
-                            // Hard permanent errors like 400 (bad request/invalid key) or 403 (forbidden)
-                            break;
+
+                        let parsedMessage = "";
+                        try {
+                            const parsed = JSON.parse(lastErrBody);
+                            parsedMessage = parsed?.error?.message || "";
+                        } catch (e) {}
+
+                        // Check if Google explicitly rejects the API key itself as invalid or expired
+                        const lowerErr = (parsedMessage || lastErrBody).toLowerCase();
+                        const isExplicitBadKey = (
+                            (lastStatus === 400 || lastStatus === 403) && (
+                                lowerErr.includes("api key not valid") || 
+                                lowerErr.includes("api_key_invalid") ||
+                                lowerErr.includes("api key expired") ||
+                                lowerErr.includes("unregistered callers")
+                            )
+                        );
+
+                        if (isExplicitBadKey) {
+                            console.warn(`Gemini explicit invalid key error on model ${model}: ${parsedMessage || lastErrBody}`);
+                            break; // Stop loop immediately: key itself is rejected by Google
                         }
+
+                        // For all other errors (503 high demand, 429 rate limit, 404 model not found, model-specific 400 parameters):
+                        // Log and try the next candidate model!
+                        console.warn(`Gemini model ${model} returned status ${lastStatus} (${parsedMessage || lastErrBody}), falling back to next candidate...`);
+                        continue;
                     }
                 } catch (fetchErr) {
                     lastErrBody = fetchErr.message;
@@ -237,18 +256,25 @@ Du MUSST deine Antwort zwingend als valides JSON nach diesem Schema liefern, ohn
 
             if (!successResp) {
                 let userFriendlyMsg = `Google Gemini Fehler (${lastStatus})`;
+                let rawMsg = lastErrBody;
                 try {
                     const parsedErr = JSON.parse(lastErrBody);
-                    const rawMsg = parsedErr?.error?.message || lastErrBody;
-                    if (lastStatus === 503) {
-                        userFriendlyMsg = "Google meldet aktuell eine kurzzeitige Server-Auslastung (503 High Demand). Bitte klicke in 5–10 Sekunden erneut auf 'Intelligente KI-Zusammenfassung generieren' oder nutze die Microsoft Copilot Option.";
-                    } else if (lastStatus === 400 || lastStatus === 403) {
-                        userFriendlyMsg = "Der eingegebene Google Gemini API-Schlüssel ist ungültig oder abgelaufen. Bitte prüfe den Schlüssel in Google AI Studio.";
-                    } else {
-                        userFriendlyMsg = rawMsg;
-                    }
-                } catch (e) {
-                    userFriendlyMsg = lastErrBody;
+                    rawMsg = parsedErr?.error?.message || lastErrBody;
+                } catch (e) {}
+
+                const lowerMsg = (rawMsg || "").toLowerCase();
+                if (lowerMsg.includes("api key not valid") || lowerMsg.includes("api_key_invalid")) {
+                    userFriendlyMsg = `Der eingegebene Google Gemini API-Schlüssel ist ungültig (${rawMsg}). Bitte kopiere den Schlüssel aus Google AI Studio (aistudio.google.com/app/apikey) noch einmal vollständig.`;
+                } else if (lowerMsg.includes("api key expired")) {
+                    userFriendlyMsg = `Der Google Gemini API-Schlüssel ist abgelaufen (${rawMsg}). Bitte erstelle in Google AI Studio einen neuen Schlüssel.`;
+                } else if (lowerMsg.includes("generative language api has not been used") || lowerMsg.includes("is disabled")) {
+                    userFriendlyMsg = `Die Generative Language API muss im Google-Projekt aktiviert werden: ${rawMsg}`;
+                } else if (lowerMsg.includes("user location is not supported")) {
+                    userFriendlyMsg = `Google meldet eine Standort-Einschränkung: ${rawMsg}`;
+                } else if (lastStatus === 503) {
+                    userFriendlyMsg = `Google meldet aktuell eine kurzzeitige Server-Auslastung auf allen Modellen (503 High Demand). Bitte klicke in 5–10 Sekunden erneut auf Generieren.`;
+                } else {
+                    userFriendlyMsg = `Google Gemini API Fehler (${lastStatus}): ${rawMsg}`;
                 }
 
                 return res.status(lastStatus).json({

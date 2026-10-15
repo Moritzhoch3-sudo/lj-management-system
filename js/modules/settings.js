@@ -977,8 +977,10 @@ export class SettingsModule {
 
             document.getElementById('save-ai-config-btn')?.addEventListener('click', () => {
                 const provider = containerEl.querySelector('input[name="ai-provider-choice"]:checked')?.value || 'gemini';
-                const geminiKey = (document.getElementById('gemini-api-key-input')?.value || '').trim();
-                const openaiKey = (document.getElementById('openai-api-key-input')?.value || '').trim();
+                const rawGemini = (document.getElementById('gemini-api-key-input')?.value || '').trim();
+                const rawOpenai = (document.getElementById('openai-api-key-input')?.value || '').trim();
+                const geminiKey = rawGemini.replace(/^["']|["']$/g, '').replace(/^key\s*=\s*/i, '').trim();
+                const openaiKey = rawOpenai.replace(/^["']|["']$/g, '').replace(/^key\s*=\s*/i, '').trim();
                 
                 StorageEngine.saveAiConfig({ provider, geminiKey, openaiKey });
                 const feedback = document.getElementById('ai-test-feedback-msg');
@@ -991,8 +993,10 @@ export class SettingsModule {
             document.getElementById('test-ai-connection-btn')?.addEventListener('click', async () => {
                 const feedback = document.getElementById('ai-test-feedback-msg');
                 const provider = containerEl.querySelector('input[name="ai-provider-choice"]:checked')?.value || 'gemini';
-                const geminiKey = (document.getElementById('gemini-api-key-input')?.value || '').trim();
-                const openaiKey = (document.getElementById('openai-api-key-input')?.value || '').trim();
+                const rawGemini = (document.getElementById('gemini-api-key-input')?.value || '').trim();
+                const rawOpenai = (document.getElementById('openai-api-key-input')?.value || '').trim();
+                const geminiKey = rawGemini.replace(/^["']|["']$/g, '').replace(/^key\s*=\s*/i, '').trim();
+                const openaiKey = rawOpenai.replace(/^["']|["']$/g, '').replace(/^key\s*=\s*/i, '').trim();
                 const key = provider === 'openai' ? openaiKey : geminiKey;
 
                 if (!key) {
