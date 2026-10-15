@@ -92,7 +92,7 @@ REGELN FÜR DIE PROTOKOLLIERUNG:
 6. BESCHLÜSSE: Fasse formelle oder informelle Einigungen klar zusammen.
 
 AUSGABEFORMAT:
-Du MUSST deine Antwort zwingend als valides JSON nach diesem Schema liefern, ohne Markdown-Ummantelung (keine ```json Backticks):
+Du MUSST deine Antwort zwingend als valides JSON nach diesem Schema liefern, ohne Markdown-Ummantelung (keine Markdown-Code-Blöcke oder Backticks):
 
 {
   "title": "Vorstandssitzung – <Prägnanter Untertitel mit Hauptthemen>",

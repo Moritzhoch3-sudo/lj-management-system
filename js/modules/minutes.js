@@ -295,7 +295,7 @@ export class MinutesModule {
         stopBtn?.addEventListener("click", async () => {
             if (activeRecorder) {
                 await activeRecorder.stopRecording();
-                alert("🎉 Aufnahme beendet! Das Transkript steht bereit. Klicke jetzt auf "Intelligente KI-Zusammenfassung generieren", um das Protokoll zu erstellen.");
+                alert("🎉 Aufnahme beendet! Das Transkript steht bereit. Klicke jetzt auf 'Intelligente KI-Zusammenfassung generieren', um das Protokoll zu erstellen.");
             }
         });
 
@@ -393,9 +393,7 @@ export class MinutesModule {
 
             const promptText = this.buildCopilotPrompt(text, members);
             navigator.clipboard.writeText(promptText).then(() => {
-                if (confirm("✅ Perfekter Vorstands-Prompt wurde in die Zwischenablage kopiert!
-
-Möchtest du Microsoft Copilot jetzt in einem neuen Tab öffnen?")) {
+                if (confirm("✅ Perfekter Vorstands-Prompt wurde in die Zwischenablage kopiert!\n\nMöchtest du Microsoft Copilot jetzt in einem neuen Tab öffnen?")) {
                     window.open("https://copilot.microsoft.com", "_blank");
                 }
             }).catch(() => {

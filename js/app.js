@@ -41,9 +41,21 @@ class App {
     static async showMainApp() {
         const appLayout = document.querySelector('.app-layout');
         if (appLayout) appLayout.style.display = 'flex';
-        this.renderNavbar();
-        this.bindGlobalEvents();
-        AutoSaveEngine.init();
+        try {
+            this.renderNavbar();
+        } catch (e) {
+            console.error('[App] renderNavbar error:', e);
+        }
+        try {
+            this.bindGlobalEvents();
+        } catch (e) {
+            console.error('[App] bindGlobalEvents error:', e);
+        }
+        try {
+            AutoSaveEngine.init();
+        } catch (e) {
+            console.error('[App] AutoSaveEngine error:', e);
+        }
 
         // 1. Fetch authoritative live data directly from the online cloud database first
         CloudStorageEngine.updateStatus('syncing', '🔄 Lade Live-Daten aus der Cloud...');
@@ -54,8 +66,16 @@ class App {
         }
 
         // 2. Render initial view with fresh online data
-        this.renderNavbar();
-        this.switchTab(activeTab);
+        try {
+            this.renderNavbar();
+        } catch (e) {
+            console.error('[App] second renderNavbar error:', e);
+        }
+        try {
+            this.switchTab(activeTab);
+        } catch (e) {
+            console.error('[App] switchTab error:', e);
+        }
 
         // 3. Listen for live updates from other devices
         CloudStorageEngine.init(() => {
@@ -110,7 +130,7 @@ class App {
         if (!container) return;
 
         const isAdmin = StorageEngine.isAdminOrSuperUser();
-        const sectionLabel = container.previousElementSibling;
+        const sectionLabel = document.getElementById('sidebar-protected-label') || container.previousElementSibling;
 
         // Strictly hide protected section from regular members (Beisitzer)
         if (!isAdmin) {

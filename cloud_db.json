@@ -1,5 +1,5 @@
 {
-  "_updatedAt": 1790438947535,
+  "_updatedAt": 1792095000000,
   "centralAccessCodeHash": "5c696b2d602e2d6d52f50915cad2710b8d7aef648ddaab69e703d15b9b1ee79b",
   "pinHash": "94f6058172e31de4765fe15ca7b2d83b427609a932c1821dcff5f52fdd9dbdcc",
   "members": [
@@ -9,7 +9,9 @@
       "role": "1. Vorstand",
       "avatar": "👱‍♂️",
       "color": "#10b981",
-      "bgLight": "#10b98122"
+      "bgLight": "#10b98122",
+      "username": "valentin",
+      "systemRole": "admin"
     },
     {
       "id": "m2",
@@ -17,7 +19,9 @@
       "role": "2. Vorstand",
       "avatar": "👱‍♀️",
       "color": "#0284c7",
-      "bgLight": "#0284c722"
+      "bgLight": "#0284c722",
+      "username": "linda",
+      "systemRole": "admin"
     },
     {
       "id": "m3",
@@ -25,7 +29,9 @@
       "role": "1. Kassier",
       "avatar": "👩‍💻",
       "color": "#f59e0b",
-      "bgLight": "#f59e0b22"
+      "bgLight": "#f59e0b22",
+      "username": "anja",
+      "systemRole": "admin"
     },
     {
       "id": "m4",
@@ -33,7 +39,9 @@
       "role": "2. Kassier",
       "avatar": "👨‍💻",
       "color": "#16a34a",
-      "bgLight": "#16a34a22"
+      "bgLight": "#16a34a22",
+      "username": "moritz",
+      "systemRole": "superuser"
     },
     {
       "id": "m5",
@@ -41,7 +49,9 @@
       "role": "1. Schriftführer",
       "avatar": "📝",
       "color": "#ec4899",
-      "bgLight": "#ec489922"
+      "bgLight": "#ec489922",
+      "username": "lena",
+      "systemRole": "member"
     },
     {
       "id": "m6",
@@ -49,7 +59,9 @@
       "role": "2. Schriftführer",
       "avatar": "📋",
       "color": "#4f46e5",
-      "bgLight": "#4f46e522"
+      "bgLight": "#4f46e522",
+      "username": "rosa",
+      "systemRole": "member"
     },
     {
       "id": "m7",
@@ -57,7 +69,9 @@
       "role": "Getränkewart",
       "avatar": "🍺",
       "color": "#dc2626",
-      "bgLight": "#dc262622"
+      "bgLight": "#dc262622",
+      "username": "cassandra",
+      "systemRole": "member"
     },
     {
       "id": "m8",
@@ -65,7 +79,9 @@
       "role": "Beisitzer",
       "avatar": "🛵",
       "color": "#7c3aed",
-      "bgLight": "#7c3aed22"
+      "bgLight": "#7c3aed22",
+      "username": "felix",
+      "systemRole": "member"
     },
     {
       "id": "m9",
@@ -73,7 +89,9 @@
       "role": "Beisitzer",
       "avatar": "🎲",
       "color": "#0d9488",
-      "bgLight": "#0d948822"
+      "bgLight": "#0d948822",
+      "username": "johannes",
+      "systemRole": "member"
     },
     {
       "id": "m10",
@@ -81,7 +99,9 @@
       "role": "Beisitzer",
       "avatar": "🔧",
       "color": "#2563eb",
-      "bgLight": "#2563eb22"
+      "bgLight": "#2563eb22",
+      "username": "dominique",
+      "systemRole": "member"
     },
     {
       "id": "m11",
@@ -89,7 +109,9 @@
       "role": "Beisitzer",
       "avatar": "👩🏽‍⚕️",
       "color": "#d97706",
-      "bgLight": "#d9770622"
+      "bgLight": "#d9770622",
+      "username": "michaela",
+      "systemRole": "member"
     },
     {
       "id": "m12",
@@ -97,7 +119,9 @@
       "role": "Beisitzer",
       "avatar": "🚗",
       "color": "#ea580c",
-      "bgLight": "#ea580c22"
+      "bgLight": "#ea580c22",
+      "username": "kilian",
+      "systemRole": "member"
     }
   ],
   "categories": [
