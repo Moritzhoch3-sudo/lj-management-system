@@ -159,12 +159,12 @@ Du MUSST deine Antwort zwingend als valides JSON nach diesem Schema liefern, ohn
         } else {
             // Dynamic Auto-Discovery & Multi-Model Fallback for Google Gemini
             let candidateModels = [
-                "gemini-2.5-flash",
                 "gemini-2.0-flash",
-                "gemini-flash-latest",
-                "gemini-1.5-flash-latest",
-                "gemini-1.5-flash",
                 "gemini-1.5-flash-8b",
+                "gemini-1.5-flash-latest",
+                "gemini-2.5-flash",
+                "gemini-flash-latest",
+                "gemini-1.5-flash",
                 "gemini-2.0-flash-exp",
                 "gemini-pro"
             ];
@@ -220,8 +220,13 @@ Du MUSST deine Antwort zwingend als valides JSON nach diesem Schema liefern, ohn
                     } else {
                         lastStatus = aiResp.status;
                         lastErrBody = await aiResp.text();
-                        // If model not found (404), try next model in candidate list
-                        if (aiResp.status !== 404) {
+                        // If model not found (404), temporarily high demand (503), rate limited (429), or server error (500/502/504):
+                        // Automatically fall through to the next candidate model!
+                        if ([404, 429, 500, 502, 503, 504].includes(aiResp.status)) {
+                            console.warn(`Gemini model ${model} returned status ${aiResp.status}, falling back to next candidate...`);
+                            continue;
+                        } else {
+                            // Hard permanent errors like 400 (bad request/invalid key) or 403 (forbidden)
                             break;
                         }
                     }
@@ -231,10 +236,25 @@ Du MUSST deine Antwort zwingend als valides JSON nach diesem Schema liefern, ohn
             }
 
             if (!successResp) {
+                let userFriendlyMsg = `Google Gemini Fehler (${lastStatus})`;
+                try {
+                    const parsedErr = JSON.parse(lastErrBody);
+                    const rawMsg = parsedErr?.error?.message || lastErrBody;
+                    if (lastStatus === 503) {
+                        userFriendlyMsg = "Google meldet aktuell eine kurzzeitige Server-Auslastung (503 High Demand). Bitte klicke in 5–10 Sekunden erneut auf 'Intelligente KI-Zusammenfassung generieren' oder nutze die Microsoft Copilot Option.";
+                    } else if (lastStatus === 400 || lastStatus === 403) {
+                        userFriendlyMsg = "Der eingegebene Google Gemini API-Schlüssel ist ungültig oder abgelaufen. Bitte prüfe den Schlüssel in Google AI Studio.";
+                    } else {
+                        userFriendlyMsg = rawMsg;
+                    }
+                } catch (e) {
+                    userFriendlyMsg = lastErrBody;
+                }
+
                 return res.status(lastStatus).json({
                     success: false,
                     error: "GEMINI_API_ERROR",
-                    message: `Google Gemini API Fehler (${lastStatus}): ${lastErrBody}`
+                    message: userFriendlyMsg
                 });
             }
 
