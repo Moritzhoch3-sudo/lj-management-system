@@ -157,37 +157,88 @@ Du MUSST deine Antwort zwingend als valides JSON nach diesem Schema liefern, ohn
             const aiData = await aiResp.json();
             aiResultText = aiData.choices?.[0]?.message?.content || "{}";
         } else {
-            const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${effectiveKey}`;
-            
-            const aiResp = await fetch(geminiUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [
-                        {
-                            parts: [
-                                { text: `${systemPrompt}\n\nTranskript der Vorstandssitzung:\n${transcript}` }
-                            ]
-                        }
-                    ],
-                    generationConfig: {
-                        temperature: 0.2,
-                        responseMimeType: "application/json"
-                    }
-                })
-            });
+            // Dynamic Auto-Discovery & Multi-Model Fallback for Google Gemini
+            let candidateModels = [
+                "gemini-2.5-flash",
+                "gemini-2.0-flash",
+                "gemini-flash-latest",
+                "gemini-1.5-flash-latest",
+                "gemini-1.5-flash",
+                "gemini-1.5-flash-8b",
+                "gemini-2.0-flash-exp",
+                "gemini-pro"
+            ];
 
-            if (!aiResp.ok) {
-                const errBody = await aiResp.text();
-                return res.status(aiResp.status).json({
+            try {
+                const listResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${effectiveKey}`);
+                if (listResp.ok) {
+                    const listData = await listResp.json();
+                    const available = (listData.models || [])
+                        .filter(m => Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes("generateContent"))
+                        .map(m => m.name.replace(/^models\//, ''));
+                    
+                    if (available.length > 0) {
+                        const matched = candidateModels.filter(c => available.includes(c));
+                        const others = available.filter(a => !matched.includes(a));
+                        candidateModels = [...matched, ...others];
+                    }
+                }
+            } catch (e) {
+                console.warn("Gemini listModels discovery note:", e.message);
+            }
+
+            let lastErrBody = "";
+            let lastStatus = 500;
+            let successResp = null;
+            let usedModel = "";
+
+            for (const model of candidateModels) {
+                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${effectiveKey}`;
+                try {
+                    const aiResp = await fetch(geminiUrl, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            contents: [
+                                {
+                                    parts: [
+                                        { text: `${systemPrompt}\n\nTranskript der Vorstandssitzung:\n${transcript}` }
+                                    ]
+                                }
+                            ],
+                            generationConfig: {
+                                temperature: 0.2,
+                                responseMimeType: "application/json"
+                            }
+                        })
+                    });
+
+                    if (aiResp.ok) {
+                        successResp = await aiResp.json();
+                        usedModel = model;
+                        break;
+                    } else {
+                        lastStatus = aiResp.status;
+                        lastErrBody = await aiResp.text();
+                        // If model not found (404), try next model in candidate list
+                        if (aiResp.status !== 404) {
+                            break;
+                        }
+                    }
+                } catch (fetchErr) {
+                    lastErrBody = fetchErr.message;
+                }
+            }
+
+            if (!successResp) {
+                return res.status(lastStatus).json({
                     success: false,
                     error: "GEMINI_API_ERROR",
-                    message: `Google Gemini API Fehler (${aiResp.status}): ${errBody}`
+                    message: `Google Gemini API Fehler (${lastStatus}): ${lastErrBody}`
                 });
             }
 
-            const aiData = await aiResp.json();
-            aiResultText = aiData.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+            aiResultText = successResp.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
         }
 
         let cleanJsonStr = aiResultText.trim();

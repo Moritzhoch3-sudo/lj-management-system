@@ -448,7 +448,7 @@ export class SettingsModule {
                             <div class="d-flex gap-3 mb-3 flex-wrap">
                                 <label class="d-flex align-items-center gap-2" style="cursor: pointer; font-weight: 600; font-size: 0.9rem;">
                                     <input type="radio" name="ai-provider-choice" value="gemini" ${aiConfig.provider === 'gemini' ? 'checked' : ''}>
-                                    ✨ Google Gemini 1.5 Flash <span class="badge" style="background: #dcfce7; color: #15803d; font-size: 0.75rem; padding: 2px 6px; border-radius: 6px;">Kostenlos & Empfohlen</span>
+                                    ✨ Google Gemini (Flash) <span class="badge" style="background: #dcfce7; color: #15803d; font-size: 0.75rem; padding: 2px 6px; border-radius: 6px;">Kostenlos & Empfohlen</span>
                                 </label>
                                 <label class="d-flex align-items-center gap-2" style="cursor: pointer; font-weight: 600; font-size: 0.9rem;">
                                     <input type="radio" name="ai-provider-choice" value="openai" ${aiConfig.provider === 'openai' ? 'checked' : ''}>
@@ -1000,7 +1000,7 @@ export class SettingsModule {
                     return;
                 }
 
-                if (feedback) feedback.innerHTML = '⏳ <i>Verbindung wird getestet (Sende Test-Anfrage an ' + (provider === 'openai' ? 'OpenAI GPT-4o-mini' : 'Google Gemini 1.5 Flash') + ')...</i>';
+                if (feedback) feedback.innerHTML = '⏳ <i>Verbindung wird getestet (Sende Test-Anfrage an ' + (provider === 'openai' ? 'OpenAI GPT-4o-mini' : 'Google Gemini') + ')...</i>';
 
                 try {
                     const resp = await fetch('/api/ai-summarize', {
@@ -1017,7 +1017,7 @@ export class SettingsModule {
                     const data = await resp.json();
                     if (data.success && data.protocol) {
                         StorageEngine.saveAiConfig({ provider, geminiKey, openaiKey });
-                        if (feedback) feedback.innerHTML = '<span style="color: #10b981;">🎉 Verbindung erfolgreich! ' + (provider === 'openai' ? 'OpenAI GPT-4o-mini' : 'Google Gemini 1.5 Flash') + ' antwortet blitzschnell und ist einsatzbereit.</span>';
+                        if (feedback) feedback.innerHTML = '<span style="color: #10b981;">🎉 Verbindung erfolgreich! ' + (provider === 'openai' ? 'OpenAI GPT-4o-mini' : 'Google Gemini') + ' antwortet blitzschnell und ist einsatzbereit.</span>';
                     } else {
                         if (feedback) feedback.innerHTML = '<span style="color: #ef4444;">❌ Fehler: ' + (data.message || data.error || 'Verbindung fehlgeschlagen') + '</span>';
                     }
