@@ -84,41 +84,51 @@ export class MinutesModule {
                                 <button class="btn btn-sm btn-ghost danger-text delete-minute-btn" data-id="${m.id}" title="Löschen">🗑️</button>
                             </div>
 
-                            <!-- Bullet Point Summary -->
-                            <div class="bullets-box mt-3" style="background: var(--bg-canvas); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 1rem;">
-                                <h5 style="color: var(--text-secondary); font-weight: 800; font-size: 0.88rem; margin-bottom: 0.5rem;">📝 Wichtige Fakten & Beschlüsse:</h5>
-                                <ul class="bullet-list" style="padding-left: 1.25rem; color: var(--text-secondary); font-size: 0.88rem;">
-                                    ${(m.bullets || [m.summary]).map(b => `<li style="margin-bottom: 0.25rem;">${escapeHTML(b)}</li>`).join('')}
-                                </ul>
-                            </div>
+                            <!-- Categorized Decision & Fact Bullets -->
+                            <div class="bullets-box mt-3" style="background: #ffffff; border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.15rem;">
+                                ${m.categorizedBullets ? `
+                                    ${m.categorizedBullets.decisions && m.categorizedBullets.decisions.length > 0 ? `
+                                        <div class="mb-3">
+                                            <h5 style="color: #6b21a8; font-weight: 800; font-size: 0.9rem; margin-bottom: 0.45rem;">⚖️ Beschlüsse & Entscheidungen:</h5>
+                                            <ul class="bullet-list" style="padding-left: 1.25rem; margin: 0; color: #1e293b; font-size: 0.88rem;">
+                                                ${m.categorizedBullets.decisions.map(d => `<li style="margin-bottom: 0.25rem; font-weight: 700;">${escapeHTML(d)}</li>`).join('')}
+                                            </ul>
+                                        </div>
+                                    ` : ''}
 
-                            <!-- Speaker Conversation Tracking -->
-                            ${m.speakerMap && m.speakerMap.length > 0 ? `
-                                <div class="speaker-tracking-box mt-3">
-                                    <h5 style="color: var(--text-secondary); font-weight: 800; font-size: 0.88rem; margin-bottom: 0.5rem;">💬 Wichtige Aussagen nach Personen:</h5>
-                                    <div class="speaker-dialogue-list">
-                                        ${m.speakerMap.map(s => {
-                                            const matchedMember = members.find(mem => mem.name.toLowerCase().includes(s.speaker.toLowerCase())) || { color: '#3b82f6', avatar: '👤' };
-                                            return `
-                                                <div class="dialogue-chip mb-2 p-2 rounded" style="background: var(--bg-canvas); border: 1px solid var(--border-subtle); border-left: 3px solid ${matchedMember.color}">
-                                                    <strong style="color: ${matchedMember.color}">${matchedMember.avatar} ${escapeHTML(s.speaker)}:</strong>
-                                                    <span style="color: var(--text-primary); font-size: 0.85rem;">${escapeHTML(s.text)}</span>
-                                                </div>
-                                            `;
-                                        }).join('')}
-                                    </div>
-                                </div>
-                            ` : ''}
+                                    ${m.categorizedBullets.tasks && m.categorizedBullets.tasks.length > 0 ? `
+                                        <div class="mb-3">
+                                            <h5 style="color: #047857; font-weight: 800; font-size: 0.9rem; margin-bottom: 0.45rem;">📌 Aufgaben & Zuständigkeiten:</h5>
+                                            <ul class="bullet-list" style="padding-left: 1.25rem; margin: 0; color: #1e293b; font-size: 0.88rem;">
+                                                ${m.categorizedBullets.tasks.map(t => `<li style="margin-bottom: 0.25rem;">${escapeHTML(t)}</li>`).join('')}
+                                            </ul>
+                                        </div>
+                                    ` : ''}
 
-                            <!-- Decisions -->
-                            ${m.decisions && m.decisions.length > 0 ? `
-                                <div class="decisions-box mt-3">
-                                    <h5>⚖️ Gefasste Beschlüsse:</h5>
-                                    <ul>
-                                        ${m.decisions.map(d => `<li>${escapeHTML(d)}</li>`).join('')}
+                                    ${m.categorizedBullets.finances && m.categorizedBullets.finances.length > 0 ? `
+                                        <div class="mb-3">
+                                            <h5 style="color: #b45309; font-weight: 800; font-size: 0.9rem; margin-bottom: 0.45rem;">💰 Kasse & Finanzen:</h5>
+                                            <ul class="bullet-list" style="padding-left: 1.25rem; margin: 0; color: #1e293b; font-size: 0.88rem;">
+                                                ${m.categorizedBullets.finances.map(f => `<li style="margin-bottom: 0.25rem;">${escapeHTML(f)}</li>`).join('')}
+                                            </ul>
+                                        </div>
+                                    ` : ''}
+
+                                    ${m.categorizedBullets.topics && m.categorizedBullets.topics.length > 0 ? `
+                                        <div>
+                                            <h5 style="color: #1e40af; font-weight: 800; font-size: 0.9rem; margin-bottom: 0.45rem;">💬 Besprochene Punkte & Termine:</h5>
+                                            <ul class="bullet-list" style="padding-left: 1.25rem; margin: 0; color: #1e293b; font-size: 0.88rem;">
+                                                ${m.categorizedBullets.topics.map(top => `<li style="margin-bottom: 0.25rem;">${escapeHTML(top)}</li>`).join('')}
+                                            </ul>
+                                        </div>
+                                    ` : ''}
+                                ` : `
+                                    <h5 style="color: var(--text-secondary); font-weight: 800; font-size: 0.88rem; margin-bottom: 0.5rem;">📝 Wichtige Fakten & Beschlüsse:</h5>
+                                    <ul class="bullet-list" style="padding-left: 1.25rem; color: var(--text-secondary); font-size: 0.88rem; margin: 0;">
+                                        ${(m.bullets || [m.summary]).map(b => `<li style="margin-bottom: 0.25rem;">${escapeHTML(b)}</li>`).join('')}
                                     </ul>
-                                </div>
-                            ` : ''}
+                                `}
+                            </div>
                         </div>
                     `).join('')}
                 </div>
@@ -265,61 +275,15 @@ export class MinutesModule {
     }
 
     /**
-     * Fact-based bullet point summarizer (filters greetings, chit-chat, and extracts actionable facts)
+     * Fact-based bullet point summarizer (filters greetings, chit-chat, and extracts actionable facts & decisions)
      */
     static generateBulletProtocol(rawText, timestampStr, containerEl, members) {
         const titleStr = `Zusammenfassung_${timestampStr}`;
         const datePart = timestampStr.split('_')[0] || new Date().toISOString().slice(0, 10);
-        const rawSentences = rawText.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
 
-        // Phrases to ignore completely (greetings, pleasantries, chit-chat)
-        const ignorePhrases = [
-            'hallo', 'herzlich willkommen', 'willkommen zur', 'begrüße euch', 'danke dass ihr',
-            'schön dass alle', 'wir fangen', 'los gehts', 'guten abend', 'servus', 'moin'
-        ];
-
-        const bullets = [];
-        const decisions = [];
-        const speakerMap = [];
-
-        rawSentences.forEach(sentence => {
-            const lower = sentence.toLowerCase();
-
-            // Skip greetings and chit-chat
-            if (ignorePhrases.some(p => lower.includes(p)) && sentence.length < 50) {
-                return;
-            }
-
-            // Check if sentence mentions a member
-            members.forEach(mem => {
-                const firstName = mem.name.split(' ')[0].toLowerCase();
-                if (lower.includes(firstName)) {
-                    speakerMap.push({
-                        speaker: mem.name,
-                        text: sentence
-                    });
-                }
-            });
-
-            // Categorize as decision or fact bullet
-            if (lower.includes('beschluss') || lower.includes('einstimmig') || lower.includes('beschlossen') || lower.includes('genehmigt')) {
-                decisions.push(sentence);
-            } else {
-                // Simplify & clean sentence to concise bullet
-                let cleaned = sentence;
-                if (lower.includes('klo') || lower.includes('wagen') || lower.includes('toilette')) {
-                    cleaned = `📌 ${sentence}`;
-                } else if (lower.includes('brauche') || lower.includes('benötigt') || lower.includes('helfer')) {
-                    cleaned = `📌 ${sentence}`;
-                } else {
-                    cleaned = `• ${sentence}`;
-                }
-                bullets.push(cleaned);
-            }
-        });
-
-        if (bullets.length === 0) bullets.push(`• Wichtige Beschlüsse und Vorstands-Fakten vom ${datePart}`);
-        if (decisions.length === 0) decisions.push('Sitzung ordnungsgemäß durchgeführt.');
+        // Synthesize conversation turns into crisp decision and task bullet points
+        const synthesized = ProtocolParser.synthesizeDecisionBullets(rawText, members);
+        const { decisions, tasks, finances, topics, allBullets } = synthesized;
 
         // Save generated minute with dedicated box title: Zusammenfassung_DD.MM.YYYY_HH:mm
         const minutes = StorageEngine.getMinutes();
@@ -329,8 +293,13 @@ export class MinutesModule {
             date: datePart,
             location: 'Landjugendheim Scheuring',
             summary: rawText,
-            bullets: bullets,
-            speakerMap: speakerMap,
+            bullets: allBullets,
+            categorizedBullets: {
+                decisions,
+                tasks,
+                finances,
+                topics
+            },
             decisions: decisions
         });
         StorageEngine.saveMinutes(minutes);
@@ -338,7 +307,7 @@ export class MinutesModule {
         // Reset recording start timestamp for future recordings
         recordingStartTimestampStr = null;
 
-        alert(`✨ Erfolg! Eigene Zusammenfassungs-Box '${titleStr}' wurde erstellt und archiviert!`);
+        alert(`✨ Erfolg! Eigene Zusammenfassungs-Box '${titleStr}' mit Fakten- & Entscheidungs-Stichpunkten wurde erstellt und archiviert!`);
         this.render(containerEl);
     }
 

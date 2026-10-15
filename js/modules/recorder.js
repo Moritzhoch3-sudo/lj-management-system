@@ -11,8 +11,46 @@ export class AudioRecorderEngine {
         this.recognition = null;
         this.transcriptText = '';
         this.recordingSeconds = 0;
-        this.timerInterval = null;
+        this.lastSpeechTime = 0;
+        this.currentSpeakerTurn = 1;
+        this.currentSpeakerLabel = 'Sprecher 1';
+        this.turnHasStarted = false;
         this.initSpeechRecognition();
+    }
+
+    detectMemberSpeaker(text) {
+        if (!text) return null;
+        const lower = text.toLowerCase();
+        const NICKNAMES = {
+            'kili': 'Kilian Salai',
+            'kilian': 'Kilian Salai',
+            'vali': 'Valentin Müllner',
+            'valentin': 'Valentin Müllner',
+            'linda': 'Linda Schweiger',
+            'schwaigerin': 'Linda Schweiger',
+            'moritz': 'Moritz Kubik',
+            'anja': 'Anja Löb',
+            'lena': 'Lena Senior',
+            'rosa': 'Rosa Krieglmeier',
+            'cassy': 'Cassandra Wunner',
+            'cassandra': 'Cassandra Wunner',
+            'felix': 'Felix Premer',
+            'premer': 'Felix Premer',
+            'johannes': 'Johannes Erhard',
+            'hanni': 'Johannes Erhard',
+            'domi': 'Dominique Zahn',
+            'dominique': 'Dominique Zahn',
+            'michi': 'Michaela Grabmaier',
+            'michaela': 'Michaela Grabmaier'
+        };
+
+        for (const [nick, fullName] of Object.entries(NICKNAMES)) {
+            const pattern = new RegExp(`\\b${nick}\\b`, 'i');
+            if (pattern.test(lower)) {
+                return fullName;
+            }
+        }
+        return null;
     }
 
     initSpeechRecognition() {
@@ -24,16 +62,41 @@ export class AudioRecorderEngine {
             this.recognition.lang = 'de-DE';
 
             this.recognition.onresult = (event) => {
+                const now = Date.now();
                 let currentInterim = '';
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    const text = event.results[i][0].transcript.trim();
+                    if (!text) continue;
+
                     if (event.results[i].isFinal) {
-                        this.transcriptText += event.results[i][0].transcript + '. ';
+                        // Pause > 1300ms indicates a new speaker turn
+                        if (this.lastSpeechTime > 0 && (now - this.lastSpeechTime) > 1300) {
+                            this.currentSpeakerTurn++;
+                            this.currentSpeakerLabel = `Sprecher ${((this.currentSpeakerTurn - 1) % 4) + 1}`;
+                            this.turnHasStarted = false;
+                        }
+
+                        // Check if a member is addressed or talking
+                        const detectedMember = this.detectMemberSpeaker(text);
+                        if (detectedMember) {
+                            this.currentSpeakerLabel = detectedMember;
+                        }
+
+                        if (!this.turnHasStarted) {
+                            this.transcriptText += (this.transcriptText ? '\n' : '') + `[${this.currentSpeakerLabel}]: ${text}. `;
+                            this.turnHasStarted = true;
+                        } else {
+                            this.transcriptText += `${text}. `;
+                        }
+
+                        this.lastSpeechTime = now;
                     } else {
-                        currentInterim += event.results[i][0].transcript;
+                        currentInterim += text;
                     }
                 }
                 if (this.onTranscriptUpdate) {
-                    this.onTranscriptUpdate(this.transcriptText + currentInterim);
+                    const interimDisplay = currentInterim ? `\n[${this.currentSpeakerLabel}]: ${currentInterim}...` : '';
+                    this.onTranscriptUpdate((this.transcriptText + interimDisplay).trim());
                 }
             };
 
@@ -90,13 +153,14 @@ export class AudioRecorderEngine {
         this.transcriptText = '';
 
         const sampleSpeech = [
-            "Florian Huber eröffnet die Vorstandssitzung um 19 Uhr 30 im Landjugendheim.",
-            "Sandra Berger berichtet zum Kassenstand: Für das Sommernachtsfest haben wir 1420 Euro Gewinn erzielt.",
-            "Beschluss einstimmig gefasst: Das Festzelt für 2027 wird bei Verleih Meyer verbindlich gebucht.",
-            "Ergebnis der Aufgabenverteilung: Felix Gruber kümmert sich um die Zelt-Genehmigung bis 15. August.",
-            "Maximilian Bauer übernimmt die Getränkebestellung bei Wieninger Brauerei bis 18. August.",
-            "Sarah Richter erstellt Plakate und schaltet Werbung auf Instagram.",
-            "Die nächste Sitzung findet am 24. August um 20 Uhr statt."
+            "[Valentin Müllner]: Eröffnung der Vorstandssitzung um 19:30 Uhr im Landjugendheim.",
+            "[Anja Löb]: Kassenstand Sommernachtsfest: Wir haben 1.420 € Reingewinn erzielt.",
+            "[Valentin Müllner]: Kili, könntest du den Klowagen fürs nächste Fest noch abholen?",
+            "[Kilian Salai]: Ja, mach ich, hole den Klowagen bis Donnerstag ab.",
+            "[Linda Schweiger]: Einstimmiger Beschluss: Das Festzelt 2027 wird verbindlich gebucht.",
+            "[Felix Premer]: Ich kümmere mich um die Schank- und Zeltgenehmigung bei der Gemeinde bis 15. August.",
+            "[Moritz Kubik]: Dominique und ich prüfen die Rechnungen und Kassenbelege.",
+            "[Valentin Müllner]: Nächste Vorstandssitzung findet am 24. August um 20:00 Uhr statt."
         ];
 
         let index = 0;

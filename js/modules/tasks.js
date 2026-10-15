@@ -381,216 +381,74 @@ export class TasksModule {
                 </div>
             `;
         }
-
-        const lastCat = StorageEngine.getLastSelectedCategory();
-
         return `
-            <div class="person-tasks-container">
+            <div class="person-overview-grid">
                 ${activeMembers.map(m => {
                     const memberTasks = tasks.filter(t => (Array.isArray(t.assigneeIds) && t.assigneeIds.includes(m.id)) || t.assigneeId === m.id);
-                    const completedCount = memberTasks.filter(t => t.status === 'erledigt').length;
-                    const percent = memberTasks.length > 0 ? Math.round((completedCount / memberTasks.length) * 100) : 0;
+                    const openCount = memberTasks.filter(t => t.status === 'offen' || !t.status).length;
+                    const inProgCount = memberTasks.filter(t => t.status === 'in_bearbeitung').length;
+                    const doneCount = memberTasks.filter(t => t.status === 'erledigt').length;
+                    const total = memberTasks.length;
+                    const percent = total > 0 ? Math.round((doneCount / total) * 100) : 0;
                     const memberColor = m.color || '#10b981';
-                    const isExpanded = expandedMemberIds.has(m.id) || currentFilterMember === m.id;
+                    const isCurrent = m.id === currentUserId;
 
                     return `
-                        <div class="person-tasks-section" 
-                             style="background: linear-gradient(180deg, ${memberColor}12 0%, ${memberColor}05 140px, #ffffff 220px, #ffffff 100%); 
-                                    border: 1px solid ${memberColor}40; 
-                                    border-left: 6px solid ${memberColor}; 
-                                    border-radius: 16px; 
-                                    box-shadow: 0 2px 10px -2px rgba(0, 0, 0, 0.04);
-                                    margin-bottom: 0 !important;">
-                            
-                            <!-- Person Header with Member Color Tint and Accordion Toggle -->
-                            <div class="person-tasks-header d-flex align-items-center justify-content-between p-2.5"
-                                 data-toggle-member="${m.id}"
-                                 style="background: ${memberColor}18; border: 1px solid ${memberColor}35; border-radius: 12px; cursor: pointer; user-select: none; transition: background 0.15s;">
-                                <div class="person-title-block d-flex align-items-center gap-3">
-                                    <span class="member-avatar" style="border: 2px solid ${memberColor}; background: #ffffff; color: ${memberColor}; width: 46px; height: 46px; font-size: 1.35rem; display: flex; align-items: center; justify-content: center; border-radius: 12px; box-shadow: 0 2px 8px ${memberColor}30; flex-shrink: 0;">
+                        <div class="person-miniature-card" data-member-id="${m.id}" style="border-left: 5px solid ${memberColor}; border-top: 1px solid ${memberColor}30; border-right: 1px solid ${memberColor}20; border-bottom: 1px solid ${memberColor}20;" title="Klicken, um Aufgaben für ${escapeHTML(m.name)} zu verwalten">
+                            <!-- Card Header -->
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-2.5">
+                                    <div class="member-avatar" style="width: 44px; height: 44px; border-radius: 12px; background: ${memberColor}15; border: 2px solid ${memberColor}; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; color: ${memberColor}; flex-shrink: 0;">
                                         ${m.avatar}
-                                    </span>
+                                    </div>
                                     <div>
-                                        <div class="d-flex align-items-center gap-2 flex-wrap">
-                                            <h3 class="person-name m-0" style="color: var(--text-primary); font-size: 1.15rem; font-weight: 800;">${escapeHTML(m.name)}</h3>
-                                            <span class="badge" style="background: ${memberColor}; color: #ffffff; font-weight: 800; font-size: 0.75rem; padding: 0.25rem 0.65rem; border-radius: 20px;">
-                                                ${escapeHTML(m.role)}
-                                            </span>
+                                        <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                                            <h4 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: var(--text-primary);">${escapeHTML(m.name)}</h4>
+                                            ${isCurrent ? `<span class="badge" style="background: #ecfdf5; color: #047857; font-size: 0.68rem; font-weight: 800; padding: 2px 6px; border-radius: 6px;">Du</span>` : ''}
                                         </div>
-                                        <span style="color: var(--text-muted); font-weight: 600; font-size: 0.8rem;">Vorstandsmitglied • Landjugend Scheuring</span>
+                                        <span class="badge mt-1" style="background: ${memberColor}; color: #ffffff; font-weight: 700; font-size: 0.72rem; padding: 0.2rem 0.55rem; border-radius: 12px;">
+                                            ${escapeHTML(m.role || 'Vorstand')}
+                                        </span>
                                     </div>
                                 </div>
-
-                                <div class="person-header-actions d-flex align-items-center gap-2 flex-wrap">
-                                    <div class="person-stats-badge" style="background: #ffffff; border: 1.5px solid ${memberColor}60; padding: 0.45rem 1rem; border-radius: 24px; font-size: 0.85rem; font-weight: 800; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-                                        <span style="color: ${memberColor}; font-size: 0.95rem;">${completedCount} / ${memberTasks.length}</span>
-                                        <span style="color: var(--text-secondary); margin-left: 4px;">erledigt (${percent}%)</span>
-                                    </div>
-
-                                    <button type="button" class="btn btn-sm toggle-member-collapse-btn" style="background: #ffffff; border: 1.5px solid ${memberColor}60; color: var(--text-primary); border-radius: 20px; font-weight: 800; font-size: 0.82rem; padding: 0.45rem 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
-                                        <span>${isExpanded ? '▲ Zuklappen' : `▼ Aufgaben anzeigen (${memberTasks.length})`}</span>
-                                    </button>
+                                <div style="text-align: right;">
+                                    <span style="font-size: 1.25rem; font-weight: 900; color: ${memberColor};">${total}</span>
+                                    <span style="display: block; font-size: 0.68rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Aufgaben</span>
                                 </div>
                             </div>
 
-                            <!-- Collapsible Person Tasks Body -->
-                            <div class="person-tasks-body mt-3" id="person-body-${m.id}" style="${isExpanded ? '' : 'display: none;'}">
-
-                            <!-- DIRECT INLINE QUICK-ADD INPUT ROW -->
-                            <div class="card-inline-add-bar mb-3 p-3" style="background: #ffffff; border: 1px solid var(--border-medium); border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-                                <form class="inline-quick-add-form" data-member-id="${m.id}">
-                                    <div class="quick-add-row-title">
-                                        <input type="text" class="form-control form-control-sm quick-task-title-input" placeholder="➕ Neue Aufgabe für ${escapeHTML(m.name.split(' ')[0])} eingeben..." required />
-                                    </div>
-                                    
-                                    <div class="quick-add-row-details">
-                                        <select class="form-select form-select-sm quick-task-cat-select">
-                                            <option value="" ${!lastCat ? 'selected' : ''} ${!lastCat ? 'disabled' : ''}>-- Kategorie --</option>
-                                            ${categories.map(c => `
-                                                <option value="${c.id}" ${lastCat === c.id ? 'selected' : ''}>
-                                                    ${c.icon} ${c.name}
-                                                </option>
-                                            `).join('')}
-                                        </select>
-
-                                        <select class="form-select form-select-sm quick-task-prio-select">
-                                            <option value="hoch">🔴 Hoch</option>
-                                            <option value="mittel" selected>🟡 Mittel</option>
-                                            <option value="niedrig">🟢 Niedrig</option>
-                                        </select>
-
-                                        <input type="date" class="form-control form-control-sm quick-task-date-input" aria-label="Fälligkeitsdatum" />
-
-                                        <button type="submit" class="btn btn-sm btn-donezo-primary quick-task-submit-btn text-nowrap">➕ Hinzufügen</button>
-                                    </div>
-                                </form>
+                            <!-- 3-Status Metric Counters -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.35rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 0.65rem 0.4rem; text-align: center;">
+                                <div style="display: flex; flex-direction: column; align-items: center;">
+                                    <span style="font-size: 0.72rem; font-weight: 700; color: #64748b; margin-bottom: 2px;">📋 Offen</span>
+                                    <span style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">${openCount}</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: center; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
+                                    <span style="font-size: 0.72rem; font-weight: 700; color: #d97706; margin-bottom: 2px;">🔄 In Arbeit</span>
+                                    <span style="font-size: 1.15rem; font-weight: 800; color: #b45309;">${inProgCount}</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: center;">
+                                    <span style="font-size: 0.72rem; font-weight: 700; color: #16a34a; margin-bottom: 2px;">✅ Erledigt</span>
+                                    <span style="font-size: 1.15rem; font-weight: 800; color: #15803d;">${doneCount}</span>
+                                </div>
                             </div>
 
-                            <!-- Clean Tasks Table -->
-                            <div class="table-responsive">
-                                ${memberTasks.length === 0 ? `
-                                    <p class="text-muted p-2 text-center" style="font-style: italic;">Keine Aufgaben für ${escapeHTML(m.name)} eingetragen.</p>
-                                ` : `
-                                    <table class="clean-tasks-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Aufgabe</th>
-                                                <th style="width: 175px;">Kategorie</th>
-                                                <th style="width: 135px;">Priorität</th>
-                                                <th style="width: 130px;">Fälligkeit</th>
-                                                <th style="width: 130px; text-align: center;">Status</th>
-                                                <th style="width: 80px; text-align: right;">Aktion</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${memberTasks.map(t => {
-                                                const cat = categories.find(c => c.id === t.categoryId) || { icon: '📋', name: t.category || 'Allgemein' };
-                                                const urgencyBadge = this.getUrgencyBadge(t.dueDate, t.status);
-                                                const isDone = t.status === 'erledigt';
-                                                const inProg = t.status === 'in_bearbeitung';
-                                                const pillClass = isDone ? 'pill-completed' : (inProg ? 'pill-progress' : 'pill-pending');
-                                                const pillText = isDone ? '✅ Erledigt' : (inProg ? '🔄 In Arbeit' : '📋 Offen');
+                            <!-- Progress Bar -->
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-1" style="font-size: 0.75rem; font-weight: 700;">
+                                    <span style="color: var(--text-muted);">Erledigungsquote</span>
+                                    <span style="color: ${memberColor};">${percent}% (${doneCount}/${total})</span>
+                                </div>
+                                <div style="width: 100%; height: 7px; background: #e2e8f0; border-radius: 10px; overflow: hidden;">
+                                    <div style="width: ${percent}%; height: 100%; background: ${memberColor}; border-radius: 10px; transition: width 0.3s ease;"></div>
+                                </div>
+                            </div>
 
-                                                return `
-                                                    <tr class="task-table-row" data-task-id="${t.id}">
-                                                        <td>
-                                                            <span class="clickable-task-title ${isDone ? 'text-decoration-line-through text-muted' : ''}" data-task-id="${t.id}" style="color: var(--text-primary); font-weight: 700; cursor: pointer;" title="Klicken zum Bearbeiten">
-                                                                ${escapeHTML(t.title)}
-                                                                ${t.subtasks && t.subtasks.length > 0 ? `<span class="badge badge-neutral" style="font-size: 0.7rem; margin-left: 4px;">☑️ ${t.subtasks.filter(s=>s.done).length}/${t.subtasks.length}</span>` : ''}
-                                                            </span>
-                                                            ${t.assigneeIds && t.assigneeIds.length > 1 ? `
-                                                                <span class="co-assignees-badge" style="display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; vertical-align: middle;">
-                                                                    ${t.assigneeIds.map(id => {
-                                                                        const co = members.find(mem => mem.id === id);
-                                                                        return co ? `<span title="Zuständig: ${escapeHTML(co.name)}" style="font-size: 0.76rem; background: ${co.color}20; color: ${co.color}; border: 1px solid ${co.color}40; border-radius: 6px; padding: 1px 4px;">${co.avatar}</span>` : '';
-                                                                    }).join('')}
-                                                                </span>
-                                                            ` : ''}
-                                                        </td>
-                                                        <td style="position: relative;">
-                                                            <div class="task-cat-picker-wrapper" style="position: relative; display: inline-block;">
-                                                                <button type="button" class="badge badge-neutral task-inline-cat-trigger" data-task-id="${t.id}" title="Kategorie ändern" style="cursor: pointer; border: 1px solid var(--border-medium); padding: 0.35rem 0.65rem; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; background: #ffffff; color: var(--text-primary); transition: all 0.15s ease;">
-                                                                    <span>${cat.icon} ${escapeHTML(cat.name)}</span>
-                                                                    <span style="font-size: 0.7rem; color: var(--text-muted);">▾</span>
-                                                                </button>
-                                                                <div class="task-inline-picker-menu hidden" id="task-cat-menu-${t.id}">
-                                                                    <div style="padding: 0.3rem 0.5rem 0.4rem; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid var(--border-subtle); text-transform: uppercase;">
-                                                                        🏷️ Kategorie wählen
-                                                                    </div>
-                                                                    ${categories.map(c => `
-                                                                        <div class="task-inline-picker-item ${c.id === t.categoryId ? 'active' : ''}" data-task-id="${t.id}" data-cat-id="${c.id}">
-                                                                            <span>${c.icon} ${escapeHTML(c.name)}</span>
-                                                                            ${c.id === t.categoryId ? '<span style="color: #10b981; font-weight: 800;">✓</span>' : ''}
-                                                                        </div>
-                                                                    `).join('')}
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td style="position: relative;">
-                                                            <div class="task-prio-picker-wrapper" style="position: relative; display: inline-block;">
-                                                                <button type="button" class="badge task-inline-prio-trigger ${t.priority === 'hoch' ? 'badge-danger' : (t.priority === 'niedrig' ? 'badge-success' : 'badge-warning')}" data-task-id="${t.id}" title="Priorität ändern" style="cursor: pointer; padding: 0.35rem 0.65rem; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s ease; border: none;">
-                                                                    <span>${t.priority === 'hoch' ? '🔴 Hoch' : (t.priority === 'niedrig' ? '🟢 Niedrig' : '🟡 Mittel')}</span>
-                                                                    <span style="font-size: 0.7rem; opacity: 0.8;">▾</span>
-                                                                </button>
-                                                                <div class="task-inline-picker-menu hidden" id="task-prio-menu-${t.id}" style="min-width: 140px;">
-                                                                    <div style="padding: 0.3rem 0.5rem 0.4rem; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid var(--border-subtle); text-transform: uppercase;">
-                                                                        ⚡ Priorität wählen
-                                                                    </div>
-                                                                    <div class="task-inline-picker-item ${t.priority === 'hoch' ? 'active' : ''}" data-task-id="${t.id}" data-priority="hoch">
-                                                                        <span>🔴 Hoch</span>
-                                                                        ${t.priority === 'hoch' ? '<span style="color: #dc2626; font-weight: 800;">✓</span>' : ''}
-                                                                    </div>
-                                                                    <div class="task-inline-picker-item ${t.priority === 'mittel' || !t.priority ? 'active' : ''}" data-task-id="${t.id}" data-priority="mittel">
-                                                                        <span>🟡 Mittel</span>
-                                                                        ${t.priority === 'mittel' || !t.priority ? '<span style="color: #f59e0b; font-weight: 800;">✓</span>' : ''}
-                                                                    </div>
-                                                                    <div class="task-inline-picker-item ${t.priority === 'niedrig' ? 'active' : ''}" data-task-id="${t.id}" data-priority="niedrig">
-                                                                        <span>🟢 Niedrig</span>
-                                                                        ${t.priority === 'niedrig' ? '<span style="color: #10b981; font-weight: 800;">✓</span>' : ''}
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            ${urgencyBadge}
-                                                        </td>
-                                                        <td style="position: relative; text-align: center;">
-                                                            <div class="task-status-picker-wrapper" style="position: relative; display: inline-block;">
-                                                                <button type="button" class="badge task-inline-status-trigger donezo-status-pill ${pillClass}" data-task-id="${t.id}" title="Status ändern (Offen / In Arbeit / Erledigt)" style="cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 3px; font-weight: 800; transition: all 0.15s ease;">
-                                                                    <span>${pillText}</span>
-                                                                    <span style="font-size: 0.7rem; opacity: 0.8;">▾</span>
-                                                                </button>
-                                                                <div class="task-inline-picker-menu hidden" id="task-status-menu-${t.id}" style="min-width: 155px; right: 0; left: auto; text-align: left;">
-                                                                    <div style="padding: 0.35rem 0.6rem 0.4rem; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid var(--border-subtle); text-transform: uppercase;">
-                                                                        📊 Status wählen
-                                                                    </div>
-                                                                    <div class="task-inline-picker-item ${t.status === 'offen' ? 'active' : ''}" data-task-id="${t.id}" data-status="offen">
-                                                                        <span>📋 Offen</span>
-                                                                        ${t.status === 'offen' ? '<span style="color: #10b981; font-weight: 800;">✓</span>' : ''}
-                                                                    </div>
-                                                                    <div class="task-inline-picker-item ${t.status === 'in_bearbeitung' ? 'active' : ''}" data-task-id="${t.id}" data-status="in_bearbeitung">
-                                                                        <span>🔄 In Arbeit</span>
-                                                                        ${t.status === 'in_bearbeitung' ? '<span style="color: #10b981; font-weight: 800;">✓</span>' : ''}
-                                                                    </div>
-                                                                    <div class="task-inline-picker-item ${t.status === 'erledigt' ? 'active' : ''}" data-task-id="${t.id}" data-status="erledigt">
-                                                                        <span>✅ Erledigt</span>
-                                                                        ${t.status === 'erledigt' ? '<span style="color: #10b981; font-weight: 800;">✓</span>' : ''}
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td style="text-align: right; white-space: nowrap;">
-                                                            <button class="btn btn-sm btn-ghost edit-task-btn" data-task-id="${t.id}" title="Aufgabe bearbeiten (Titel, Person, Kategorie, Notizen...)" style="padding: 0.25rem 0.45rem; font-size: 0.95rem; border-radius: 6px; margin-right: 2px;">✏️</button>
-                                                            <button class="btn btn-sm btn-ghost danger-text delete-task-btn" data-task-id="${t.id}" title="Löschen" style="padding: 0.25rem 0.45rem; font-size: 0.95rem; border-radius: 6px;">🗑️</button>
-                                                        </td>
-                                                    </tr>
-                                                `;
-                                            }).join('')}
-                                        </tbody>
-                                    </table>
-                                `}
-                            </div>
-                            </div>
+                            <!-- Action Button -->
+                            <button type="button" class="btn open-person-tasks-btn" data-member-id="${m.id}" style="width: 100%; background: #ffffff; border: 1.5px solid ${memberColor}50; color: ${memberColor}; font-weight: 800; font-size: 0.85rem; padding: 0.55rem; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: all 0.18s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                                <span>📌 Aufgaben verwalten (${total})</span>
+                                <span style="font-size: 0.95rem;">→</span>
+                            </button>
                         </div>
                     `;
                 }).join('')}
@@ -886,6 +744,16 @@ export class TasksModule {
 
     static bindTaskEvents(containerEl, viewportEl, tasks, members, categories) {
         // Reset all filters button in empty state
+                // Miniature Person Card Click -> Opens Overlay Modal
+        viewportEl.querySelectorAll('.person-miniature-card[data-member-id]').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const memberId = card.dataset.memberId;
+                if (memberId) {
+                    TasksModule.openPersonTasksModal(memberId, () => this.updateViewport(containerEl));
+                }
+            });
+        });
+
         viewportEl.querySelector('#reset-all-task-filters-btn')?.addEventListener('click', () => {
             this.resetAllFilters(containerEl);
         });
@@ -1114,7 +982,439 @@ export class TasksModule {
         document.addEventListener('click', closePickersOnDocClick);
     }
 
-    static openTaskModal(taskId, containerEl) {
+        /**
+     * Overlay Modal to view, edit, add, and change status of tasks for a specific person
+     */
+    static openPersonTasksModal(memberId, onModalClose = null) {
+        const existing = document.getElementById('person-tasks-overlay-modal');
+        if (existing) existing.remove();
+
+        const members = StorageEngine.getMembers();
+        const member = members.find(m => m.id === memberId);
+        if (!member) return;
+
+        const categories = StorageEngine.getCategories();
+        const memberColor = member.color || '#10b981';
+
+        const overlay = document.createElement('div');
+        overlay.id = 'person-tasks-overlay-modal';
+        overlay.className = 'person-tasks-overlay';
+
+        const closeModal = () => {
+            overlay.remove();
+            document.removeEventListener('keydown', handleKeyDown);
+            if (typeof onModalClose === 'function') {
+                onModalClose();
+            }
+        };
+
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') closeModal();
+        };
+        document.addEventListener('keydown', handleKeyDown);
+
+        const renderModalContent = () => {
+            const allTasks = StorageEngine.getTasks();
+            const memberTasks = allTasks.filter(t => (Array.isArray(t.assigneeIds) && t.assigneeIds.includes(member.id)) || t.assigneeId === member.id);
+            const openCount = memberTasks.filter(t => t.status === 'offen' || !t.status).length;
+            const inProgCount = memberTasks.filter(t => t.status === 'in_bearbeitung').length;
+            const doneCount = memberTasks.filter(t => t.status === 'erledigt').length;
+            const total = memberTasks.length;
+            const percent = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+            const lastCat = StorageEngine.getLastSelectedCategory();
+
+            overlay.innerHTML = `
+                <div class="person-tasks-dialog" style="border-top: 5px solid ${memberColor};">
+                    <!-- Modal Header -->
+                    <div class="person-tasks-dialog-header">
+                        <div class="d-flex align-items-center gap-3">
+                            <div style="width: 48px; height: 48px; border-radius: 12px; background: ${memberColor}18; border: 2.5px solid ${memberColor}; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: ${memberColor}; flex-shrink: 0;">
+                                ${member.avatar}
+                            </div>
+                            <div>
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--text-primary);">${escapeHTML(member.name)}</h3>
+                                    <span class="badge" style="background: ${memberColor}; color: #ffffff; font-weight: 800; font-size: 0.75rem; padding: 0.25rem 0.65rem; border-radius: 20px;">
+                                        ${escapeHTML(member.role || 'Vorstand')}
+                                    </span>
+                                </div>
+                                <span style="color: var(--text-muted); font-weight: 600; font-size: 0.8rem;">Vorstandschaft • Landjugend Scheuring</span>
+                            </div>
+                        </div>
+
+                        <!-- Stats Pill in Header -->
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 24px; padding: 0.35rem 0.85rem; font-size: 0.82rem; font-weight: 800;">
+                                <span style="color: #64748b;">📋 ${openCount}</span>
+                                <span style="color: #cbd5e1;">|</span>
+                                <span style="color: #d97706;">🔄 ${inProgCount}</span>
+                                <span style="color: #cbd5e1;">|</span>
+                                <span style="color: #16a34a;">✅ ${doneCount}</span>
+                                <span style="color: var(--text-muted); margin-left: 4px;">(${percent}%)</span>
+                            </div>
+
+                            <button type="button" class="btn btn-sm btn-ghost" id="close-person-modal-btn" style="font-size: 1.25rem; line-height: 1; padding: 0.35rem 0.6rem; border-radius: 8px;" title="Schließen (Esc)">✕</button>
+                        </div>
+                    </div>
+
+                    <!-- Modal Body -->
+                    <div class="person-tasks-dialog-body">
+                        <!-- Direct Inline Quick-Add Form -->
+                        <div class="card-inline-add-bar mb-3 p-3" style="background: #f8fafc; border: 1px solid var(--border-medium); border-radius: 12px;">
+                            <form id="modal-quick-add-form" class="inline-quick-add-form">
+                                <div class="quick-add-row-title">
+                                    <input type="text" id="modal-quick-title" class="form-control form-control-sm" placeholder="➕ Neue Aufgabe für ${escapeHTML(member.name.split(' ')[0])} eingeben..." required />
+                                </div>
+                                
+                                <div class="quick-add-row-details">
+                                    <select id="modal-quick-cat" class="form-select form-select-sm" style="width: 155px;">
+                                        <option value="" ${!lastCat ? 'selected' : ''} ${!lastCat ? 'disabled' : ''}>-- Kategorie --</option>
+                                        ${categories.map(c => `
+                                            <option value="${c.id}" ${lastCat === c.id ? 'selected' : ''}>${c.icon} ${c.name}</option>
+                                        `).join('')}
+                                    </select>
+
+                                    <select id="modal-quick-prio" class="form-select form-select-sm" style="width: 110px;">
+                                        <option value="hoch">🔴 Hoch</option>
+                                        <option value="mittel" selected>🟡 Mittel</option>
+                                        <option value="niedrig">🟢 Niedrig</option>
+                                    </select>
+
+                                    <input type="date" id="modal-quick-date" class="form-control form-control-sm" style="width: 135px;" aria-label="Fälligkeitsdatum" />
+
+                                    <button type="submit" class="btn btn-sm btn-donezo-primary text-nowrap" style="padding: 0.45rem 1rem;">➕ Hinzufügen</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Tasks Table -->
+                        <div class="table-responsive" style="overflow: visible;">
+                            ${memberTasks.length === 0 ? `
+                                <div class="text-center p-4" style="color: var(--text-muted); font-size: 0.95rem;">
+                                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎉</div>
+                                    <strong>Keine Aufgaben für ${escapeHTML(member.name)} vorhanden.</strong>
+                                    <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem;">Füge oben eine neue Aufgabe hinzu!</p>
+                                </div>
+                            ` : `
+                                <table class="clean-tasks-table" style="overflow: visible;">
+                                    <thead>
+                                        <tr>
+                                            <th>Aufgabe</th>
+                                            <th style="width: 175px;">Kategorie</th>
+                                            <th style="width: 135px;">Priorität</th>
+                                            <th style="width: 130px;">Fälligkeit</th>
+                                            <th style="width: 140px; text-align: center;">Status</th>
+                                            <th style="width: 80px; text-align: right;">Aktion</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${memberTasks.map((t, idx) => {
+                                            const cat = categories.find(c => c.id === t.categoryId) || { icon: '📋', name: t.category || 'Allgemein' };
+                                            const isDone = t.status === 'erledigt';
+                                            const inProg = t.status === 'in_bearbeitung';
+                                            const pillClass = isDone ? 'pill-completed' : (inProg ? 'pill-progress' : 'pill-pending');
+                                            const pillText = isDone ? '✅ Erledigt' : (inProg ? '🔄 In Arbeit' : '📋 Offen');
+                                            const isNearBottom = idx >= memberTasks.length - 2 || memberTasks.length === 1;
+
+                                            return `
+                                                <tr class="task-table-row" data-task-id="${t.id}">
+                                                    <td>
+                                                        <span class="clickable-task-title ${isDone ? 'text-decoration-line-through text-muted' : ''}" data-task-id="${t.id}" style="color: var(--text-primary); font-weight: 700; cursor: pointer;" title="Klicken zum Bearbeiten">
+                                                            ${escapeHTML(t.title)}
+                                                            ${t.subtasks && t.subtasks.length > 0 ? `<span class="badge badge-neutral" style="font-size: 0.7rem; margin-left: 4px;">☑️ ${t.subtasks.filter(s=>s.done).length}/${t.subtasks.length}</span>` : ''}
+                                                        </span>
+                                                        ${t.assigneeIds && t.assigneeIds.length > 1 ? `
+                                                            <span class="co-assignees-badge" style="display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; vertical-align: middle;">
+                                                                ${t.assigneeIds.map(id => {
+                                                                    const co = members.find(mem => mem.id === id);
+                                                                    return co ? `<span title="Zuständig: ${escapeHTML(co.name)}" style="font-size: 0.76rem; background: ${co.color}20; color: ${co.color}; border: 1px solid ${co.color}40; border-radius: 6px; padding: 1px 4px;">${co.avatar}</span>` : '';
+                                                                }).join('')}
+                                                            </span>
+                                                        ` : ''}
+                                                    </td>
+                                                    <td style="position: relative;">
+                                                        <div class="task-cat-picker-wrapper" style="position: relative; display: inline-block;">
+                                                            <button type="button" class="badge badge-neutral modal-inline-cat-trigger" data-task-id="${t.id}" title="Kategorie ändern" style="cursor: pointer; border: 1px solid var(--border-medium); padding: 0.35rem 0.65rem; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; background: #ffffff; color: var(--text-primary);">
+                                                                <span>${cat.icon} ${escapeHTML(cat.name)}</span>
+                                                                <span style="font-size: 0.7rem; color: var(--text-muted);">▾</span>
+                                                            </button>
+                                                            <div class="task-inline-picker-menu ${isNearBottom ? 'picker-upward' : ''} hidden" id="modal-cat-menu-${t.id}">
+                                                                <div style="padding: 0.3rem 0.5rem 0.4rem; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid var(--border-subtle); text-transform: uppercase;">
+                                                                    🏷️ Kategorie wählen
+                                                                </div>
+                                                                ${categories.map(c => `
+                                                                    <div class="task-inline-picker-item modal-cat-item ${c.id === t.categoryId ? 'active' : ''}" data-task-id="${t.id}" data-cat-id="${c.id}">
+                                                                        <span>${c.icon} ${escapeHTML(c.name)}</span>
+                                                                        ${c.id === t.categoryId ? '<span style="color: #10b981; font-weight: 800;">✓</span>' : ''}
+                                                                    </div>
+                                                                `).join('')}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td style="position: relative;">
+                                                        <div class="task-prio-picker-wrapper" style="position: relative; display: inline-block;">
+                                                            <button type="button" class="badge modal-inline-prio-trigger ${t.priority === 'hoch' ? 'badge-danger' : (t.priority === 'niedrig' ? 'badge-success' : 'badge-warning')}" data-task-id="${t.id}" title="Priorität ändern" style="cursor: pointer; padding: 0.35rem 0.65rem; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; border: none;">
+                                                                <span>${t.priority === 'hoch' ? '🔴 Hoch' : (t.priority === 'niedrig' ? '🟢 Niedrig' : '🟡 Mittel')}</span>
+                                                                <span style="font-size: 0.7rem; opacity: 0.8;">▾</span>
+                                                            </button>
+                                                            <div class="task-inline-picker-menu ${isNearBottom ? 'picker-upward' : ''} hidden" id="modal-prio-menu-${t.id}" style="min-width: 140px;">
+                                                                <div style="padding: 0.3rem 0.5rem 0.4rem; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid var(--border-subtle); text-transform: uppercase;">
+                                                                    ⚡ Priorität wählen
+                                                                </div>
+                                                                <div class="task-inline-picker-item modal-prio-item ${t.priority === 'hoch' ? 'active' : ''}" data-task-id="${t.id}" data-priority="hoch">
+                                                                    <span>🔴 Hoch</span>
+                                                                    ${t.priority === 'hoch' ? '<span style="color: #dc2626; font-weight: 800;">✓</span>' : ''}
+                                                                </div>
+                                                                <div class="task-inline-picker-item modal-prio-item ${t.priority === 'mittel' || !t.priority ? 'active' : ''}" data-task-id="${t.id}" data-priority="mittel">
+                                                                    <span>🟡 Mittel</span>
+                                                                    ${t.priority === 'mittel' || !t.priority ? '<span style="color: #f59e0b; font-weight: 800;">✓</span>' : ''}
+                                                                </div>
+                                                                <div class="task-inline-picker-item modal-prio-item ${t.priority === 'niedrig' ? 'active' : ''}" data-task-id="${t.id}" data-priority="niedrig">
+                                                                    <span>🟢 Niedrig</span>
+                                                                    ${t.priority === 'niedrig' ? '<span style="color: #10b981; font-weight: 800;">✓</span>' : ''}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td style="white-space: nowrap; font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">
+                                                        ${t.dueDate ? `📅 ${t.dueDate}` : '—'}
+                                                    </td>
+                                                    <td style="position: relative; text-align: center;">
+                                                        <div class="task-status-picker-wrapper" style="position: relative; display: inline-block;">
+                                                            <button type="button" class="badge modal-inline-status-trigger donezo-status-pill ${pillClass}" data-task-id="${t.id}" title="Status ändern" style="border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-weight: 800; font-size: 0.76rem; padding: 0.28rem 0.65rem; transition: all 0.15s ease;">
+                                                                <span>${pillText}</span>
+                                                                <span style="font-size: 0.68rem; opacity: 0.75;">▾</span>
+                                                            </button>
+                                                            <div class="task-inline-picker-menu ${isNearBottom ? 'picker-upward' : ''} hidden" id="modal-status-menu-${t.id}" style="min-width: 165px; text-align: left;">
+                                                                <div style="padding: 0.35rem 0.55rem 0.4rem; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid var(--border-subtle); text-transform: uppercase;">
+                                                                    📊 Status wählen
+                                                                </div>
+                                                                <div class="task-inline-picker-item modal-status-item ${t.status === 'offen' || !t.status ? 'active' : ''}" data-task-id="${t.id}" data-status="offen">
+                                                                    <span>📋 Offen</span>
+                                                                    ${t.status === 'offen' || !t.status ? '<span style="color: #10b981; font-weight: 800;">✓</span>' : ''}
+                                                                </div>
+                                                                <div class="task-inline-picker-item modal-status-item ${t.status === 'in_bearbeitung' ? 'active' : ''}" data-task-id="${t.id}" data-status="in_bearbeitung">
+                                                                    <span>🔄 In Arbeit</span>
+                                                                    ${t.status === 'in_bearbeitung' ? '<span style="color: #10b981; font-weight: 800;">✓</span>' : ''}
+                                                                </div>
+                                                                <div class="task-inline-picker-item modal-status-item ${t.status === 'erledigt' ? 'active' : ''}" data-task-id="${t.id}" data-status="erledigt">
+                                                                    <span>✅ Erledigt</span>
+                                                                    ${t.status === 'erledigt' ? '<span style="color: #10b981; font-weight: 800;">✓</span>' : ''}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td style="text-align: right; white-space: nowrap;">
+                                                        <button type="button" class="btn btn-sm btn-ghost modal-edit-task-btn" data-task-id="${t.id}" title="Aufgabe bearbeiten" style="padding: 0.25rem 0.45rem; font-size: 0.95rem; border-radius: 6px; margin-right: 2px;">✏️</button>
+                                                        <button type="button" class="btn btn-sm btn-ghost danger-text modal-delete-task-btn" data-task-id="${t.id}" title="Löschen" style="padding: 0.25rem 0.45rem; font-size: 0.95rem; border-radius: 6px;">🗑️</button>
+                                                    </td>
+                                                </tr>
+                                            `;
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            `}
+                        </div>
+                    </div>
+
+                    <!-- Modal Footer -->
+                    <div class="person-tasks-dialog-footer">
+                        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
+                            💡 Status-Klicks speichern sofort und bleiben in dieser Ansicht sichtbar.
+                        </span>
+                        <button type="button" class="btn btn-donezo-primary" id="modal-done-btn" style="padding: 0.5rem 1.35rem; font-weight: 800; border-radius: 10px;">
+                            Fertig & Schließen ✓
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Event Bindings inside modal
+            overlay.querySelector('#close-person-modal-btn')?.addEventListener('click', closeModal);
+            overlay.querySelector('#modal-done-btn')?.addEventListener('click', closeModal);
+
+            // Backdrop click closes modal
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) closeModal();
+            });
+
+            // Quick add submit
+            overlay.querySelector('#modal-quick-add-form')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const title = overlay.querySelector('#modal-quick-title').value.trim();
+                const catId = overlay.querySelector('#modal-quick-cat').value || (categories[0] ? categories[0].id : 'allgemein');
+                const priority = overlay.querySelector('#modal-quick-prio').value || 'mittel';
+                const dueDate = overlay.querySelector('#modal-quick-date').value || new Date().toISOString().slice(0, 10);
+
+                if (title) {
+                    const currentAll = StorageEngine.getTasks();
+                    currentAll.unshift({
+                        id: 't_' + Date.now(),
+                        title,
+                        assigneeIds: [member.id],
+                        assigneeId: member.id,
+                        categoryId: catId,
+                        status: 'offen',
+                        priority,
+                        dueDate,
+                        description: 'Über Overlay-Modal hinzugefügt',
+                        subtasks: []
+                    });
+                    StorageEngine.saveTasks(currentAll);
+                    if (catId) StorageEngine.setLastSelectedCategory(catId);
+                    renderModalContent();
+                }
+            });
+
+            // Status Picker Toggle
+            overlay.querySelectorAll('.modal-inline-status-trigger').forEach(trigger => {
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const taskId = trigger.dataset.taskId;
+                    const menu = overlay.querySelector(`#modal-status-menu-${taskId}`);
+                    overlay.querySelectorAll('.task-inline-picker-menu').forEach(m => {
+                        if (m !== menu) m.classList.add('hidden');
+                    });
+                    if (menu) {
+                        const rect = trigger.getBoundingClientRect();
+                        if (window.innerHeight - rect.bottom < 210) {
+                            menu.classList.add('picker-upward');
+                        }
+                        menu.classList.toggle('hidden');
+                    }
+                });
+            });
+
+            // Status Item Click
+            overlay.querySelectorAll('.modal-status-item[data-status]').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const taskId = item.dataset.taskId;
+                    const newStatus = item.dataset.status;
+                    const currentAll = StorageEngine.getTasks();
+                    const target = currentAll.find(t => t.id === taskId);
+                    if (target && newStatus) {
+                        target.status = newStatus;
+                        TasksModule.activeModifiedTaskIds.add(taskId);
+                        StorageEngine.saveTasks(currentAll);
+                        renderModalContent();
+                    }
+                });
+            });
+
+            // Category Picker Toggle & Selection
+            overlay.querySelectorAll('.modal-inline-cat-trigger').forEach(trigger => {
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const taskId = trigger.dataset.taskId;
+                    const menu = overlay.querySelector(`#modal-cat-menu-${taskId}`);
+                    overlay.querySelectorAll('.task-inline-picker-menu').forEach(m => {
+                        if (m !== menu) m.classList.add('hidden');
+                    });
+                    if (menu) {
+                        const rect = trigger.getBoundingClientRect();
+                        if (window.innerHeight - rect.bottom < 210) menu.classList.add('picker-upward');
+                        menu.classList.toggle('hidden');
+                    }
+                });
+            });
+
+            overlay.querySelectorAll('.modal-cat-item[data-cat-id]').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const taskId = item.dataset.taskId;
+                    const catId = item.dataset.catId;
+                    const currentAll = StorageEngine.getTasks();
+                    const target = currentAll.find(t => t.id === taskId);
+                    if (target && catId) {
+                        target.categoryId = catId;
+                        StorageEngine.saveTasks(currentAll);
+                        renderModalContent();
+                    }
+                });
+            });
+
+            // Priority Picker Toggle & Selection
+            overlay.querySelectorAll('.modal-inline-prio-trigger').forEach(trigger => {
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const taskId = trigger.dataset.taskId;
+                    const menu = overlay.querySelector(`#modal-prio-menu-${taskId}`);
+                    overlay.querySelectorAll('.task-inline-picker-menu').forEach(m => {
+                        if (m !== menu) m.classList.add('hidden');
+                    });
+                    if (menu) {
+                        const rect = trigger.getBoundingClientRect();
+                        if (window.innerHeight - rect.bottom < 210) menu.classList.add('picker-upward');
+                        menu.classList.toggle('hidden');
+                    }
+                });
+            });
+
+            overlay.querySelectorAll('.modal-prio-item[data-priority]').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const taskId = item.dataset.taskId;
+                    const priority = item.dataset.priority;
+                    const currentAll = StorageEngine.getTasks();
+                    const target = currentAll.find(t => t.id === taskId);
+                    if (target && priority) {
+                        target.priority = priority;
+                        StorageEngine.saveTasks(currentAll);
+                        renderModalContent();
+                    }
+                });
+            });
+
+            // Click outside closes pickers inside modal
+            overlay.addEventListener('click', (e) => {
+                if (!e.target.closest('.task-cat-picker-wrapper') && !e.target.closest('.task-prio-picker-wrapper') && !e.target.closest('.task-status-picker-wrapper')) {
+                    overlay.querySelectorAll('.task-inline-picker-menu').forEach(m => m.classList.add('hidden'));
+                }
+            });
+
+            // Task title click opens detailed edit modal
+            overlay.querySelectorAll('.clickable-task-title').forEach(span => {
+                span.addEventListener('click', (e) => {
+                    const taskId = e.target.dataset.taskId;
+                    if (taskId) {
+                        TasksModule.openTaskModal(taskId, document.body, () => renderModalContent());
+                    }
+                });
+            });
+
+            // Edit button click opens detailed edit modal
+            overlay.querySelectorAll('.modal-edit-task-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const taskId = btn.dataset.taskId;
+                    if (taskId) {
+                        TasksModule.openTaskModal(taskId, document.body, () => renderModalContent());
+                    }
+                });
+            });
+
+            // Delete task click
+            overlay.querySelectorAll('.modal-delete-task-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const taskId = btn.dataset.taskId;
+                    if (confirm('Aufgabe wirklich löschen?')) {
+                        StorageEngine.markTaskDeleted(taskId);
+                        const currentAll = StorageEngine.getTasks();
+                        const updated = currentAll.filter(t => t.id !== taskId);
+                        StorageEngine.saveTasks(updated);
+                        renderModalContent();
+                    }
+                });
+            });
+        };
+
+        renderModalContent();
+        document.body.appendChild(overlay);
+    }
+
+static openTaskModal(taskId, containerEl, onTaskSaved = null) {
         const tasks = StorageEngine.getTasks();
         const task = tasks.find(t => t.id === taskId);
         if (!task) return;
@@ -1265,7 +1565,11 @@ export class TasksModule {
                 const updated = currentTasks.filter(t => t.id !== taskId);
                 StorageEngine.saveTasks(updated);
                 closeModal();
-                this.render(containerEl);
+                if (typeof onTaskSaved === 'function') {
+                    onTaskSaved();
+                } else {
+                    this.render(containerEl);
+                }
             }
         });
 
@@ -1288,7 +1592,11 @@ export class TasksModule {
 
                 StorageEngine.saveTasks(currentTasks);
                 closeModal();
-                this.render(containerEl);
+                if (typeof onTaskSaved === 'function') {
+                    onTaskSaved();
+                } else {
+                    this.render(containerEl);
+                }
             }
         });
     }

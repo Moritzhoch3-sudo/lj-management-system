@@ -5,6 +5,7 @@
  */
 import { StorageEngine, escapeHTML } from '../storage.js';
 import { VaultGuard } from './vault.js';
+import { TasksModule } from './tasks.js';
 
 export class DashboardModule {
     static render(containerEl, onFilterMemberClick) {
@@ -254,14 +255,14 @@ export class DashboardModule {
 
                         <div class="donezo-team-list">
                             ${members.slice(0, 6).map(m => {
-                                const memberTasks = tasks.filter(t => t.assigneeId === m.id);
+                                const memberTasks = tasks.filter(t => (Array.isArray(t.assigneeIds) && t.assigneeIds.includes(m.id)) || t.assigneeId === m.id);
                                 const isDone = memberTasks.length > 0 && memberTasks.every(t => t.status === 'erledigt');
                                 const inProg = memberTasks.some(t => t.status === 'in_bearbeitung');
                                 const pillClass = isDone ? 'pill-completed' : (inProg ? 'pill-progress' : 'pill-pending');
                                 const pillText = isDone ? 'Erledigt' : (inProg ? 'In Arbeit' : 'Offen');
 
                                 return `
-                                    <div class="donezo-team-member" style="cursor: pointer;" data-member-id="${m.id}">
+                                    <div class="donezo-team-member" style="cursor: pointer;" data-member-id="${m.id}" title="Klicken, um Aufgaben für ${escapeHTML(m.name)} im Overlay zu verwalten">
                                         <div class="member-left">
                                             <div class="member-avatar-circle" style="background: ${m.color}15; color: ${m.color};">
                                                 ${m.avatar}
@@ -271,7 +272,10 @@ export class DashboardModule {
                                                 <span class="role">${escapeHTML(m.role)}</span>
                                             </div>
                                         </div>
-                                        <span class="donezo-status-pill ${pillClass}">${pillText}</span>
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <span class="donezo-status-pill ${pillClass}">${pillText}</span>
+                                            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">(${memberTasks.length})</span>
+                                        </div>
                                     </div>
                                 `;
                             }).join('')}
@@ -415,14 +419,12 @@ export class DashboardModule {
             });
         });
 
-        // Member Click to filter in Tasks
+        // Member Click: Opens person tasks overlay modal directly (per user request)
         containerEl.querySelectorAll('.donezo-team-member[data-member-id]').forEach(el => {
             el.addEventListener('click', (e) => {
                 const memberId = e.currentTarget.dataset.memberId;
-                if (onFilterMemberClick) {
-                    onFilterMemberClick(memberId);
-                } else {
-                    window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'tasks', filterMember: memberId } }));
+                if (memberId) {
+                    TasksModule.openPersonTasksModal(memberId, () => DashboardModule.render(containerEl, onFilterMemberClick));
                 }
             });
         });

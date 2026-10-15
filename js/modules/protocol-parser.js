@@ -311,6 +311,215 @@ export class ProtocolParser {
         
         return { tasks, protocolSummary };
     }
+
+    /**
+     * Smart Dialogue-to-Decision Summarizer:
+     * Synthesizes question-response pairs into crisp, active decision bullet points
+     * without conversational back-and-forth dialogue or "Frage nach...".
+     */
+    static synthesizeDecisionBullets(rawText, members = []) {
+        if (!rawText || typeof rawText !== 'string') {
+            return {
+                decisions: [],
+                tasks: [],
+                finances: [],
+                topics: [],
+                allBullets: []
+            };
+        }
+
+        const ALIASES = {
+            'kili': 'Kilian Salai',
+            'kilian': 'Kilian Salai',
+            'vali': 'Valentin Müllner',
+            'valentin': 'Valentin Müllner',
+            'linda': 'Linda Schweiger',
+            'schwaigerin': 'Linda Schweiger',
+            'moritz': 'Moritz Kubik',
+            'anja': 'Anja Löb',
+            'lena': 'Lena Senior',
+            'rosa': 'Rosa Krieglmeier',
+            'cassy': 'Cassandra Wunner',
+            'cassandra': 'Cassandra Wunner',
+            'felix': 'Felix Premer',
+            'premer': 'Felix Premer',
+            'johannes': 'Johannes Erhard',
+            'hanni': 'Johannes Erhard',
+            'domi': 'Dominique Zahn',
+            'dominique': 'Dominique Zahn',
+            'michi': 'Michaela Grabmaier',
+            'michaela': 'Michaela Grabmaier'
+        };
+
+        // Add member names from storage
+        members.forEach(m => {
+            if (m && m.name) {
+                const parts = m.name.toLowerCase().split(' ');
+                if (parts[0] && parts[0].length >= 3) {
+                    ALIASES[parts[0]] = m.name;
+                }
+            }
+        });
+
+        const ignorePhrases = [
+            'hallo', 'herzlich willkommen', 'willkommen zur', 'begrüße euch', 'danke dass ihr',
+            'schön dass alle', 'wir fangen', 'los gehts', 'guten abend', 'servus', 'moin'
+        ];
+
+        let lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        if (lines.length <= 1 && (rawText.includes('.') || rawText.includes('?'))) {
+            lines = rawText.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
+        }
+
+        const decisions = [];
+        const tasks = [];
+        const finances = [];
+        const topics = [];
+
+        // Parse lines into dialogue turns
+        const dialogue = [];
+        for (const line of lines) {
+            const m = line.match(/^\[(.*?)\]:\s*(.*)$/);
+            if (m) {
+                dialogue.push({ speaker: m[1].trim(), text: m[2].trim() });
+            } else {
+                dialogue.push({ speaker: '', text: line });
+            }
+        }
+
+        let i = 0;
+        while (i < dialogue.length) {
+            const item = dialogue[i];
+            const speaker = item.speaker;
+            let cleanText = item.text.replace(/Clowagen/g, 'Klowagen').replace(/clowagen/g, 'Klowagen').replace(/klowagen/g, 'Klowagen');
+            const lower = cleanText.toLowerCase();
+
+            // Skip greetings and pleasantries
+            if (ignorePhrases.some(p => lower.includes(p)) && cleanText.length < 50) {
+                i++;
+                continue;
+            }
+
+            // Lookahead for question-agreement pair:
+            const isQuestion = cleanText.includes('?') || ['könntest du', 'kannst du', 'holst du', 'machst du', 'übernimmst du', 'kann wer'].some(q => lower.includes(q));
+
+            const nextItem = i + 1 < dialogue.length ? dialogue[i + 1] : { speaker: '', text: '' };
+            const nextLower = nextItem.text.toLowerCase();
+            const hasAgreement = ['ja', 'mach ich', 'stimmt zu', 'stimme zu', 'passt', 'geht klar', 'übernehme', 'hole', 'mache'].some(a => nextLower.includes(a));
+
+            let targetMember = null;
+            for (const [nick, full] of Object.entries(ALIASES)) {
+                const regex = new RegExp(`\\b${nick}\\b`, 'i');
+                if (regex.test(lower)) {
+                    targetMember = full;
+                    break;
+                }
+            }
+
+            if (isQuestion && (hasAgreement || lower.includes('stimmt zu') || lower.includes('erledigt'))) {
+                let actionDesc = cleanText;
+                actionDesc = actionDesc.replace(/^\[.*?\]:?\s*/, '');
+                for (const nick of Object.keys(ALIASES)) {
+                    actionDesc = actionDesc.replace(new RegExp(`\\b${nick}\\b[,:]?\\s*`, 'gi'), '');
+                }
+                actionDesc = actionDesc.replace(/\b(?:könntest du|kannst du|würdest du|kann jemand|holst du|machst du|übernimmst du|bitte|noch)\b/gi, '');
+                actionDesc = actionDesc.replace(/\?/g, '').trim();
+
+                let taskBullet = '';
+                if (actionDesc.toLowerCase().includes('klowagen') && (actionDesc.toLowerCase().includes('holen') || actionDesc.toLowerCase().includes('abholen'))) {
+                    taskBullet = `• ${targetMember || 'Zuständiger'} holt den Klowagen ab.`;
+                } else {
+                    taskBullet = `• ${targetMember || 'Vorstand'} übernimmt: ${actionDesc}.`;
+                }
+                tasks.push(taskBullet);
+                i += hasAgreement ? 2 : 1;
+                continue;
+            }
+
+            // Check for explicit task assignment in single sentence
+            const actionWords = ['kümmert sich', 'kümmere mich', 'übernimmt', 'übernehme', 'organisiert', 'organisiere', 'holt', 'hole', 'besorgt', 'besorge', 'schreibt', 'erstellt', 'bestellt', 'bestelle'];
+            if (actionWords.some(kw => lower.includes(kw))) {
+                let assignedName = targetMember;
+                if (!assignedName && speaker) {
+                    for (const [nick, full] of Object.entries(ALIASES)) {
+                        if (speaker.toLowerCase().includes(nick)) {
+                            assignedName = full;
+                            break;
+                        }
+                    }
+                    if (!assignedName) assignedName = speaker;
+                }
+
+                // Extract due date if present
+                const dueMatch = cleanText.match(/\bbis\s+(\d{1,2}\.\s*[A-ZÄÖÜa-zäöüß]+|\d{1,2}\.\d{1,2}\.?\d{0,4}|freitag|donnerstag|dienstag|montag|mittwoch|samstag|sonntag)/i);
+                const dueStr = dueMatch ? ` (Frist: bis ${dueMatch[1]})` : '';
+
+                let cleanAction = cleanText.replace(/^\[.*?\]:\s*/, '');
+                cleanAction = cleanAction.replace(/^\s*ich\s+kümmere\s+mich\s+um\s+/i, 'kümmert sich um ');
+                cleanAction = cleanAction.replace(/^\s*ich\s+übernehme\s+/i, 'übernimmt ');
+                cleanAction = cleanAction.replace(/^\s*ich\s+hole\s+/i, 'holt ');
+                cleanAction = cleanAction.replace(/^\s*ich\s+besorge\s+/i, 'besorgt ');
+                cleanAction = cleanAction.replace(/^\s*ich\s+organisiere\s+/i, 'organisiert ');
+                cleanAction = cleanAction.replace(/^\s*ich\s+erstelle\s+/i, 'erstellt ');
+                cleanAction = cleanAction.replace(/^\s*ich\s+bestelle\s+/i, 'bestellt ');
+
+                if (['kümmert sich', 'übernimmt', 'holt', 'besorgt', 'organisiert', 'erstellt', 'bestellt'].some(v => cleanAction.toLowerCase().startsWith(v))) {
+                    tasks.push(`• ${assignedName || 'Vorstand'} ${cleanAction}${dueStr}`);
+                } else {
+                    tasks.push(`• ${assignedName || 'Vorstand'}: ${cleanAction}${dueStr}`);
+                }
+                i++;
+                continue;
+            }
+
+            // Check for Beschlüsse / Entscheidungen
+            if (['beschluss', 'beschlossen', 'einstimmig', 'genehmigt', 'verbindlich gebucht'].some(kw => lower.includes(kw))) {
+                let cleanDec = cleanText.replace(/^\[.*?\]:\s*/, '');
+                cleanDec = cleanDec.replace(/^(?:beschluss\s*(?:einstimmig)?:?|einstimmiger\s*beschluss:?)\s*/i, '').trim();
+                decisions.push(`• ${cleanDec} (einstimmig beschlossen).`);
+                i++;
+                continue;
+            }
+
+            // Check for Finanzen / Kasse
+            if (['kasse', 'kassenstand', 'gewinn', 'reingewinn', 'ausgaben', 'einnahmen', 'euro', '€'].some(kw => lower.includes(kw))) {
+                let cleanFin = cleanText.replace(/^\[.*?\]:\s*/, '');
+                finances.push(`• ${cleanFin}`);
+                i++;
+                continue;
+            }
+
+            // Check for Termine / Nächste Sitzung
+            if (['nächste sitzung', 'nächste vorstandssitzung', 'uhr statt', 'termin'].some(kw => lower.includes(kw))) {
+                let cleanTop = cleanText.replace(/^\[.*?\]:\s*/, '');
+                topics.push(`• ${cleanTop}`);
+                i++;
+                continue;
+            }
+
+            // General discussed topic
+            let cleanGen = cleanText.replace(/^\[.*?\]:\s*/, '').trim();
+            if (cleanGen.length >= 6) {
+                topics.push(`• ${cleanGen}`);
+            }
+            i++;
+        }
+
+        const allBullets = [
+            ...decisions,
+            ...tasks,
+            ...finances,
+            ...topics
+        ];
+
+        return {
+            decisions,
+            tasks,
+            finances,
+            topics,
+            allBullets: allBullets.length > 0 ? allBullets : [`• Sitzungsprotokoll ordnungsgemäß erfasst.`]
+        };
+    }
 }
 
 
