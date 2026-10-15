@@ -2,14 +2,58 @@
    LANDJUGEND SCHEURUNG - "DONEZO" COMPONENTS & DASHBOARD CARDS
    ========================================================================== */
 
-/* Page Header */
+/* Page Header & Executive Hero Welcome */
 .donezo-page-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 1.75rem;
+    margin-bottom: 2rem;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 1.25rem;
+    padding-bottom: 0.5rem;
+}
+
+.hero-date-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.22);
+    padding: 0.3rem 0.8rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--donezo-green-dark);
+    margin-bottom: 0.45rem;
+}
+
+.hero-role-pill {
+    background: #ffffff;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    padding: 0.12rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--donezo-green-dark);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.hero-welcome-title {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    line-height: 1.15;
+    margin: 0.2rem 0 0.4rem 0;
+    letter-spacing: -0.025em;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.hero-welcome-subtitle {
+    font-size: 0.94rem;
+    color: var(--text-muted);
+    margin: 0;
+    max-width: 680px;
+    line-height: 1.45;
 }
 
 .donezo-header-text h1 {
@@ -166,6 +210,21 @@
     font-weight: 700;
     padding: 0.25rem 0.65rem;
     border-radius: var(--radius-full);
+}
+
+.stat-pill-success {
+    background: rgba(16, 185, 129, 0.12) !important;
+    color: #047857 !important;
+}
+
+.stat-pill-warning {
+    background: rgba(245, 158, 11, 0.12) !important;
+    color: #b45309 !important;
+}
+
+.stat-pill-danger {
+    background: rgba(239, 68, 68, 0.12) !important;
+    color: #b91c1c !important;
 }
 
 /* ==========================================================================
@@ -1995,16 +2054,22 @@ tr:hover td {
         align-items: flex-start;
         gap: 0.65rem;
         margin-top: 0.25rem !important;
-        margin-bottom: 1rem !important;
+        margin-bottom: 1.25rem !important;
         width: 100% !important;
     }
-    .donezo-header-text h1 {
-        font-size: 1.35rem !important;
-        line-height: 1.25 !important;
-        margin: 0 0 0.25rem 0 !important;
+    .hero-date-badge {
+        font-size: 0.74rem !important;
+        padding: 0.22rem 0.6rem !important;
+        margin-bottom: 0.25rem !important;
+        flex-wrap: wrap !important;
     }
-    .donezo-header-text p {
-        font-size: 0.82rem !important;
+    .hero-welcome-title, .donezo-header-text h1 {
+        font-size: 1.4rem !important;
+        line-height: 1.2 !important;
+        margin: 0.15rem 0 0.25rem 0 !important;
+    }
+    .hero-welcome-subtitle, .donezo-header-text p {
+        font-size: 0.84rem !important;
         margin: 0 0 0.5rem 0 !important;
         line-height: 1.4 !important;
     }

@@ -31,20 +31,37 @@ export class DashboardModule {
         const totalAusgaben = finances.filter(f => f && f.type === 'ausgabe').reduce((sum, f) => sum + Math.abs(Number(f.amount) || 0), 0);
         const kassenstand = totalEinnahmen - totalAusgaben;
 
+        // User profile and greeting information
+        const loggedInUser = StorageEngine.getLoggedInUser();
+        const firstName = (loggedInUser?.name || 'Vorstand').split(' ')[0];
+        const hour = new Date().getHours();
+        const greeting = hour < 11 ? 'Guten Morgen' : (hour < 18 ? 'Guten Tag' : 'Guten Abend');
+        const todayDateStr = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        const roleLabel = isUserAdmin 
+            ? (loggedInUser?.systemRole === 'superuser' ? '👑 Superuser' : '⭐ Vorstand') 
+            : `👤 ${escapeHTML(loggedInUser?.role || 'Mitglied')}`;
+
         // Top 4 Priority Tasks for Quick List
         const topTasks = displayTasks.slice(0, 4);
 
         containerEl.innerHTML = `
             <div class="donezo-dashboard-wrapper">
-                <!-- Page Header -->
+                <!-- Page Header & Executive Hero Welcome -->
                 <div class="donezo-page-header">
                     <div class="donezo-header-text">
-                        <h1>Dashboard</h1>
-                        <p>${isUserAdmin ? 'Plane, priorisiere und verwalte die Landjugend Scheuring mit Leichtigkeit.' : 'Deine persönliche Übersicht über alle an dich zugewiesenen Aufgaben.'}</p>
+                        <div class="hero-date-badge">
+                            <span>📅 ${todayDateStr}</span>
+                            <span class="hero-role-pill">${roleLabel}</span>
+                        </div>
+                        <h1 class="hero-welcome-title">${greeting}, ${escapeHTML(firstName)}! 👋</h1>
+                        <p class="hero-welcome-subtitle">${isUserAdmin ? 'Zentrale Übersicht für alle Aktivitäten, Termine und Aufgaben der Vorstandschaft.' : 'Deine persönliche Übersicht über alle an dich zugewiesenen Aufgaben & Termine.'}</p>
                     </div>
                     <div class="donezo-header-actions">
-                        <button class="btn btn-donezo-primary" id="donezo-add-task-btn">
-                            ➕ Neue Aufgabe
+                        <button class="btn btn-donezo-primary" id="donezo-add-task-btn" title="Neue Aufgabe erstellen">
+                            <span>➕</span> <span>Neue Aufgabe</span>
+                        </button>
+                        <button class="btn btn-donezo-outline" id="donezo-quick-minutes-btn" title="Sitzungsprotokoll öffnen">
+                            <span>🎙️</span> <span>Sitzungsprotokoll</span>
                         </button>
                     </div>
                 </div>
@@ -54,7 +71,10 @@ export class DashboardModule {
                     <!-- Hero Dark Green Stat Card -->
                     <div class="donezo-stat-hero" id="dash-stat-total" title="Zu Aufgaben wechseln">
                         <div class="stat-top">
-                            <span class="stat-label">${isUserAdmin ? 'Gesamte Aufgaben' : 'Meine Aufgaben'}</span>
+                            <div style="display: flex; align-items: center; gap: 0.45rem;">
+                                <span style="font-size: 1.15rem;">📋</span>
+                                <span class="stat-label">${isUserAdmin ? 'Gesamte Aufgaben' : 'Meine Aufgaben'}</span>
+                            </div>
                             <span class="donezo-arrow-badge">↗</span>
                         </div>
                         <div class="stat-number">${totalTasks}</div>
@@ -62,36 +82,42 @@ export class DashboardModule {
                     </div>
 
                     <!-- White Card 2: Ended Projects -->
-                    <div class="donezo-stat-card" id="dash-stat-completed" title="Zu erledigten Aufgaben wechseln">
+                    <div class="donezo-stat-card stat-card-completed" id="dash-stat-completed" title="Zu erledigten Aufgaben wechseln">
                         <div class="stat-top">
-                            <span class="stat-label">${isUserAdmin ? 'Erledigte To-Dos' : 'Meine Erledigten'}</span>
+                            <div style="display: flex; align-items: center; gap: 0.45rem;">
+                                <span style="font-size: 1.15rem;">✅</span>
+                                <span class="stat-label">${isUserAdmin ? 'Erledigte To-Dos' : 'Meine Erledigten'}</span>
+                            </div>
                             <span class="donezo-arrow-badge">↗</span>
                         </div>
                         <div class="stat-number">${completedTasks}</div>
-                        <div class="stat-pill">Erfolgreich abgeschlossen</div>
-                    </div>
-                        <div class="stat-number">${completedTasks}</div>
-                        <div class="stat-pill">Erfolgreich abgeschlossen</div>
+                        <div class="stat-pill stat-pill-success">${globalPercentage}% abgeschlossen</div>
                     </div>
 
                     <!-- White Card 3: Running Projects -->
-                    <div class="donezo-stat-card" id="dash-stat-inprogress" title="Zu Aufgaben in Bearbeitung wechseln">
+                    <div class="donezo-stat-card stat-card-inprogress" id="dash-stat-inprogress" title="Zu Aufgaben in Bearbeitung wechseln">
                         <div class="stat-top">
-                            <span class="stat-label">In Bearbeitung</span>
+                            <div style="display: flex; align-items: center; gap: 0.45rem;">
+                                <span style="font-size: 1.15rem;">🔄</span>
+                                <span class="stat-label">In Bearbeitung</span>
+                            </div>
                             <span class="donezo-arrow-badge">↗</span>
                         </div>
                         <div class="stat-number">${inProgressTasks}</div>
-                        <div class="stat-pill">Laufende Projekte</div>
+                        <div class="stat-pill stat-pill-warning">Laufende Projekte</div>
                     </div>
 
                     <!-- White Card 4: Pending / Urgent -->
-                    <div class="donezo-stat-card" id="dash-stat-open" title="Zu offenen & dringenden Aufgaben wechseln">
+                    <div class="donezo-stat-card stat-card-urgent" id="dash-stat-open" title="Zu offenen & dringenden Aufgaben wechseln">
                         <div class="stat-top">
-                            <span class="stat-label">Offen & Dringend</span>
+                            <div style="display: flex; align-items: center; gap: 0.45rem;">
+                                <span style="font-size: 1.15rem;">⚡</span>
+                                <span class="stat-label">Offen & Dringend</span>
+                            </div>
                             <span class="donezo-arrow-badge">↗</span>
                         </div>
                         <div class="stat-number">${openTasks}</div>
-                        <div class="stat-pill">Priorität Hoch</div>
+                        <div class="stat-pill ${openTasks === 0 ? 'stat-pill-success' : 'stat-pill-danger'}">${openTasks === 0 ? 'Alles erledigt 🎉' : 'Erfordert Aktion'}</div>
                     </div>
                 </div>
 
@@ -164,7 +190,13 @@ export class DashboardModule {
                         </div>
 
                         <div class="donezo-tasks-list">
-                            ${topTasks.map((t, idx) => {
+                            ${topTasks.length === 0 ? `
+                                <div style="padding: 1.5rem 1rem; text-align: center; color: var(--text-muted);">
+                                    <div style="font-size: 1.8rem; margin-bottom: 0.35rem;">🎉</div>
+                                    <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Keine offenen To-Dos</div>
+                                    <div style="font-size: 0.78rem; margin-top: 0.2rem;">Alle anstehenden Aufgaben wurden erfolgreich erledigt.</div>
+                                </div>
+                            ` : topTasks.map((t, idx) => {
                                 const colors = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6'];
                                 const dotColor = colors[idx % colors.length];
                                 const isDone = t.status === 'erledigt';
@@ -278,6 +310,11 @@ export class DashboardModule {
         // Add Task Shortcut
         containerEl.querySelector('#donezo-add-task-btn')?.addEventListener('click', () => {
             window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'tasks' } }));
+        });
+
+        // Quick Minutes Shortcut
+        containerEl.querySelector('#donezo-quick-minutes-btn')?.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'minutes' } }));
         });
 
         // Start Meeting / Open Minutes
