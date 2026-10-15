@@ -15,8 +15,11 @@ let currentViewMode = 'person-list';
 let expandedMemberIds = new Set();
 
 export class TasksModule {
+    static activeModifiedTaskIds = new Set();
+
     static setFilterMember(memberId) {
         currentFilterMember = memberId || 'all';
+        this.activeModifiedTaskIds.clear();
         if (memberId && memberId !== 'all') {
             expandedMemberIds.add(memberId);
         }
@@ -24,14 +27,17 @@ export class TasksModule {
 
     static setFilterCategory(catId) {
         currentFilterCategory = catId || 'all';
+        this.activeModifiedTaskIds.clear();
     }
 
     static setFilterStatus(status) {
         currentFilterStatus = status || 'all';
+        this.activeModifiedTaskIds.clear();
     }
 
     static setFilterDue(due) {
         currentFilterDue = due || 'all';
+        this.activeModifiedTaskIds.clear();
     }
 
     static levenshtein(a, b) {
@@ -285,6 +291,11 @@ export class TasksModule {
             // Role-based visibility: regular members strictly ONLY see tasks where they are assigned!
             if (!isUserAdmin && !taskAssigneeIds.includes(currentUserId)) {
                 return false;
+            }
+
+            // Keep recently modified tasks visible in the current session so they never vanish under the user's cursor
+            if (TasksModule.activeModifiedTaskIds.has(t.id)) {
+                return true;
             }
 
             if (currentFilterMember !== 'all' && !taskAssigneeIds.includes(currentFilterMember)) return false;
@@ -543,10 +554,30 @@ export class TasksModule {
                                                         <td>
                                                             ${urgencyBadge}
                                                         </td>
-                                                        <td style="text-align: center;">
-                                                            <span class="task-status-cycle-pill donezo-status-pill ${pillClass}" data-task-id="${t.id}" title="Klicken, um Status zu ändern (Offen ➔ In Arbeit ➔ Erledigt)">
-                                                                ${pillText}
-                                                            </span>
+                                                        <td style="position: relative; text-align: center;">
+                                                            <div class="task-status-picker-wrapper" style="position: relative; display: inline-block;">
+                                                                <button type="button" class="badge task-inline-status-trigger donezo-status-pill ${pillClass}" data-task-id="${t.id}" title="Status ändern (Offen / In Arbeit / Erledigt)" style="cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 3px; font-weight: 800; transition: all 0.15s ease;">
+                                                                    <span>${pillText}</span>
+                                                                    <span style="font-size: 0.7rem; opacity: 0.8;">▾</span>
+                                                                </button>
+                                                                <div class="task-inline-picker-menu hidden" id="task-status-menu-${t.id}" style="min-width: 155px; right: 0; left: auto; text-align: left;">
+                                                                    <div style="padding: 0.35rem 0.6rem 0.4rem; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid var(--border-subtle); text-transform: uppercase;">
+                                                                        📊 Status wählen
+                                                                    </div>
+                                                                    <div class="task-inline-picker-item ${t.status === 'offen' ? 'active' : ''}" data-task-id="${t.id}" data-status="offen">
+                                                                        <span>📋 Offen</span>
+                                                                        ${t.status === 'offen' ? '<span style="color: #10b981; font-weight: 800;">✓</span>' : ''}
+                                                                    </div>
+                                                                    <div class="task-inline-picker-item ${t.status === 'in_bearbeitung' ? 'active' : ''}" data-task-id="${t.id}" data-status="in_bearbeitung">
+                                                                        <span>🔄 In Arbeit</span>
+                                                                        ${t.status === 'in_bearbeitung' ? '<span style="color: #10b981; font-weight: 800;">✓</span>' : ''}
+                                                                    </div>
+                                                                    <div class="task-inline-picker-item ${t.status === 'erledigt' ? 'active' : ''}" data-task-id="${t.id}" data-status="erledigt">
+                                                                        <span>✅ Erledigt</span>
+                                                                        ${t.status === 'erledigt' ? '<span style="color: #10b981; font-weight: 800;">✓</span>' : ''}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                         </td>
                                                         <td style="text-align: right; white-space: nowrap;">
                                                             <button class="btn btn-sm btn-ghost edit-task-btn" data-task-id="${t.id}" title="Aufgabe bearbeiten (Titel, Person, Kategorie, Notizen...)" style="padding: 0.25rem 0.45rem; font-size: 0.95rem; border-radius: 6px; margin-right: 2px;">✏️</button>
@@ -742,6 +773,7 @@ export class TasksModule {
             menu.querySelectorAll(itemSelector).forEach(item => {
                 item.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    this.activeModifiedTaskIds.clear();
                     onSelect(item);
                     menu.classList.add('hidden');
                     trigger.classList.remove('active');
@@ -848,6 +880,7 @@ export class TasksModule {
         currentFilterDue = 'all';
         currentSearchQuery = '';
         expandedMemberIds.clear();
+        this.activeModifiedTaskIds.clear();
         this.render(containerEl);
     }
 
@@ -882,20 +915,30 @@ export class TasksModule {
             });
         });
 
-        // Interactive Status Pill Click (Cycles: Offen -> In Arbeit -> Erledigt -> Offen)
-        viewportEl.querySelectorAll('.task-status-cycle-pill').forEach(pill => {
-            pill.addEventListener('click', (e) => {
+        // Inline Status Picker Toggle & Selection (Offen / In Arbeit / Erledigt)
+        viewportEl.querySelectorAll('.task-inline-status-trigger').forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const taskId = e.currentTarget.dataset.taskId;
-                const task = tasks.find(t => t.id === taskId);
-                if (task) {
-                    const cycleMap = {
-                        'offen': 'in_bearbeitung',
-                        'in_bearbeitung': 'erledigt',
-                        'erledigt': 'offen'
-                    };
-                    task.status = cycleMap[task.status] || 'offen';
-                    StorageEngine.saveTasks(tasks);
+                const taskId = trigger.dataset.taskId;
+                const menu = viewportEl.querySelector(`#task-status-menu-${taskId}`);
+                viewportEl.querySelectorAll('.task-inline-picker-menu').forEach(m => {
+                    if (m !== menu) m.classList.add('hidden');
+                });
+                if (menu) menu.classList.toggle('hidden');
+            });
+        });
+
+        viewportEl.querySelectorAll('.task-inline-picker-item[data-status]').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const taskId = item.dataset.taskId;
+                const newStatus = item.dataset.status;
+                const currentTasks = StorageEngine.getTasks();
+                const target = currentTasks.find(t => t.id === taskId);
+                if (target && newStatus) {
+                    target.status = newStatus;
+                    TasksModule.activeModifiedTaskIds.add(taskId);
+                    StorageEngine.saveTasks(currentTasks);
                     this.updateViewport(containerEl);
                 }
             });
@@ -909,6 +952,7 @@ export class TasksModule {
                 const task = tasks.find(t => t.id === taskId);
                 if (task) {
                     task.status = (task.status === 'erledigt') ? 'offen' : 'erledigt';
+                    TasksModule.activeModifiedTaskIds.add(taskId);
                     StorageEngine.saveTasks(tasks);
                     this.updateViewport(containerEl);
                 }
@@ -924,6 +968,7 @@ export class TasksModule {
                 const task = tasks.find(t => t.id === taskId);
                 if (task && newStatus) {
                     task.status = newStatus;
+                    TasksModule.activeModifiedTaskIds.add(taskId);
                     StorageEngine.saveTasks(tasks);
                     this.updateViewport(containerEl);
                 }
@@ -1058,7 +1103,7 @@ export class TasksModule {
 
         // Close inline picker menus on click outside
         const closePickersOnDocClick = (e) => {
-            if (!e.target.closest('.task-cat-picker-wrapper') && !e.target.closest('.task-prio-picker-wrapper')) {
+            if (!e.target.closest('.task-cat-picker-wrapper') && !e.target.closest('.task-prio-picker-wrapper') && !e.target.closest('.task-status-picker-wrapper')) {
                 viewportEl.querySelectorAll('.task-inline-picker-menu').forEach(m => m.classList.add('hidden'));
             }
         };

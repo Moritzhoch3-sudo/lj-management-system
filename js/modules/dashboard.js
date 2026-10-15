@@ -167,12 +167,42 @@ export class DashboardModule {
                             ${topTasks.map((t, idx) => {
                                 const colors = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6'];
                                 const dotColor = colors[idx % colors.length];
+                                const isDone = t.status === 'erledigt';
+                                const inProg = t.status === 'in_bearbeitung';
+                                const pillClass = isDone ? 'pill-completed' : (inProg ? 'pill-progress' : 'pill-pending');
+                                const pillText = isDone ? '✅ Erledigt' : (inProg ? '🔄 In Arbeit' : '📋 Offen');
+
                                 return `
-                                    <div class="donezo-task-row" data-task-id="${t.id}" style="cursor: pointer;" title="Aufgabe öffnen: ${escapeHTML(t.title)}">
-                                        <div class="task-dot" style="background: ${dotColor};"></div>
-                                        <div class="donezo-task-info">
-                                            <span class="title">${escapeHTML(t.title)}</span>
-                                            <span class="due">Fällig: ${t.dueDate || 'Keine Frist'}</span>
+                                    <div class="donezo-task-row" data-task-id="${t.id}" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;" title="Aufgabe öffnen: ${escapeHTML(t.title)}">
+                                        <div style="display: flex; align-items: center; gap: 0.65rem; flex: 1; min-width: 0;">
+                                            <div class="task-dot" style="background: ${dotColor}; flex-shrink: 0;"></div>
+                                            <div class="donezo-task-info" style="min-width: 0;">
+                                                <span class="title ${isDone ? 'text-decoration-line-through text-muted' : ''}" style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHTML(t.title)}</span>
+                                                <span class="due">Fällig: ${t.dueDate || 'Keine Frist'}</span>
+                                            </div>
+                                        </div>
+                                        <div class="dash-task-status-wrapper" style="position: relative; flex-shrink: 0;">
+                                            <button type="button" class="badge dash-inline-status-trigger donezo-status-pill ${pillClass}" data-task-id="${t.id}" title="Status ändern" style="border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; font-weight: 800; font-size: 0.72rem; padding: 0.2rem 0.55rem; transition: all 0.15s ease;">
+                                                <span>${pillText}</span>
+                                                <span style="font-size: 0.65rem; opacity: 0.75;">▾</span>
+                                            </button>
+                                            <div class="task-inline-picker-menu hidden" id="dash-status-menu-${t.id}" style="right: 0; left: auto; min-width: 155px; text-align: left;">
+                                                <div style="padding: 0.35rem 0.55rem 0.4rem; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid var(--border-subtle); text-transform: uppercase;">
+                                                    📊 Status wählen
+                                                </div>
+                                                <div class="task-inline-picker-item dash-status-item ${t.status === 'offen' ? 'active' : ''}" data-task-id="${t.id}" data-status="offen">
+                                                    <span>📋 Offen</span>
+                                                    ${t.status === 'offen' ? '<span style="color: #10b981; font-weight: 800;">✓</span>' : ''}
+                                                </div>
+                                                <div class="task-inline-picker-item dash-status-item ${t.status === 'in_bearbeitung' ? 'active' : ''}" data-task-id="${t.id}" data-status="in_bearbeitung">
+                                                    <span>🔄 In Arbeit</span>
+                                                    ${t.status === 'in_bearbeitung' ? '<span style="color: #10b981; font-weight: 800;">✓</span>' : ''}
+                                                </div>
+                                                <div class="task-inline-picker-item dash-status-item ${t.status === 'erledigt' ? 'active' : ''}" data-task-id="${t.id}" data-status="erledigt">
+                                                    <span>✅ Erledigt</span>
+                                                    ${t.status === 'erledigt' ? '<span style="color: #10b981; font-weight: 800;">✓</span>' : ''}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 `;
@@ -299,9 +329,50 @@ export class DashboardModule {
             window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'tasks', filterStatus: 'all', filterDue: 'all', filterMember: 'all', filterCategory: 'all' } }));
         });
 
-        // Quick Task row clicks
+        // Inline Status Picker on Dashboard
+        containerEl.querySelectorAll('.dash-inline-status-trigger').forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const taskId = trigger.dataset.taskId;
+                const menu = containerEl.querySelector(`#dash-status-menu-${taskId}`);
+                containerEl.querySelectorAll('.dash-task-status-wrapper .task-inline-picker-menu').forEach(m => {
+                    if (m !== menu) m.classList.add('hidden');
+                });
+                if (menu) menu.classList.toggle('hidden');
+            });
+        });
+
+        containerEl.querySelectorAll('.dash-status-item[data-status]').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const taskId = item.dataset.taskId;
+                const newStatus = item.dataset.status;
+                const allTasks = StorageEngine.getTasks();
+                const target = allTasks.find(t => t.id === taskId);
+                if (target && newStatus) {
+                    target.status = newStatus;
+                    StorageEngine.saveTasks(allTasks);
+                    DashboardModule.render(containerEl, onFilterMemberClick);
+                }
+            });
+        });
+
+        // Close dashboard pickers on click outside
+        const closeDashPickers = (e) => {
+            if (!e.target.closest('.dash-task-status-wrapper')) {
+                containerEl.querySelectorAll('.dash-task-status-wrapper .task-inline-picker-menu').forEach(m => m.classList.add('hidden'));
+            }
+        };
+        if (containerEl._dashDocPickerHandler) {
+            document.removeEventListener('click', containerEl._dashDocPickerHandler);
+        }
+        containerEl._dashDocPickerHandler = closeDashPickers;
+        document.addEventListener('click', closeDashPickers);
+
+        // Quick Task row clicks (opens modal, but ignores if clicking status trigger or menu)
         containerEl.querySelectorAll('.donezo-task-row[data-task-id]').forEach(row => {
-            row.addEventListener('click', () => {
+            row.addEventListener('click', (e) => {
+                if (e.target.closest('.dash-task-status-wrapper')) return;
                 const taskId = row.dataset.taskId;
                 window.dispatchEvent(new CustomEvent('nav-to-tab', { detail: { tab: 'tasks', openTaskId: taskId } }));
             });

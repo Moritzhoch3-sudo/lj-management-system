@@ -1833,7 +1833,35 @@ tr:hover td {
     color: #059669;
 }
 
-/* --- Inline Pickers for Category & Priority on Task Rows --- */
+/* --- Inline Pickers for Category, Priority & Status on Task Rows --- */
+.task-cat-picker-wrapper,
+.task-prio-picker-wrapper,
+.task-status-picker-wrapper,
+.dash-task-status-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.task-inline-status-trigger,
+.dash-inline-status-trigger {
+    cursor: pointer;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-weight: 800;
+    transition: var(--transition-smooth);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.task-inline-status-trigger:hover,
+.dash-inline-status-trigger:hover {
+    transform: scale(1.03);
+    filter: brightness(0.96);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
 .task-inline-picker-menu {
     position: absolute;
     top: calc(100% + 4px);
